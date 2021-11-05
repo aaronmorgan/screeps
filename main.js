@@ -21,6 +21,29 @@ function findRoomSources() {
 module.exports.loop = function () {
     let room = Game.spawns['Spawn1'].room;
 
+    var tower = Game.getObjectById('TOWER_ID');
+    if (tower) {
+        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax
+        });
+        if (closestDamagedStructure) {
+            tower.repair(closestDamagedStructure);
+        }
+
+        var hostiles = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
+        if (hostiles) {
+            var username = hostiles[0].owner.username;
+
+            var towers = Game.rooms[roomName].find(FIND_MY_STRUCTURES, {
+                filter: {
+                    structureType: STRUCTURE_TOWER
+                }
+            });
+
+            towers.forEach(tower => tower.attack(hostiles[0]));
+        }
+    }
+
     for (var name in Memory.creeps) {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
