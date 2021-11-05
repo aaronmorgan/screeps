@@ -5,12 +5,10 @@ var roleDropMiner = require('role.dropminer');
 var roleHauler = require('role.hauler');
 
 var MAX_HARVESTER_CREEPS = 2;
-//var MAX_BUILDER_CREEPS = maxBuilderCreepsModifier;
 var MAX_UPGRADER_CREEPS = 2;
 var MAX_BUILDER_CREEPS = 5;
 var MIN_BUILDER_CREEPS = 1;
 var MIN_DROPMINER_CREEPS = 3;
-var MIN_HAULER_CREEPS = 3
 
 function findConstructionSites() {
     return Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES).length;
@@ -108,8 +106,15 @@ module.exports.loop = function () {
 
     if (builders.length < maxBuilderCreeps) {
         var newName = 'Builder' + Game.time;
-        console.log('Spawning new builder: ' + newName);
-        Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
+        let bodyType = [];
+
+        if (energyAvailable >= 350) { bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE]; } else
+            if (energyAvailable >= 300) { bodyType = [WORK, CARRY, CARRY, MOVE, MOVE]; } else {
+                bodyType = [WORK, CARRY, MOVE];
+            }
+
+        console.log('Spawning new builder: ' + newName + ', [' + bodyType + ']');
+        Game.spawns['Spawn1'].spawnCreep(bodyType, newName,
             {
                 memory: { role: 'builder' }
             });
