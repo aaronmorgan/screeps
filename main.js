@@ -21,6 +21,7 @@ function findRoomSources() {
 }
 
 module.exports.loop = function () {
+    let room = Game.spawns['Spawn1'].room;
 
     for (var name in Memory.creeps) {
         if (!Game.creeps[name]) {
@@ -28,6 +29,9 @@ module.exports.loop = function () {
             console.log('Clearing non-existing creep memory:', name);
         }
     }
+
+    let energyAvailable = room.energyCapacityAvailable;
+    console.log('energyAvailable', energyAvailable);
 
     console.log("---------------------------------------");
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
@@ -42,50 +46,67 @@ module.exports.loop = function () {
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
-    let maxDropMiners = dropMiners.length < MIN_DROPMINER_CREEPS ? Math.max(MIN_DROPMINER_CREEPS, findRoomSources() * 2) : MIN_DROPMINER_CREEPS;
+    let maxDropMinerCreeps = dropMiners.length < MIN_DROPMINER_CREEPS ? Math.max(MIN_DROPMINER_CREEPS, findRoomSources() * 2) : MIN_DROPMINER_CREEPS;
 
     // Haulers
-    let maxHaulerCreepsModifier = Math.max(0, dropMiners.length / 2);
+    let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.75));
 
     // Builders
     let constructionSites = findConstructionSites();
-    let maxBuilderCreepsModifier = constructionSites > 0
-        ? Math.max(MAX_BUILDER_CREEPS, constructionSites)
+    let maxBuilderCreeps = constructionSites > 0
+        ? Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750))
         : MIN_BUILDER_CREEPS;
 
     // Upgraders
     // Should be a set value + number of containers * 2?
-    let maxUpgraders = MAX_UPGRADER_CREEPS + (1 * 2);
+    let maxUpgraderCreeps = MAX_UPGRADER_CREEPS + (1 * 2);
 
     // Summary of actual vs target numbers.
     console.log('Harvesters: ' + harvesters.length + '/' + maxHarvesterCreeps);
-    console.log('Drop Miners: ' + dropMiners.length + '/' + maxDropMiners);
-    console.log('Haulers: ' + haulers.length + '/' + maxHaulerCreepsModifier);
-    console.log('Builders: ' + builders.length + '/' + maxBuilderCreepsModifier);
-    console.log('Upgraders: ' + upgraders.length + '/' + MAX_UPGRADER_CREEPS);
+    console.log('Drop Miners: ' + dropMiners.length + '/' + maxDropMinerCreeps);
+    console.log('Haulers: ' + haulers.length + '/' + maxHaulerCreeps);
+    console.log('Builders: ' + builders.length + '/' + maxBuilderCreeps);
+    console.log('Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
-    if (dropMiners.length < maxDropMiners) {
-        var newName = 'DropMiner' + Game.time;
-        console.log('Spawning new drop miner: ' + newName);
-        Game.spawns['Spawn1'].spawnCreep([WORK, MOVE], newName,
+    if (dropMiners.length < maxDropMinerCreeps) {
+        let newName = 'DropMiner' + Game.time;
+        let bodyType = [];
+
+        if (energyAvailable >= 250) {
+            bodyType = [WORK, WORK, MOVE];
+        } else {
+            bodyType = [WORK, MOVE];
+        }
+
+        console.log('Spawning new drop miner: ' + newName + ', [' + bodyType + ']');
+        Game.spawns['Spawn1'].spawnCreep(bodyType, newName,
             { memory: { role: 'dropminer' } });
     }
 
-    if (haulers.length < maxHaulerCreepsModifier) {
+    if (haulers.length < maxHaulerCreeps) {
         var newName = 'Hauler' + Game.time;
-        console.log('Spawning new hauler: ' + newName);
-        Game.spawns['Spawn1'].spawnCreep([CARRY, MOVE], newName,
+        let bodyType = [];
+
+        if (energyAvailable >= 200) {
+            bodyType = [CARRY, CARRY, MOVE, MOVE];
+        } else {
+            bodyType = [CARRY, MOVE];
+        }
+
+        console.log('Spawning new hauler: ' + newName + ', [' + bodyType + ']');
+        Game.spawns['Spawn1'].spawnCreep(bodyType, newName,
             { memory: { role: 'hauler' } });
     }
 
     if (harvesters.length < maxHarvesterCreeps) {
         var newName = 'Harvester' + Game.time;
         console.log('Spawning new harvester: ' + newName);
+
         Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
             { memory: { role: 'harvester' } });
     }
 
-    if (builders.length < maxBuilderCreepsModifier) {
+    if (builders.length < maxBuilderCreeps) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
         Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
@@ -94,7 +115,7 @@ module.exports.loop = function () {
             });
     }
 
-    if (upgraders.length < maxUpgraders) {
+    if (upgraders.length < maxUpgraderCreeps) {
         var newName = 'Upgrader' + Game.time;
         console.log('Spawning new upgrader: ' + newName);
         Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
