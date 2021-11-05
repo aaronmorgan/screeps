@@ -71,7 +71,7 @@ module.exports.loop = function () {
         let bodyType = [];
 
         if (energyAvailable >= 250) {
-            bodyType = [WORK, WORK, MOVE];
+            bodyType = [WORK, WORK, MOVE]; // 3 creeps will mine a 3k source faster than it respawns.
         } else {
             bodyType = [WORK, MOVE];
         }
