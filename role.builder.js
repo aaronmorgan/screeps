@@ -22,6 +22,17 @@ var roleBuilder = {
             }
         }
         else {
+            // Dropped energy
+            var droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
+            var sorted = _.sortBy(droppedResources, 'energy');
+            let nearestDroppedSource = sorted[sorted.length - 1];
+
+            if (nearestDroppedSource && creep.pickup(nearestDroppedSource) == ERR_NOT_IN_RANGE) {
+                creep.say('⚡  pickup ');
+                return creep.moveTo(nearestDroppedSource, { visualizePathStyle: { stroke: '#ffaa00' } });
+            }
+
+            // Nearby containers
             var targets = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_CONTAINER) &&
@@ -31,19 +42,19 @@ var roleBuilder = {
             if (targets.length > 0) {
                 var dropSite = creep.pos.findClosestByPath(targets);
 
-
-                console.log('Upgrader target source:', dropSite);
                 if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.say('⚡  withdraw ');
                     creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#ffffff' } });
                 }
             }
-            else {
-                let sources = creep.room.find(FIND_SOURCES);
-                let nearestSource = creep.pos.findClosestByPath(sources);
 
-                if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(nearestSource, { visualizePathStyle: { stroke: '#ffaa00' } });
-                }
+            // Local energy sources
+            let sources = creep.room.find(FIND_SOURCES);
+            let nearestSource = creep.pos.findClosestByPath(sources);
+
+            if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+                creep.say('⚡  harvest ');
+                return creep.moveTo(nearestSource, { visualizePathStyle: { stroke: '#ffaa00' } });
             }
         }
     }
