@@ -9,6 +9,7 @@ var roleBuilder = {
         }
         if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
             creep.memory.building = true;
+            creep.memory.harvesting = false;
             creep.say('building');
         }
 
@@ -17,20 +18,23 @@ var roleBuilder = {
             if (targets.length) {
                 targets.sort(function (a, b) { return a.progress > b.progress ? -1 : 1 });
                 if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], { reusePath: 10 });
+                    creep.moveTo(targets[0], {
+                        reusePath: 10,
+                        visualizePathStyle: { stroke: '#ffffff' }
+                    });
                 }
             }
         }
         else {
             // Dropped energy
-            var droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
-            var sorted = _.sortBy(droppedResources, 'energy');
-            let nearestDroppedSource = sorted[sorted.length - 1];
+            // var droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
+            // var sorted = _.sortBy(droppedResources, 'energy');
+            // let nearestDroppedSource = sorted[sorted.length - 1];
 
-            if (nearestDroppedSource && creep.pickup(nearestDroppedSource) == ERR_NOT_IN_RANGE) {
-                creep.say('⚡  pickup ');
-                return creep.moveTo(nearestDroppedSource, { visualizePathStyle: { stroke: '#ffaa00' } });
-            }
+            // if (nearestDroppedSource && creep.pickup(nearestDroppedSource) == ERR_NOT_IN_RANGE) {
+            //     creep.say('⚡  pickup ');
+            //     return creep.moveTo(nearestDroppedSource, { visualizePathStyle: { stroke: '#ffaa00' } });
+            // }
 
             // Nearby containers
             var targets = creep.room.find(FIND_STRUCTURES, {
@@ -39,12 +43,13 @@ var roleBuilder = {
                         structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity();
                 }
             });
-            if (targets.length > 0) {
+
+            if (!creep.memory.harvesting && targets.length > 0) {
                 var dropSite = creep.pos.findClosestByPath(targets);
 
                 if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.say('⚡  withdraw ');
-                    creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#ffffff' } });
+                    creep.say('⚡ withdraw ');
+                    return creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#ffffff' } });
                 }
             }
 
@@ -53,7 +58,8 @@ var roleBuilder = {
             let nearestSource = creep.pos.findClosestByPath(sources);
 
             if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                creep.say('⚡  harvest ');
+                creep.memory.harvesting = true;
+                creep.say('⛏ harvest ');
                 return creep.moveTo(nearestSource, { visualizePathStyle: { stroke: '#ffaa00' } });
             }
         }
