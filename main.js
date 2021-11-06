@@ -7,7 +7,7 @@ var roleHauler = require('role.hauler');
 var MAX_HARVESTER_CREEPS = 2;
 var MAX_UPGRADER_CREEPS = 2;
 var MAX_BUILDER_CREEPS = 5;
-var MIN_BUILDER_CREEPS = 1;
+var MIN_BUILDER_CREEPS = 0;
 var MIN_DROPMINER_CREEPS = 3;
 
 function findConstructionSites() {
