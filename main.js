@@ -19,29 +19,30 @@ function findRoomSources() {
 }
 
 module.exports.loop = function () {
+    console.log("--- NEW TICK -----------------------------");
     let room = Game.spawns['Spawn1'].room;
 
-    var tower = Game.getObjectById('TOWER_ID');
+    let towers = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, { filter: (c) => c.structureType == STRUCTURE_TOWER });
+    let tower = towers[0];
     if (tower) {
-        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax
-        });
-        if (closestDamagedStructure) {
-            tower.repair(closestDamagedStructure);
-        }
+        console.log('INFO: Processing Towers...');
 
-        var hostiles = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
-        if (hostiles) {
-            var username = hostiles[0].owner.username;
+        var hostiles = Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS);
 
-            var towers = Game.rooms[roomName].find(FIND_MY_STRUCTURES, {
-                filter: {
-                    structureType: STRUCTURE_TOWER
-                }
+        if (hostiles.length) {
+            console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
+            towers.forEach(t => t.attack(hostiles[0]));
+        } else {
+            var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => structure.hits < structure.hitsMax
             });
-
-            towers.forEach(tower => tower.attack(hostiles[0]));
+            if (closestDamagedStructure) {
+                console.log('DEFENCE: Repairing damaged structure');
+                tower.repair(closestDamagedStructure);
+            }
         }
+    } else {
+        console.log('WARNING: No towers!');
     }
 
     for (var name in Memory.creeps) {
