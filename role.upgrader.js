@@ -19,15 +19,15 @@ var roleUpgrader = {
     else {
       var targets = creep.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
-          return (structure.structureType == STRUCTURE_CONTAINER) &&
+          return (structure.structureType == STRUCTURE_CONTAINER ||
+            structure.structureType == STRUCTURE_STORAGE) &&
             structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity();
         }
       });
       if (targets.length > 0) {
         var dropSite = creep.pos.findClosestByPath(targets);
 
-
-        console.log('Upgrader target source:', dropSite);
+        // console.log('Upgrader target source:', dropSite);
         if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#ffffff' } });
         }
@@ -40,7 +40,6 @@ var roleUpgrader = {
           creep.moveTo(nearestSource, { visualizePathStyle: { stroke: '#ffaa00' } });
         }
       }
-
     }
   }
 };
