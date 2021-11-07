@@ -179,17 +179,20 @@ module.exports.loop = function () {
         var newName = 'Upgrader' + Game.time;
         let bodyType = [];
 
-        if (room.storage && energyAvailable >= 400) {
+        if (room.storage && energyAvailable >= 550) {
+            bodyType = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
+        } else if (room.storage && energyAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-        } else {
+        } else if (room.storage && energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
+        } else {
+            bodyType = undefined;
+            console.log('DEBUG: Insufficient energy to build upgrader creep.');
         }
 
-        console.log('Spawning new upgrader: ' + newName + ', [' + bodyType + ']');
-        Game.spawns['Spawn1'].spawnCreep(bodyType, newName,
-            {
-                memory: { role: 'upgrader' }
-            });
+        if (bodyType) {
+            roleUpgrader.createUpgrader(Game.spawns['Spawn1'], newName, bodyType);
+        }
     }
 
     if (Game.spawns['Spawn1'].spawning) {
