@@ -1,21 +1,27 @@
+require('prototype.room')();
+
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleDropMiner = require('role.dropminer');
 var roleHauler = require('role.hauler');
 
-var MAX_HARVESTER_CREEPS = 2;
+var MAX_HARVESTER_CREEPS = 5;
 var MAX_UPGRADER_CREEPS = 2;
 var MAX_BUILDER_CREEPS = 5;
+var MIN_HARVESTER_CREEPS = 0;
 var MIN_BUILDER_CREEPS = 0;
-var MIN_DROPMINER_CREEPS = 3;
+var MIN_DROPMINER_CREEPS = 1;
 
 function findConstructionSites() {
     return Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES).length;
 }
 
-function findRoomSources() {
-    return Game.spawns['Spawn1'].room.find(FIND_SOURCES_ACTIVE).length;
+function bodyCost(body) {
+    let sum = 0;
+    for (let i in body)
+        sum += BODYPART_COST[body[i]];
+    return sum;
 }
 
 module.exports.loop = function () {
@@ -53,7 +59,12 @@ module.exports.loop = function () {
     }
 
     console.log('INFO: Processing Creeps...');
-    let energyAvailable = room.energyCapacityAvailable;
+
+    let energyCapacityAvailable = room.energyCapacityAvailable;
+    let energyAvailable = room.energyAvailable;
+    let sources = room.getSources();
+
+    console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
 
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
     var dropMiners = _.filter(Game.creeps, (creep) => creep.memory.role == 'dropminer');
@@ -63,11 +74,11 @@ module.exports.loop = function () {
 
     // Harvesters
     // Should have MAX_HARVESTER_CREEPS but reduce numbers when drop miners start to appear.
-    let maxHarvesterCreeps = dropMiners.length == 0 ? MAX_HARVESTER_CREEPS : 0;
+    let maxHarvesterCreeps = dropMiners.length == 0 ? MAX_HARVESTER_CREEPS : MIN_HARVESTER_CREEPS;
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
-    let maxDropMinerCreeps = dropMiners.length < MIN_DROPMINER_CREEPS ? Math.max(MIN_DROPMINER_CREEPS, findRoomSources() * 2) : MIN_DROPMINER_CREEPS;
+    let maxDropMinerCreeps = dropMiners.length < MIN_DROPMINER_CREEPS ? Math.max(MIN_DROPMINER_CREEPS, room.getSources() * 2) : MIN_DROPMINER_CREEPS;
 
     // Haulers
     let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.75));
@@ -89,19 +100,22 @@ module.exports.loop = function () {
     console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps);
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
-    if (dropMiners.length < maxDropMinerCreeps) {
+    if (dropMiners.length < maxDropMinerCreeps || dropMiners.length < sources.length) {
         let newName = 'DropMiner' + Game.time;
         let bodyType = [];
 
-        if (energyAvailable >= 250) {
-            bodyType = [WORK, WORK, MOVE]; // 3 creeps will mine a 3k source faster than it respawns.
+        if (energyAvailable >= 550) {
+            bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
+            // TODO set room memory max number of miners per source = 1
         } else {
             bodyType = [WORK, MOVE];
+            // TODO set room memory max number of miners per source = ?
         }
 
-        console.log('Spawning new drop miner: ' + newName + ', [' + bodyType + ']');
-        Game.spawns['Spawn1'].spawnCreep(bodyType, newName,
-            { memory: { role: 'dropminer' } });
+        let targetSourceId = room.selectAvailableSource(dropMiners)[0].id;
+        console.log('Assigning creep sourceId: ' + targetSourceId);
+
+        roleDropMiner.createMiner(Game.spawns['Spawn1'], newName, bodyType, targetSourceId)
     }
 
     if (haulers.length < maxHaulerCreeps) {
@@ -176,7 +190,7 @@ module.exports.loop = function () {
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
         if (creep.memory.role == 'dropminer') {
-            roleDropMiner.run(creep);
+            roleDropMiner.harvest(creep);
         }
         if (creep.memory.role == 'hauler') {
             roleHauler.run(creep);
