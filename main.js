@@ -160,26 +160,37 @@ module.exports.loop = function () {
         var newName = 'Builder' + Game.time;
         let bodyType = [];
 
-        if (energyAvailable >= 400) {
+        if (energyAvailable >= 900) {
+            bodyType = [
+                WORK, WORK, WORK, WORK, WORK,
+                CARRY, CARRY, CARRY, CARRY, CARRY,
+                MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 300) {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
-        } else {
+        } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
+        } else {
+            bodyType = undefined;
+            console.log('DEBUG: Insufficient energy to build builder creep.');
         }
 
-        console.log('Spawning new builder: ' + newName + ', [' + bodyType + ']');
-        Game.spawns['Spawn1'].spawnCreep(bodyType, newName,
-            {
-                memory: { role: 'builder' }
-            });
+        if (bodyType) {
+            roleBuilder.createBuilder(Game.spawns['Spawn1'], newName, bodyType);
+        }
     }
 
     if (upgraders.length < maxUpgraderCreeps) {
         var newName = 'Upgrader' + Game.time;
         let bodyType = [];
 
-        if (room.storage && energyAvailable >= 550) {
+        if (room.storage && energyAvailable >= 1750) {
+            bodyType = [
+                WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
+                CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+                MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (room.storage && energyAvailable >= 550) {
             bodyType = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
         } else if (room.storage && energyAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];

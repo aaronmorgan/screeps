@@ -1,5 +1,11 @@
 var roleBuilder = {
 
+    createBuilder: function (p_spawn, p_name, p_body) {
+        console.log('Spawning new builder: ' + p_name + ', [' + p_body + ']');
+
+        p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'dropminer' } });
+    },
+
     /** @param {Creep} creep **/
     run: function (creep) {
 
@@ -14,7 +20,7 @@ var roleBuilder = {
         }
 
         if (creep.memory.building) {
-            var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+            let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
             if (targets.length) {
                 targets.sort(function (a, b) { return a.progress > b.progress ? -1 : 1 });
                 if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
