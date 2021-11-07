@@ -1,10 +1,8 @@
-const ROLE = 'UPGRADER';
-
 var roleUpgrader = {
 
   createUpgrader: function (p_spawn, p_name, p_body) {
     console.log('Spawning new upgrader: ' + p_name + ', [' + p_body + ']');
-    p_spawn.spawnCreep(p_body, p_name, { memory: { role: ROLE } });
+    p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'upgrader' } });
   },
 
   /** @param {Creep} creep **/
