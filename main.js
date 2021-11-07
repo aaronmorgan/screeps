@@ -106,33 +106,46 @@ module.exports.loop = function () {
         let newName = 'DropMiner' + Game.time;
         let bodyType = [];
 
-        if (energyAvailable >= 550) {
-            bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
-            // TODO set room memory max number of miners per source = 1
+        if (energyAvailable >= 600) {
+            bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
+            room.memory.minersPerSource = 1;
+        } else if (energyAvailable >= 300) {
+            bodyType = [WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
+            room.memory.minersPerSource = 3;
+        } else if (energyAvailable >= 200) {
+            bodyType = [WORK, MOVE, MOVE];
+            room.memory.minersPerSource = 3;
         } else {
-            bodyType = [WORK, MOVE];
-            // TODO set room memory max number of miners per source = ?
+            bodyType = undefined;
+            console.log('DEBUG: Insufficient energy to build dropMiner creep.');
         }
 
-        let targetSourceId = room.selectAvailableSource(dropMiners)[0].id;
-        console.log('Assigning creep sourceId: ' + targetSourceId);
+        if (bodyType) {
+            let targetSourceId = room.selectAvailableSource(dropMiners)[0].id;
+            console.log('Assigning creep sourceId: ' + targetSourceId);
 
-        roleDropMiner.createMiner(Game.spawns['Spawn1'], newName, bodyType, targetSourceId)
+            roleDropMiner.createMiner(Game.spawns['Spawn1'], newName, bodyType, targetSourceId)
+        }
     }
 
     if (haulers.length < maxHaulerCreeps) {
         var newName = 'Hauler' + Game.time;
         let bodyType = [];
 
-        if (energyAvailable >= 200) {
+        if (energyAvailable >= 400 && room.memory.minersPerSource == 1) {
+            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 200) {
             bodyType = [CARRY, CARRY, MOVE, MOVE];
-        } else {
+        } else if (energyAvailable >= 100) {
             bodyType = [CARRY, MOVE];
+        } else {
+            bodyType = undefined;
+            console.log('DEBUG: Insufficient energy to build hauler creep.');
         }
 
-        console.log('Spawning new hauler: ' + newName + ', [' + bodyType + ']');
-        Game.spawns['Spawn1'].spawnCreep(bodyType, newName,
-            { memory: { role: 'hauler' } });
+        if (bodyType) {
+            roleHauler.createHauler(Game.spawns['Spawn1'], newName, bodyType);
+        }
     }
 
     if (harvesters.length < maxHarvesterCreeps) {
@@ -207,7 +220,7 @@ module.exports.loop = function () {
             roleBuilder.run(creep);
         }
     }
-    
+
     console.log('INFO: Running Infrastructure tasks...');
     infrastructureTasks.buildLinks(room);
 }

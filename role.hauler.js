@@ -1,19 +1,34 @@
 var roleHauler = {
 
+  createHauler: function (p_spawn, p_name, p_body) {
+    console.log('Spawning new hauler: ' + p_name + ', [' + p_body + ']');
+    p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'hauler' } });
+  },
+
   /** @param {Creep} creep **/
   run: function (creep) {
-    if (creep.store.getFreeCapacity() > 0) {
-      var droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
-      var sorted = _.sortBy(droppedResources, 'energy');
+    // TODO: Determine time to live and whether it's better to suicide while empty than with full energy store.
+
+    if (creep.store.getFreeCapacity() == 0) {
+      creep.memory.harvesting = false;
+    }
+
+    if (creep.store.getFreeCapacity() > 0 && creep.memory.harvesting == true) {
+      let droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
+      let sorted = _.sortBy(droppedResources, 'energy');
       let nearestDroppedSource = sorted[sorted.length - 1];
 
       if (nearestDroppedSource && creep.pickup(nearestDroppedSource) == ERR_NOT_IN_RANGE) {
+        creep.memory.harvesting = true;
+
         creep.say('⚡  pickup ');
         creep.moveTo(nearestDroppedSource, { visualizePathStyle: { stroke: '#ffaa00' } });
       }
     }
     else {
-      var targets = creep.room.find(FIND_STRUCTURES, {
+      creep.memory.harvesting = false;
+
+      let targets = creep.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
           return (structure.structureType == STRUCTURE_EXTENSION ||
             structure.structureType == STRUCTURE_SPAWN ||
@@ -25,11 +40,14 @@ var roleHauler = {
       });
 
       if (targets.length > 0) {
-        var dropSite = creep.pos.findClosestByPath(targets);
-        // console.log('Hauler target source:', dropSite);
+        let dropSite = creep.pos.findClosestByPath(targets);
 
         if (creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#ffffff' } });
+        }
+
+        if (creep.store.getUsedCapacity() == 0) {
+          creep.memory.harvesting = true;
         }
       }
     }
