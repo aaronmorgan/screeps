@@ -3,7 +3,7 @@ var roleBuilder = {
     createBuilder: function (p_spawn, p_name, p_body) {
         console.log('Spawning new builder: ' + p_name + ', [' + p_body + ']');
 
-        p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'dropminer' } });
+        p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'builder' } });
     },
 
     /** @param {Creep} creep **/

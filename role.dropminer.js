@@ -1,7 +1,7 @@
 var roleDropMiner = {
 
     createMiner: function (p_spawn, p_name, p_body, p_sourceId) {
-        console.log('Spawning new drop miner: ' + p_name + ', [' + p_body + ']');
+        console.log('Spawning new drop miner: ' + p_name + ', [' + p_body + '], sourceId: ' + p_sourceId);
 
         p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'dropminer', sourceId: p_sourceId } });
     },
