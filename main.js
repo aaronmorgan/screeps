@@ -35,13 +35,13 @@ module.exports.loop = function () {
     if (tower) {
         console.log('INFO: Processing Towers...');
 
-        var hostiles = room.find(FIND_HOSTILE_CREEPS);
+        let hostiles = room.find(FIND_HOSTILE_CREEPS);
 
         if (hostiles.length) {
             console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
             towers.forEach(t => t.attack(hostiles[0]));
         } else {
-            var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+            let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => structure.hits < structure.hitsMax
             });
             if (closestDamagedStructure) {
@@ -53,7 +53,7 @@ module.exports.loop = function () {
         console.log('WARNING: No towers!');
     }
 
-    for (var name in Memory.creeps) {
+    for (let name in Memory.creeps) {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
             console.log('INFO: Clearing creep memory:', name);
@@ -64,15 +64,14 @@ module.exports.loop = function () {
 
     let energyCapacityAvailable = room.energyCapacityAvailable;
     let energyAvailable = room.energyAvailable;
-    let sources = room.getSources();
 
     console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
 
-    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    var dropMiners = _.filter(Game.creeps, (creep) => creep.memory.role == 'dropminer');
-    var haulers = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
-    var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-    var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
+    let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
+    let dropMiners = _.filter(Game.creeps, (creep) => creep.memory.role == 'dropminer');
+    let haulers = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
+    let builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
+    let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
 
     // Harvesters
     // Should have MAX_HARVESTER_CREEPS but reduce numbers when drop miners start to appear.
@@ -80,11 +79,10 @@ module.exports.loop = function () {
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
-    //let maxDropMinerCreeps = dropMiners.length < MIN_DROPMINER_CREEPS ? Math.max(MIN_DROPMINER_CREEPS, room.getSources().length * 2) : MIN_DROPMINER_CREEPS;
     let maxDropMinerCreeps = room.getSources().length * room.memory.minersPerSource;
 
     // Haulers
-    let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.75));
+    let maxHaulerCreeps = Math.max(0, Math.round(maxDropMinerCreeps * 1.75));
 
     // Builders
     let constructionSites = findConstructionSites();
@@ -103,8 +101,7 @@ module.exports.loop = function () {
     console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps);
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
-    if (dropMiners.length < maxDropMinerCreeps) { // || dropMiners.length < sources.length) {
-        let newName = 'DropMiner' + Game.time;
+    if (dropMiners.length <= maxDropMinerCreeps) {
         let bodyType = [];
 
         if (energyAvailable >= 600) {
@@ -121,8 +118,9 @@ module.exports.loop = function () {
             console.log('DEBUG: Insufficient energy to build dropMiner creep.');
         }
 
-        if (bodyType) { //  && dropMiners.length > 0) {
+        if (bodyType && dropMiners.length < maxDropMinerCreeps) {
             let availableSources = room.selectAvailableSource(dropMiners);
+            let newName = 'DropMiner' + Game.time;
             let targetSourceId = availableSources[0].id;
 
             roleDropMiner.createMiner(Game.spawns['Spawn1'], newName, bodyType, targetSourceId)
@@ -130,7 +128,6 @@ module.exports.loop = function () {
     }
 
     if (haulers.length < maxHaulerCreeps) {
-        var newName = 'Hauler' + Game.time;
         let bodyType = [];
 
         if (energyAvailable >= 400 && room.memory.minersPerSource == 1) {
@@ -145,12 +142,15 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            roleHauler.createHauler(Game.spawns['Spawn1'], newName, bodyType);
+            roleHauler.createHauler(
+                Game.spawns['Spawn1'],
+                'Hauler' + Game.time,
+                bodyType);
         }
     }
 
     if (harvesters.length < maxHarvesterCreeps) {
-        var newName = 'Harvester' + Game.time;
+        let newName = 'Harvester' + Game.time;
         console.log('Spawning new harvester: ' + newName);
 
         Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
@@ -158,7 +158,6 @@ module.exports.loop = function () {
     }
 
     if (builders.length < maxBuilderCreeps) {
-        var newName = 'Builder' + Game.time;
         let bodyType = [];
 
         if (energyAvailable >= 900) {
@@ -178,13 +177,15 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            roleBuilder.createBuilder(Game.spawns['Spawn1'], newName, bodyType);
+            roleBuilder.createBuilder(
+                Game.spawns['Spawn1'],
+                'Builder' + Game.time,
+                bodyType);
         }
     }
 
     // TODO: ...and < min drop miners
     if (upgraders.length < maxUpgraderCreeps) {
-        var newName = 'Upgrader' + Game.time;
         let bodyType = [];
 
         if (room.storage && energyAvailable >= 1750) {
@@ -204,12 +205,15 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            roleUpgrader.createUpgrader(Game.spawns['Spawn1'], newName, bodyType);
+            roleUpgrader.createUpgrader(
+                Game.spawns['Spawn1'],
+                'Upgrader' + Game.time,
+                bodyType);
         }
     }
 
     if (Game.spawns['Spawn1'].spawning) {
-        var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
+        let spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
         room.visual.text(
             '🛠️' + spawningCreep.memory.role,
             Game.spawns['Spawn1'].pos.x + 1,
@@ -218,8 +222,8 @@ module.exports.loop = function () {
     }
 
     console.log('INFO: Running Creeps...');
-    for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
+    for (let name in Game.creeps) {
+        let creep = Game.creeps[name];
         if (creep.memory.role == 'dropminer') {
             roleDropMiner.harvest(creep);
         }
