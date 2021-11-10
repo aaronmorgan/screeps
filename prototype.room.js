@@ -64,12 +64,14 @@ module.exports = function () {
                     if (!sources.hasOwnProperty(sourceKey)) {
                         continue;
                     }
-                    var source = sources[sourceKey];
-                    var initial = source.pos;
+                    let source = sources[sourceKey];
+                    let initial = source.pos;
+
                     for (var offsetKey in offsets) {
-                        var offset = offsets[offsetKey];
-                        var newPos = new RoomPosition(initial.x + offset.x, initial.y + offset.y, initial.roomName);
-                        var terrain = Game.map.getTerrainAt(newPos);
+                        let offset = offsets[offsetKey];
+                        let newPos = new RoomPosition(initial.x + offset.x, initial.y + offset.y, initial.roomName);
+                        let terrain = Game.map.getTerrainAt(newPos);
+
                         if (terrain == "plain") {
                             harvestPoints++;
                         }

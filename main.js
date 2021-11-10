@@ -186,6 +186,11 @@ module.exports.loop = function () {
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (room.storage && energyAvailable >= 1000) {
+            bodyType = [
+                WORK, WORK, WORK, WORK, WORK, WORK,
+                CARRY, CARRY, CARRY, CARRY,
+                MOVE, MOVE, MOVE, MOVE];
         } else if (room.storage && energyAvailable >= 550) {
             bodyType = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
         } else if (room.storage && energyAvailable >= 400) {
