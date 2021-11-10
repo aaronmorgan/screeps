@@ -1,8 +1,10 @@
 var roleHauler = {
 
   createHauler: function (p_spawn, p_name, p_body) {
-    console.log('Spawning new hauler: ' + p_name + ', [' + p_body + ']');
-    p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'hauler' } });
+    let name = p_name + Game.time;
+
+    console.log('Spawning new hauler: ' + name + ', [' + p_body + ']');
+    p_spawn.spawnCreep(p_body, name, { memory: { role: 'hauler' } });
   },
 
   /** @param {Creep} creep **/

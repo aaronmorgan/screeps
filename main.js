@@ -120,10 +120,9 @@ module.exports.loop = function () {
 
         if (bodyType && dropMiners.length < maxDropMinerCreeps) {
             let availableSources = room.selectAvailableSource(dropMiners);
-            let newName = 'DropMiner' + Game.time;
             let targetSourceId = availableSources[0].id;
 
-            roleDropMiner.createMiner(Game.spawns['Spawn1'], newName, bodyType, targetSourceId)
+            roleDropMiner.createMiner(Game.spawns['Spawn1'], 'DropMiner', bodyType, targetSourceId)
         }
     }
 
@@ -142,10 +141,7 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            roleHauler.createHauler(
-                Game.spawns['Spawn1'],
-                'Hauler' + Game.time,
-                bodyType);
+            roleHauler.createHauler(Game.spawns['Spawn1'], 'Hauler', bodyType);
         }
     }
 
@@ -177,10 +173,7 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            roleBuilder.createBuilder(
-                Game.spawns['Spawn1'],
-                'Builder' + Game.time,
-                bodyType);
+            roleBuilder.createBuilder(Game.spawns['Spawn1'], 'Builder', bodyType);
         }
     }
 
@@ -205,10 +198,7 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            roleUpgrader.createUpgrader(
-                Game.spawns['Spawn1'],
-                'Upgrader' + Game.time,
-                bodyType);
+            roleUpgrader.createUpgrader(Game.spawns['Spawn1'], 'Upgrader', bodyType);
         }
     }
 

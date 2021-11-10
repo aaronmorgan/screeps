@@ -1,8 +1,10 @@
 var roleUpgrader = {
 
   createUpgrader: function (p_spawn, p_name, p_body) {
-    console.log('Spawning new upgrader: ' + p_name + ', [' + p_body + ']');
-    p_spawn.spawnCreep(p_body, p_name, { memory: { role: 'upgrader' } });
+    let name = p_name + Game.time;
+
+    console.log('Spawning new upgrader: ' + name + ', [' + p_body + ']');
+    p_spawn.spawnCreep(p_body, name, { memory: { role: 'upgrader' } });
   },
 
   /** @param {Creep} creep **/
@@ -11,6 +13,7 @@ var roleUpgrader = {
       creep.memory.upgrading = false;
       creep.say('🔄 harvest');
     }
+
     if (!creep.memory.upgrading && creep.store.getFreeCapacity() == 0) {
       creep.memory.upgrading = true;
       creep.say('⚡ upgrade');

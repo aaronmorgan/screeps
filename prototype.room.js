@@ -15,6 +15,14 @@ var offsets = [
 
 module.exports = function () {
 
+    Room.prototype.getStructures = function () {
+        if (!this.memory._structures) {
+            this.memory._structures = this.find(FIND_STRUCTURES);
+        }
+
+        return this.memory._structures;
+    };
+
     /**
      * Returns the sources in this room.
      * @returns {*}
@@ -31,7 +39,7 @@ module.exports = function () {
     Room.prototype.selectAvailableSource =
         function (dropMiners) {
             if (dropMiners.length == 0) { return this.find(FIND_SOURCES); }
-            
+
             let sources = _.filter(this.find(FIND_SOURCES), (s) => {
                 for (var i = 0; i < dropMiners.length; i++) {
                     if (dropMiners[i].memory.sourceId != s.id) {
