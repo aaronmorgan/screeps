@@ -1,5 +1,12 @@
 var roleHarvester = {
 
+    createHarvester: function (p_spawn, p_name, p_body) {
+        let name = p_name + Game.time;
+        console.log('Spawning new harvester: ' + name + ', [' + p_body + ']');
+
+        p_spawn.spawnCreep(p_body, name, { memory: { role: 'harvester' } });
+    },
+
     /** @param {Creep} creep **/
     run: function (creep) {
         if (creep.store.getFreeCapacity() > 0) {

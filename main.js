@@ -145,11 +145,18 @@ module.exports.loop = function () {
     }
 
     if (harvesters.length < maxHarvesterCreeps) {
-        let newName = 'Harvester' + Game.time;
-        console.log('Spawning new harvester: ' + newName);
+        let bodyType = [];
 
-        Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName,
-            { memory: { role: 'harvester' } });
+        if (energyAvailable >= 150) {
+            bodyType = [WORK, CARRY, MOVE];
+        } else {
+            bodyType = undefined;
+            console.log('DEBUG: Insufficient energy to build havester creep.');
+        }
+
+        if (bodyType) {
+            roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Havester', bodyType);
+        }
     }
 
     if (builders.length < maxBuilderCreeps) {
