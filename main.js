@@ -13,7 +13,6 @@ var MAX_UPGRADER_CREEPS = 2;
 var MAX_BUILDER_CREEPS = 5;
 var MIN_HARVESTER_CREEPS = 0;
 var MIN_BUILDER_CREEPS = 0;
-var MIN_DROPMINER_CREEPS = 1;
 
 function findConstructionSites() {
     return Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES).length;
@@ -82,7 +81,7 @@ module.exports.loop = function () {
     let maxDropMinerCreeps = room.getSources().length * room.memory.minersPerSource;
 
     // Haulers
-    let maxHaulerCreeps = Math.max(0, Math.round(maxDropMinerCreeps * 1.75));
+    let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.75));
 
     // Builders
     let constructionSites = findConstructionSites();
