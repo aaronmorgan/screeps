@@ -7,6 +7,7 @@ var roleDropMiner = require('role.dropminer');
 var roleHauler = require('role.hauler');
 
 var infrastructureTasks = require('tasks.infrastructure');
+var creepTasks = require('tasks.creeps');
 
 var MAX_HARVESTER_CREEPS = 5;
 var MAX_UPGRADER_CREEPS = 2;
@@ -251,4 +252,7 @@ module.exports.loop = function () {
 
     console.log('INFO: Running Infrastructure tasks...');
     infrastructureTasks.buildLinks(room);
+
+    console.log('INFO: Running Creep tasks...');
+    creepTasks.suicideCreep(room);
 }
