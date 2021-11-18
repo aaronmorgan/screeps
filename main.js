@@ -75,14 +75,14 @@ module.exports.loop = function () {
 
     // Harvesters
     // Should have MAX_HARVESTER_CREEPS but reduce numbers when drop miners start to appear.
-    let maxHarvesterCreeps = dropMiners.length == 0 ? MAX_HARVESTER_CREEPS : MIN_HARVESTER_CREEPS;
+    room.memory.maxHarvesterCreeps = dropMiners.length == 0 ? MAX_HARVESTER_CREEPS : MIN_HARVESTER_CREEPS;
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
-    let maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
+    room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
 
     // Haulers
-    let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.25));
+    room.memory.maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.25));
 
     // Builders
     let constructionSites = findConstructionSites();
@@ -95,15 +95,16 @@ module.exports.loop = function () {
     let maxUpgraderCreeps = MAX_UPGRADER_CREEPS + (1 * 2);
 
     // Summary of actual vs target numbers.
-    console.log('  Harvesters: ' + harvesters.length + '/' + maxHarvesterCreeps);
-    console.log('  Drop Miners: ' + dropMiners.length + '/' + maxDropMinerCreeps);
-    console.log('  Haulers: ' + haulers.length + '/' + maxHaulerCreeps);
+    console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps);
+    console.log('  Drop Miners: ' + dropMiners.length + '/' + room.memory.maxDropMinerCreeps);
+    console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps);
     console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps);
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
-    room.memory.sufficientHarvesters = harvesters.length >= maxHarvesterCreeps;
+    room.memory.sufficientDropMiners = dropMiners.length >= room.memory.maxDropMinerCreeps && haulers.length > room.memory.maxHaulerCreeps;
+    room.memory.sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
 
-    if (dropMiners.length <= maxDropMinerCreeps) {
+    if (!room.memory.sufficientDropMiners) {
         let bodyType = [];
 
         if (energyAvailable >= 600) {
@@ -120,7 +121,7 @@ module.exports.loop = function () {
             console.log('DEBUG: Insufficient energy to build dropMiner creep.');
         }
 
-        if (bodyType && dropMiners.length < maxDropMinerCreeps) {
+        if (bodyType && dropMiners.length < room.memory.maxDropMinerCreeps) {
             let availableSources = room.selectAvailableSource(dropMiners);
             let targetSourceId = availableSources[0].id;
 
@@ -128,7 +129,7 @@ module.exports.loop = function () {
         }
     }
 
-    if (haulers.length < maxHaulerCreeps) {
+    if (haulers.length < room.memory.maxHaulerCreeps) {
         let bodyType = [];
 
         if (energyAvailable >= 400 && room.memory.minersPerSource == 1) {
@@ -191,7 +192,7 @@ module.exports.loop = function () {
     }
 
     // TODO: ...and < min drop miners
-    if ((room.memory.sufficientHarvesters) || upgraders.length < maxUpgraderCreeps) {
+    if ((room.memory.sufficientHarvesters || room.memory.sufficientDropMiners) && upgraders.length < maxUpgraderCreeps) {
         let bodyType = [];
 
         if (room.storage && energyAvailable >= 1750) {
@@ -213,6 +214,7 @@ module.exports.loop = function () {
         } else {
             bodyType = undefined;
             console.log('DEBUG: Insufficient energy to build upgrader creep.');
+            // TODO Should queue the upgrader here and not build any more until it's removed from the queue.
         }
 
         if (bodyType) {
