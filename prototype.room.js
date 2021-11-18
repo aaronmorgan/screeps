@@ -15,12 +15,34 @@ var offsets = [
 
 module.exports = function () {
 
-    Room.prototype.getStructures = function () {
-        if (!this.memory._structures) {
-            this.memory._structures = this.find(FIND_STRUCTURES);
-        }
+    Room.prototype.clearCache = function () {
+        this.memory._cacheRoomStructures = undefined;
+    };
 
-        return this.memory._structures;
+    Room.prototype.getStructures = function () {
+        if (!this.memory._cacheRoomStructures) {
+            console.log('DEBUG: Refreshing STRUCTURES cache...');
+
+            this.memory._cacheRoomStructures = this.find(FIND_STRUCTURES);
+        }
+        else {
+            console.log('DEBUG: Fetching STRUCTURES from cache...');
+
+            return this.memory._cacheRoomStructures;
+        }
+    };
+
+    Room.prototype.getConstructionSites = function () {
+        if (!this.memory._cacheRoomConstructionSites) {
+            console.log('DEBUG: Refreshing CONSTRUCTION_SITES cache...');
+
+            this.memory._cacheRoomConstructionSites = this.find(FIND_CONSTRUCTION_SITES);
+        }
+        else {
+            console.log('DEBUG: Fetching CONSTRUCTION_SITES from cache...');
+
+            return this.memory._cacheRoomConstructionSites;
+        }
     };
 
     /**
@@ -38,7 +60,10 @@ module.exports = function () {
      */
     Room.prototype.selectAvailableSource =
         function (dropMiners) {
-            if (dropMiners.length == 0) { return this.find(FIND_SOURCES); }
+            if (dropMiners.length == 0) {
+                console.log('here');
+                return this.find(FIND_SOURCES);
+            }
 
             let sources = _.filter(this.find(FIND_SOURCES), (s) => {
                 for (var i = 0; i < dropMiners.length; i++) {

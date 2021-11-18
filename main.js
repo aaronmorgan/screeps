@@ -15,10 +15,6 @@ var MAX_BUILDER_CREEPS = 5;
 var MIN_HARVESTER_CREEPS = 0;
 var MIN_BUILDER_CREEPS = 0;
 
-function findConstructionSites() {
-    return Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES).length;
-}
-
 function bodyCost(body) {
     let sum = 0;
     for (let i in body)
@@ -32,8 +28,10 @@ function bodyCost(body) {
 module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
     let room = Game.spawns['Spawn1'].room;
+    let structures = room.getStructures();
 
-    let towers = room.find(FIND_STRUCTURES, { filter: (c) => c.structureType == STRUCTURE_TOWER });
+    let towers = _.filter(structures, { filter: (c) => c.structureType == STRUCTURE_TOWER });
+
     let tower = towers[0];
     if (tower) {
         console.log('INFO: Processing Towers...');
@@ -88,8 +86,8 @@ module.exports.loop = function () {
     room.memory.maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.25));
 
     // Builders
-    let constructionSites = findConstructionSites();
-    let maxBuilderCreeps = constructionSites > 0
+    let constructionSites = room.getConstructionSites();
+    room.memory.maxBuilderCreeps = constructionSites > 0
         ? Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750))
         : MIN_BUILDER_CREEPS;
 
@@ -101,7 +99,7 @@ module.exports.loop = function () {
     console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps);
     console.log('  Drop Miners: ' + dropMiners.length + '/' + room.memory.maxDropMinerCreeps);
     console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps);
-    console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps);
+    console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps);
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
     room.memory.sufficientDropMiners = dropMiners.length >= room.memory.maxDropMinerCreeps && haulers.length > room.memory.maxHaulerCreeps;
@@ -158,19 +156,19 @@ module.exports.loop = function () {
             bodyType = [WORK, CARRY, MOVE];
         } else {
             bodyType = undefined;
-            console.log('DEBUG: Insufficient energy to build havester creep.');
+            console.log('DEBUG: Insufficient energy to build HARVESTER creep.');
         }
 
         if (bodyType) {
             room.memory.buildingHarvester = true;
-            roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Havester', bodyType);
+            roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Harvester', bodyType);
         }
         else {
             room.memory.buildingHarvester = false;
         }
     }
 
-    if (builders.length < maxBuilderCreeps) {
+    if (builders.length < room.memory.maxBuilderCreeps) {
         let bodyType = [];
 
         if (energyAvailable >= 900) {
