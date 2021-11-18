@@ -11,6 +11,8 @@ var creepTasks = {
         let builders = _.filter(p_room.creeps, (creep) => creep.memory.role == 'builder');
         let upgraders = _.filter(p_room.creeps, (creep) => creep.memory.role == 'upgrader');
 
+        let creepsToRemove = [];
+
         if (harvesters.length > p_room.memory.maxHarvesterCreeps) {
             let creepsToDelete = harvesters.length - p_room.memory.maxHarvesterCreeps;
 
