@@ -78,7 +78,7 @@ module.exports.loop = function () {
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
-    let maxDropMinerCreeps = room.getSources().length * room.memory.minersPerSource;
+    let maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
 
     // Haulers
     let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.25));
