@@ -28,6 +28,8 @@ function bodyCost(body) {
 module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
     let room = Game.spawns['Spawn1'].room;
+
+    room.clearCache();
     let structures = room.getStructures();
 
     let towers = _.filter(structures, { filter: (c) => c.structureType == STRUCTURE_TOWER });

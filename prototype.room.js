@@ -25,11 +25,8 @@ module.exports = function () {
 
             this.memory._cacheRoomStructures = this.find(FIND_STRUCTURES);
         }
-        else {
-            console.log('DEBUG: Fetching STRUCTURES from cache...');
 
-            return this.memory._cacheRoomStructures;
-        }
+        return this.memory._cacheRoomStructures;
     };
 
     Room.prototype.getConstructionSites = function () {
@@ -38,11 +35,8 @@ module.exports = function () {
 
             this.memory._cacheRoomConstructionSites = this.find(FIND_CONSTRUCTION_SITES);
         }
-        else {
-            console.log('DEBUG: Fetching CONSTRUCTION_SITES from cache...');
 
-            return this.memory._cacheRoomConstructionSites;
-        }
+        return this.memory._cacheRoomConstructionSites;
     };
 
     /**
