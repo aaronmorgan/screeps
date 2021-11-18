@@ -81,7 +81,7 @@ module.exports.loop = function () {
     let maxDropMinerCreeps = room.getSources().length * room.memory.minersPerSource;
 
     // Haulers
-    let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.75));
+    let maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.25));
 
     // Builders
     let constructionSites = findConstructionSites();
@@ -100,6 +100,8 @@ module.exports.loop = function () {
     console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps);
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
+    room.memory.sufficientHarvesters = harvesters.length >= maxHarvesterCreeps;
+
     if (dropMiners.length <= maxDropMinerCreeps) {
         let bodyType = [];
 
@@ -107,7 +109,7 @@ module.exports.loop = function () {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
             room.memory.minersPerSource = 1;
         } else if (energyAvailable >= 300) {
-            bodyType = [WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
+            bodyType = [WORK, WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, MOVE, MOVE];
@@ -144,7 +146,7 @@ module.exports.loop = function () {
         }
     }
 
-    if (harvesters.length < maxHarvesterCreeps) {
+    if (!room.memory.sufficientHarvesters) {
         let bodyType = [];
 
         if (energyAvailable >= 150) {
@@ -155,7 +157,11 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
+            room.memory.buildingHarvester = true;
             roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Havester', bodyType);
+        }
+        else {
+            room.memory.buildingHarvester = false;
         }
     }
 
@@ -184,7 +190,7 @@ module.exports.loop = function () {
     }
 
     // TODO: ...and < min drop miners
-    if (upgraders.length < maxUpgraderCreeps) {
+    if ((room.memory.sufficientHarvesters) || upgraders.length < maxUpgraderCreeps) {
         let bodyType = [];
 
         if (room.storage && energyAvailable >= 1750) {
@@ -225,14 +231,15 @@ module.exports.loop = function () {
     console.log('INFO: Running Creeps...');
     for (let name in Game.creeps) {
         let creep = Game.creeps[name];
+
+        if (creep.memory.role == 'harvester') {
+            roleHarvester.harvest(creep);
+        }
         if (creep.memory.role == 'dropminer') {
             roleDropMiner.harvest(creep);
         }
         if (creep.memory.role == 'hauler') {
             roleHauler.run(creep);
-        }
-        if (creep.memory.role == 'harvester') {
-            roleHarvester.run(creep);
         }
         if (creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep);
