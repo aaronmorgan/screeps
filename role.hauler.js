@@ -34,7 +34,8 @@ var roleHauler = {
 
       let targets = creep.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
-          return (structure.structureType == STRUCTURE_SPAWN ||
+          return (
+            structure.structureType == STRUCTURE_SPAWN ||
             structure.structureType == STRUCTURE_EXTENSION) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
         }
@@ -43,7 +44,8 @@ var roleHauler = {
       if (targets.length == 0) {
         targets = creep.room.find(FIND_STRUCTURES, {
           filter: (structure) => {
-            return (structure.structureType == STRUCTURE_STORAGE ||
+            return (
+              structure.structureType == STRUCTURE_STORAGE ||
               structure.structureType == STRUCTURE_CONTAINER ||
               structure.structureType == STRUCTURE_TOWER) &&
               structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
@@ -54,6 +56,7 @@ var roleHauler = {
       let dropSite = creep.pos.findClosestByPath(targets);
 
       if (creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.say('⚡  transfer ');
         creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#ffffff' } });
       }
 
