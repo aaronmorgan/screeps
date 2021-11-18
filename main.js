@@ -26,6 +26,9 @@ function bodyCost(body) {
     return sum;
 }
 
+// TODO:
+// 1. Hauler should drop at spawn if no storage and builders should pickup dropped energy.
+
 module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
     let room = Game.spawns['Spawn1'].room;
@@ -207,9 +210,9 @@ module.exports.loop = function () {
                 MOVE, MOVE, MOVE, MOVE];
         } else if (room.storage && energyAvailable >= 550) {
             bodyType = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
-        } else if (room.storage && energyAvailable >= 400) {
+        } else if (energyAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-        } else if (room.storage && energyAvailable >= 200) {
+        } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
         } else {
             bodyType = undefined;
