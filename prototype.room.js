@@ -20,6 +20,8 @@ module.exports = function () {
     };
 
     Room.prototype.getStructures = function () {
+        return this.find(FIND_STRUCTURES);
+
         if (!this.memory._cacheRoomStructures) {
             console.log('DEBUG: Refreshing STRUCTURES cache...');
 
@@ -30,6 +32,8 @@ module.exports = function () {
     };
 
     Room.prototype.getConstructionSites = function () {
+        return this.find(FIND_CONSTRUCTION_SITES);
+
         if (!this.memory._cacheRoomConstructionSites) {
             console.log('DEBUG: Refreshing CONSTRUCTION_SITES cache...');
 

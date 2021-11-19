@@ -88,7 +88,8 @@ module.exports.loop = function () {
     room.memory.maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.25));
 
     // Builders
-    let constructionSites = room.getConstructionSites();
+    let constructionSites = room.getConstructionSites().length;
+
     room.memory.maxBuilderCreeps = constructionSites > 0
         ? Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750))
         : MIN_BUILDER_CREEPS;
