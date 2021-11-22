@@ -257,9 +257,6 @@ module.exports.loop = function () {
     }
 
     // TODO Only do this mod n times, e.g. % 10.
-    console.log('INFO: Running Infrastructure tasks...');
     infrastructureTasks.buildLinks(room);
-
-    console.log('INFO: Running Creep tasks...');
     creepTasks.suicideCreep(room);
 }
