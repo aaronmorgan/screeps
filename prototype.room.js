@@ -20,7 +20,7 @@ module.exports = function () {
     };
 
     Room.prototype.getStructures = function () {
-        return this.find(FIND_STRUCTURES);
+        return this.find(FIND_MY_STRUCTURES);
 
         if (!this.memory._cacheRoomStructures) {
             console.log('DEBUG: Refreshing STRUCTURES cache...');
