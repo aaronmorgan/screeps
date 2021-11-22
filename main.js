@@ -32,7 +32,7 @@ module.exports.loop = function () {
     room.clearCache();
     let structures = room.getStructures();
 
-    let towers = _.filter(structures, { filter: (c) => c.structureType == STRUCTURE_TOWER });
+    let towers = structures.filter(function (x) { return x.structureType == STRUCTURE_TOWER });
 
     let tower = towers[0];
     if (tower) {
@@ -256,6 +256,7 @@ module.exports.loop = function () {
         }
     }
 
+    // TODO Only do this mod n times, e.g. % 10.
     console.log('INFO: Running Infrastructure tasks...');
     infrastructureTasks.buildLinks(room);
 
