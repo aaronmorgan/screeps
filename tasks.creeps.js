@@ -3,7 +3,7 @@ var creepTasks = {
     suicideCreep: function (p_room) {
         console.log('DEBUG: Checking for creeps to remove in room ' + p_room.name);
 
-        let creeps = p_room.find(FIND_CREEPS);
+        let creeps = p_room.find(FIND_MY_CREEPS);
 
         if (!creeps || creeps.length == 0) {
             console.log('DEBUG: No creeps found in room ' + p_room.name);
@@ -46,6 +46,9 @@ var creepTasks = {
         if (creepsToRemove.length > 0) {
             for (var i = 0; i < creepsToRemove.length; i++) {
                 let creep = creepsToRemove[i];
+
+                if (!creep) { continue; }
+
                 console.log('Removing creep ' + creep.id)
                 creep.suicide();
             }
