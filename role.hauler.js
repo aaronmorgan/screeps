@@ -21,7 +21,10 @@ var roleHauler = {
       creep.memory.harvesting = false;
     }
 
-    if (creep.store.getFreeCapacity() > 0 && creep.memory.harvesting == true) {
+    let creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+
+    if (creepFillPercentage < 30 && creep.memory.harvesting == true) {
+      creep.say('⚡ ' + creepFillPercentage + '%');
       let droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
       let sorted = _.sortBy(droppedResources, 'energy');
       let nearestDroppedSource = sorted[sorted.length - 1];
@@ -38,6 +41,7 @@ var roleHauler = {
       }
     } else {
       creep.memory.harvesting = false;
+      creep.say('⚡ ' + creepFillPercentage + '%');
 
       let structures = creep.room.find(FIND_STRUCTURES);
 

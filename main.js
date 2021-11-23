@@ -85,7 +85,10 @@ module.exports.loop = function () {
     room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
 
     // Haulers
-    room.memory.maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * 1.25));
+    if (!room.memory.maxHaulerCreepsModifier) {
+        room.memory.maxHaulerCreepsModifier = 1;
+    } 
+    room.memory.maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * room.memory.maxHaulerCreepsModifier));
 
     // Builders
     let constructionSites = room.getConstructionSites().length;
