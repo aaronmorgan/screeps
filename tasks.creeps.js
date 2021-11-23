@@ -34,7 +34,7 @@ var creepTasks = {
             let creepsToDelete = haulers.length - p_room.memory.maxHaulerCreeps;
 
             if (creepsToDelete > 0) {
-                console.log('DEBUG: Found ' + creepsToDelete + ' HARVESTER creeps to remove...');
+                console.log('DEBUG: Found ' + creepsToDelete + ' HAULER creeps to remove...');
 
                 for (var i = 0; i <= creepsToDelete; i++) {
                     creepsToRemove.push(haulers[i]);

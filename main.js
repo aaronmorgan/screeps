@@ -88,7 +88,7 @@ module.exports.loop = function () {
     if (!room.memory.maxHaulerCreepsModifier) {
         room.memory.maxHaulerCreepsModifier = 1;
     } 
-    room.memory.maxHaulerCreeps = Math.max(0, Math.round(dropMiners.length * room.memory.maxHaulerCreepsModifier));
+    room.memory.maxHaulerCreeps = Math.max(room.getSources().length, Math.floor(dropMiners.length * room.memory.maxHaulerCreepsModifier));
 
     // Builders
     let constructionSites = room.getConstructionSites().length;
@@ -117,12 +117,15 @@ module.exports.loop = function () {
         if (energyAvailable >= 600) {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
             room.memory.minersPerSource = 1;
+            room.memory.maxHaulerCreepsModifier = 0.75
         } else if (energyAvailable >= 300) {
             bodyType = [WORK, WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
+            room.memory.maxHaulerCreepsModifier = 0.35;
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
+            room.memory.maxHaulerCreepsModifier = 0.25;
         } else {
             bodyType = undefined;
             console.log('DEBUG: Insufficient energy to build dropMiner creep.');
@@ -139,12 +142,12 @@ module.exports.loop = function () {
     if (haulers.length < room.memory.maxHaulerCreeps) {
         let bodyType = [];
 
-        if (energyAvailable >= 400 && room.memory.minersPerSource == 1) {
-            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+        if (energyAvailable >= 450 && room.memory.minersPerSource == 1) {
+            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 250) {
+            bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 200) {
-            bodyType = [CARRY, CARRY, MOVE, MOVE];
-        } else if (energyAvailable >= 100) {
-            bodyType = [CARRY, MOVE];
+            bodyType = [CARRY, MOVE, MOVE, MOVE];
         } else {
             bodyType = undefined;
             console.log('DEBUG: Insufficient energy to build hauler creep.');
