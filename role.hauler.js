@@ -4,7 +4,11 @@ var roleHauler = {
     let name = p_name + Game.time;
 
     console.log('Spawning new hauler: ' + name + ', [' + p_body + ']');
-    p_spawn.spawnCreep(p_body, name, { memory: { role: 'hauler' } });
+    p_spawn.spawnCreep(p_body, name, {
+      memory: {
+        role: 'hauler'
+      }
+    });
 
     Memory.buildingHauler = false;
   },
@@ -25,39 +29,51 @@ var roleHauler = {
       if (nearestDroppedSource && creep.pickup(nearestDroppedSource) == ERR_NOT_IN_RANGE) {
         creep.memory.harvesting = true;
 
-        creep.say('⚡  pickup ');
-        creep.moveTo(nearestDroppedSource, { visualizePathStyle: { stroke: '#ffaa00' } });
+        //creep.say('⚡  pickup ');
+        creep.moveTo(nearestDroppedSource, {
+          visualizePathStyle: {
+            stroke: '#ffaa00'
+          }
+        });
       }
-    }
-    else {
+    } else {
       creep.memory.harvesting = false;
 
-      let targets = creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) => {
+      let structures = creep.room.find(FIND_MY_STRUCTURES);
+
+      let targets = structures.filter(function (structure) {
+        return (
+          structure.structureType == STRUCTURE_TOWER) &&
+          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+      });
+
+      if (targets.length == 0) {
+        targets = structures.filter(function (structure) {
           return (
             structure.structureType == STRUCTURE_SPAWN ||
             structure.structureType == STRUCTURE_EXTENSION) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-        }
-      });
+        });
+      }
 
       if (targets.length == 0) {
-        targets = creep.room.find(FIND_STRUCTURES, {
-          filter: (structure) => {
-            return (
-              structure.structureType == STRUCTURE_STORAGE ||
-              structure.structureType == STRUCTURE_CONTAINER ||
-              structure.structureType == STRUCTURE_TOWER) &&
-              structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-          }
+        targets = structures.filter(function (structure) {
+          return (
+            structure.structureType == STRUCTURE_STORAGE ||
+            structure.structureType == STRUCTURE_CONTAINER) &&
+            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
         });
       }
 
       let dropSite = creep.pos.findClosestByPath(targets);
 
       if (creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        creep.say('⚡  transfer ');
-        creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#ffffff' } });
+        //creep.say('⚡  transfer ');
+        creep.moveTo(dropSite, {
+          visualizePathStyle: {
+            stroke: '#ffffff'
+          }
+        });
       }
 
       if (creep.store.getUsedCapacity() == 0) {
