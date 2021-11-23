@@ -39,28 +39,28 @@ var roleHauler = {
     } else {
       creep.memory.harvesting = false;
 
-      let structures = creep.room.find(FIND_MY_STRUCTURES);
+      let structures = creep.room.find(FIND_STRUCTURES);
 
       let targets = structures.filter(function (structure) {
         return (
-          structure.structureType == STRUCTURE_TOWER) &&
+            structure.structureType == STRUCTURE_TOWER) &&
           structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
       });
 
-      if (targets.length == 0) {
+      if (!targets || targets.length == 0) {
         targets = structures.filter(function (structure) {
           return (
-            structure.structureType == STRUCTURE_SPAWN ||
-            structure.structureType == STRUCTURE_EXTENSION) &&
+              structure.structureType == STRUCTURE_SPAWN ||
+              structure.structureType == STRUCTURE_EXTENSION) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
         });
       }
 
-      if (targets.length == 0) {
+      if (!targets || targets.length == 0) {
         targets = structures.filter(function (structure) {
           return (
-            structure.structureType == STRUCTURE_STORAGE ||
-            structure.structureType == STRUCTURE_CONTAINER) &&
+              structure.structureType == STRUCTURE_STORAGE ||
+              structure.structureType == STRUCTURE_CONTAINER) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
         });
       }
