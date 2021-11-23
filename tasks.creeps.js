@@ -30,6 +30,18 @@ var creepTasks = {
             }
         }
 
+        if (dropMiners.length > p_room.memory.maxDropMinerCreeps) {
+            let creepsToDelete = dropMiners.length - p_room.memory.maxDropMinerCreeps;
+
+            if (creepsToDelete > 0) {
+                console.log('DEBUG: Found ' + creepsToDelete + ' DROPMINER creeps to remove...');
+
+                for (var i = 0; i <= creepsToDelete; i++) {
+                    creepsToRemove.push(dropMiners[i]);
+                }
+            }
+        }
+
         if (haulers.length > p_room.memory.maxHaulerCreeps) {
             let creepsToDelete = haulers.length - p_room.memory.maxHaulerCreeps;
 
@@ -50,6 +62,18 @@ var creepTasks = {
 
                 for (var i = 0; i <= creepsToDelete; i++) {
                     creepsToRemove.push(builders[i]);
+                }
+            }
+        }
+
+        if (upgraders.length > p_room.memory.maxUpgraderCreeps) {
+            let creepsToDelete = upgraders.length - p_room.memory.maxUpgraderCreeps;
+
+            if (creepsToDelete > 0) {
+                console.log('DEBUG: Found ' + creepsToDelete + ' UPGRADER creeps to remove...');
+
+                for (var i = 0; i <= creepsToDelete; i++) {
+                    creepsToRemove.push(upgraders[i]);
                 }
             }
         }
