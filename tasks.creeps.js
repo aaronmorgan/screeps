@@ -30,6 +30,18 @@ var creepTasks = {
             }
         }
 
+        if (haulers.length > p_room.memory.maxHaulerCreeps) {
+            let creepsToDelete = haulers.length - p_room.memory.maxHaulerCreeps;
+
+            if (creepsToDelete > 0) {
+                console.log('DEBUG: Found ' + creepsToDelete + ' HARVESTER creeps to remove...');
+
+                for (var i = 0; i <= creepsToDelete; i++) {
+                    creepsToRemove.push(haulers[i]);
+                }
+            }
+        }
+
         if (builders.length > p_room.memory.maxBuilderCreeps) {
             let creepsToDelete = builders.length - p_room.memory.maxBuilderCreeps;
 
@@ -48,6 +60,8 @@ var creepTasks = {
                 let creep = creepsToRemove[i];
 
                 if (!creep) { continue; }
+
+                if (creep.memory.role == 'hauler' && creep.store.getUsedCapacity() > 0) { continue; }
 
                 console.log('Removing creep ' + creep.id)
                 creep.suicide();
