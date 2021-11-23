@@ -32,7 +32,7 @@ module.exports.loop = function () {
     room.clearCache();
     let structures = room.getStructures();
 
-    let towers = structures.filter(function (x) { return x.structureType == STRUCTURE_TOWER });
+    let towers = structures.filter(x => x.structureType == STRUCTURE_TOWER);
 
     let tower = towers[0];
     if (tower) {
@@ -90,9 +90,9 @@ module.exports.loop = function () {
     // Builders
     let constructionSites = room.getConstructionSites().length;
 
-    room.memory.maxBuilderCreeps = constructionSites > 0
-        ? Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750))
-        : MIN_BUILDER_CREEPS;
+    room.memory.maxBuilderCreeps = constructionSites > 0 ?
+        Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750)) :
+        MIN_BUILDER_CREEPS;
 
     // Upgraders
     // Should be a set value + number of containers * 2?
@@ -165,8 +165,7 @@ module.exports.loop = function () {
         if (bodyType) {
             room.memory.buildingHarvester = true;
             roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Harvester', bodyType);
-        }
-        else {
+        } else {
             room.memory.buildingHarvester = false;
         }
     }
@@ -178,7 +177,8 @@ module.exports.loop = function () {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE];
+                MOVE, MOVE, MOVE
+            ];
         } else if (energyAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 300) {
@@ -203,12 +203,14 @@ module.exports.loop = function () {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE, MOVE, MOVE];
+                MOVE, MOVE, MOVE, MOVE, MOVE
+            ];
         } else if (room.storage && energyAvailable >= 1000) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE, MOVE];
+                MOVE, MOVE, MOVE, MOVE
+            ];
         } else if (room.storage && energyAvailable >= 550) {
             bodyType = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 400) {
@@ -231,8 +233,10 @@ module.exports.loop = function () {
         room.visual.text(
             '🛠️' + spawningCreep.memory.role,
             Game.spawns['Spawn1'].pos.x + 1,
-            Game.spawns['Spawn1'].pos.y,
-            { align: 'left', opacity: 0.8 });
+            Game.spawns['Spawn1'].pos.y, {
+                align: 'left',
+                opacity: 0.8
+            });
     }
 
     console.log('INFO: Running Creeps...');
