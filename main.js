@@ -36,7 +36,7 @@ module.exports.loop = function () {
 
     let tower = towers[0];
     if (tower) {
-        console.log('INFO: Processing Towers...');
+        //console.log('INFO: Processing Towers...');
 
         let hostiles = room.find(FIND_HOSTILE_CREEPS);
 
@@ -68,7 +68,7 @@ module.exports.loop = function () {
     let energyCapacityAvailable = room.energyCapacityAvailable;
     let energyAvailable = room.energyAvailable;
 
-    console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
+    //console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
 
     let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
     let dropMiners = _.filter(Game.creeps, (creep) => creep.memory.role == 'dropminer');
