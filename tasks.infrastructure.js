@@ -128,6 +128,10 @@ var infrastructureTasks = {
       this.getJobsForRCLLevel(p_room, p_room.memory._constructionJobLevel);
 
       p_room.memory._constructionJobLevel += 1;
+    } else {
+      // TODO run periodically rather than every tick.
+
+     // p_room.memory._constructionJobLevel = 0
     }
   },
 
