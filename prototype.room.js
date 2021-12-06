@@ -2,15 +2,38 @@
 
 // https://github.com/quonic/screeps-prototypes/blob/master/prototype.room.js
 
-var offsets = [
-    { x: -1, y: -1 },
-    { x: 0, y: -1 },
-    { x: 1, y: -1 },
-    { x: -1, y: 0 },
-    { x: 1, y: 0 },
-    { x: -1, y: 1 },
-    { x: 0, y: 1 },
-    { x: 1, y: 1 }
+var offsets = [{
+        x: -1,
+        y: -1
+    },
+    {
+        x: 0,
+        y: -1
+    },
+    {
+        x: 1,
+        y: -1
+    },
+    {
+        x: -1,
+        y: 0
+    },
+    {
+        x: 1,
+        y: 0
+    },
+    {
+        x: -1,
+        y: 1
+    },
+    {
+        x: 0,
+        y: 1
+    },
+    {
+        x: 1,
+        y: 1
+    }
 ];
 
 module.exports = function () {
@@ -59,9 +82,9 @@ module.exports = function () {
     Room.prototype.selectAvailableSource =
         function (dropMiners) {
             if (dropMiners.length == 0) {
-                console.log('here');
                 return this.find(FIND_SOURCES);
             }
+
 
             let sources = _.filter(this.find(FIND_SOURCES), (s) => {
                 for (var i = 0; i < dropMiners.length; i++) {
@@ -74,12 +97,57 @@ module.exports = function () {
             return sources;
         };
 
-    /**
-     * Gets how many harvest points are around the sources you specify.
-     * @param sources
-     * @returns {*}
-     */
-    Room.prototype.getHarvestPoints =
+    Room.prototype.determineSourceAccessPoints = function () {
+            if (this.memory.sources) {
+                return;
+            }
+
+            this.memory.sources = [];
+
+            let sources = this.find(FIND_SOURCES);
+
+            for (let i = 0; i < sources.length; i++) {
+
+                const source = sources[i];
+
+                console.log('source', JSON.stringify(source));
+
+                var fields = this.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
+                //console.log('fields', JSON.stringify(fields));
+
+                var accessibleFields = 9 - _.countBy(fields, "terrain").wall;
+                //console.log('accessibleFields', JSON.stringify(accessibleFields));
+
+                this.memory.sources.push({
+                    id: source.id,
+                    accessPoints: accessibleFields
+                });
+            }
+
+        },
+
+        Room.prototype.getMaxSourceAccessPoints = function () {
+            if (!this.memory.sources) {
+                this.determineSourceAccessPoints();
+            }
+
+            let accessPoints = 0;
+
+            for (let i = 0; i < this.memory.sources.length; i++) {
+                accessPoints += this.memory.sources[i].accessPoints;
+            }
+
+            console.log('accessPoints', accessPoints);
+
+            return accessPoints;
+        },
+
+        /**
+         * Gets how many harvest points are around the sources you specify.
+         * @param sources
+         * @returns {*}
+         */
+        Room.prototype.getHarvestPoints =
         function (sources) {
             if (this.memory.harvestPoints === undefined) {
                 let harvestPoints = 0
