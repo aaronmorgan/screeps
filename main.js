@@ -29,22 +29,23 @@ module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
     let room = Game.spawns['Spawn1'].room;
 
-    room.clearCache();
     room.determineSourceAccessPoints();
 
-    let structures = room.getStructures();
+    room.structures();
 
-    let towers = structures.filter(x => x.structureType == STRUCTURE_TOWER);
+    let sources = room.getSources();
 
-    let tower = towers[0];
-    if (tower) {
-        //console.log('INFO: Processing Towers...');
+    //let towers = structures.filter(x => x.structureType == STRUCTURE_TOWER);
 
+    room.structures().tower.forEach(tower => {
+        //console.log('INFO: Processing Tower '+ tower.id + '...');
+        
         let hostiles = room.find(FIND_HOSTILE_CREEPS);
 
         if (hostiles.length) {
             console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
-            towers.forEach(t => t.attack(hostiles[0]));
+            tower.attack(hostiles[0]);
+            //towers.forEach(t => t.attack(hostiles[0]));
         } else {
             let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => structure.hits < structure.hitsMax
@@ -54,7 +55,9 @@ module.exports.loop = function () {
                 tower.repair(closestDamagedStructure);
             }
         }
-    } else {
+    });
+
+    if (_.isEmpty(room.structures().tower)) {
         console.log('WARNING: No towers!');
     }
 
@@ -67,9 +70,7 @@ module.exports.loop = function () {
 
     console.log('INFO: Processing Creeps...');
 
-    //let energyCapacityAvailable = room.energyCapacityAvailable;
     let energyAvailable = room.energyAvailable;
-
     //console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
 
     let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');

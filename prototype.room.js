@@ -38,20 +38,16 @@ var offsets = [{
 
 module.exports = function () {
 
-    Room.prototype.clearCache = function () {
-        this.memory._cacheRoomStructures = undefined;
-    };
-
-    Room.prototype.getStructures = function () {
-        return this.find(FIND_MY_STRUCTURES);
-
-        if (!this.memory._cacheRoomStructures) {
-            console.log('DEBUG: Refreshing STRUCTURES cache...');
-
-            this.memory._cacheRoomStructures = this.find(FIND_STRUCTURES);
+    // Should be called once per tick and then the cached result should be used.
+    Room.prototype.structures = function() {
+        if (!this._structures || _.isEmpty(this._structures)) {
+            const allStructures = this.find(FIND_STRUCTURES);
+            this._structures = _.groupBy(allStructures, "structureType");
+            this._structures.all = allStructures;
         }
 
-        return this.memory._cacheRoomStructures;
+        console.log('_structures', JSON.stringify(this._structures))
+        return this._structures;
     };
 
     Room.prototype.getConstructionSites = function () {
