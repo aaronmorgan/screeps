@@ -1,8 +1,86 @@
 var infrastructureTasks = {
 
+  buildLinks: function (p_room) {
+    if (!p_room.memory._constructionBuildQueue) {
+      p_room.memory._constructionBuildQueue = [];
+    }
+
+    if (!p_room.memory._constructionJobLevel) {
+      p_room.memory._constructionJobLevel = 1;
+    }
+
+    if (p_room.memory._constructionJobLevel <= p_room.controller.level) {
+
+      if (p_room.memory._constructionBuildQueue.length > 0) {
+        this.processBuildQueue(p_room);
+      }
+
+      let constructionSites = p_room.find(FIND_CONSTRUCTION_SITES);
+      if (constructionSites.length > 0) {
+        return;
+      }
+
+      for (let i = 0; i < p_room.controller.level; i++) {
+        
+        this.getJobsForRCLLevel(p_room, i);
+      }
+
+      //p_room.memory._constructionJobLevel += 1;
+      p_room.memory._constructionJobLevel = p_room.controller.level;
+    } else {
+      // Periodically check whether we need to rebuild anything by resetting the construction job level.
+      // This could be further improved to increase the frequency to per tick during times of war.
+      if (Game.time % 10) {
+        console.log('INFO: Resetting room._constructionJobLevel');
+        p_room.memory._constructionJobLevel = 1;
+
+        console.log('INFO: Clearing room construction build queue');
+        p_room.memory._constructionBuildQueue = [];
+      }
+    }
+  },
+
+  getJobsForRCLLevel: function (p_room, p_level) {
+    let rclLevelJobs = constructionJobsTemplate.filter(x => x.stage == p_level);
+
+    //console.log('RCL', JSON.stringify(rclLevelJobs));
+
+    let spawn = p_room.find(FIND_MY_STRUCTURES, {
+      filter: (structure) => {
+        return structure.structureType == STRUCTURE_SPAWN;
+      }
+    })[0];
+
+
+    for (var i = 0; i < rclLevelJobs.length; i++) {
+      let job = rclLevelJobs[i];
+
+      this.queueJob(p_room, job.type, spawn.pos.x + job.x, spawn.pos.y + job.y)
+    }
+  },
+
+  queueJob: function (p_room, p_type, p_x, p_y) {
+    let tileObjects = p_room.lookAt(p_x, p_y);
+
+    if (tileObjects.find(x => x.type == 'constructionSite')) {
+      console.log('WARNING: Found construction site already present on x: ' + p_x + ', y: ' + p_y);
+      p_room.memory._constructionBuildQueue = [];
+
+      return;
+    }
+
+    //console.log('INFO: Queuing construction job: ' + p_type + ', x:' + p_x + ', y: ' + p_y);
+
+    p_room.memory._constructionBuildQueue.push({
+      name: p_type,
+      x: p_x,
+      y: p_y
+    });
+  },
+
   processBuildQueue: function (p_room) {
     if (!p_room.memory._constructionBuildQueue || p_room.memory._constructionBuildQueue.length == 0) {
-      console.log('TRACE: No construction jobs queued');
+      //console.log('TRACE: No construction jobs queued');
       return;
     }
 
@@ -26,115 +104,32 @@ var infrastructureTasks = {
         console.log('DEBUG: Dequeuing build job...');
 
         p_room.memory._constructionBuildQueue.shift();
+
         return;
       }
+
+      console.log('objects', JSON.stringify(objects));
 
       if (objects.length == 1 && objects[0].type == 'terrain') {
         p_room.createConstructionSite(job.x, job.y, job.name);
       } else {
-        let structure = tileObjects[0];
+        let tile = tileObjects[0];
 
-        if (!structure.structure) {
-          console.log('*** ERROR ***: ' + JSON.stringify(structure));
+        if (!tile.structure) {
+          console.log('*** ERROR ***: ' + JSON.stringify(tile));
+          p_room.memory._constructionBuildQueue.shift();
+
           return;
         }
 
-        console.log('WARNING: Position x: ' + structure.structure.pos.x + ', y: ' + structure.structure.pos.y + ', is already allocated with a ' + structure.structure.structureType + ', removing from queue...');
+        if (tile.structure.structureType != job.name) {
+          console.log('WARNING: Position x: ' + tile.structure.pos.x + ', y: ' + tile.structure.pos.y + ', is already allocated with a ' + tile.structure.structureType);
+        }
 
         p_room.memory._constructionBuildQueue.shift();
       }
     }
   },
-
-  // addJob: function (p_room, p_name, p_x, p_y) {
-  //   let tileObjects = p_room.lookAt(p_x, p_y);
-
-  //   if (tileObjects.find(x => x.type == 'constructionSite')) {
-  //     console.log('WARNING: Found construction site already present on x: ' + p_x + ', y: ' + p_y);
-  //     return;
-  //   }
-
-  //   p_room.memory._constructionBuildQueue.push({
-  //     name: p_name,
-  //     x: p_x,
-  //     y: p_y
-  //   });
-  // },
-
-  getJobsForRCLLevel: function (p_room, p_level) {
-    let rclLevelJobs = constructionJobsTemplate.filter(x => x.stage == p_level);
-
-
-    console.log('RCL', JSON.stringify(rclLevelJobs));
-    //   return;
-
-    let spawn = p_room.find(FIND_MY_STRUCTURES, {
-      filter: (structure) => {
-        return structure.structureType == STRUCTURE_SPAWN;
-      }
-    })[0];
-
-
-    for (var i = 0; i < rclLevelJobs.length; i++) {
-      let job = rclLevelJobs[i];
-
-      this.queueJob(p_room, job.type, spawn.pos.x + job.x, spawn.pos.y + job.y)
-    }
-  },
-
-  queueJob: function (p_room, p_type, p_x, p_y) {
-    let tileObjects = p_room.lookAt(p_x, p_y);
-
-    if (tileObjects.find(x => x.type == 'constructionSite')) {
-      console.log('WARNING: Found construction site already present on x: ' + p_x + ', y: ' + p_y);
-      return;
-    }
-
-    console.log('INFO: Queuing construction job: ' + p_type + ', x:' + p_x + ', y: ' + p_y);
-
-    p_room.memory._constructionBuildQueue.push({
-      name: p_type,
-      x: p_x,
-      y: p_y
-    });
-  },
-
-  buildLinks: function (p_room) {
-    if (!p_room.memory._constructionBuildQueue) {
-      p_room.memory._constructionBuildQueue = [];
-    }
-
-    if (!p_room.memory._constructionJobLevel) {
-      p_room.memory._constructionJobLevel = 0;
-    }
-
-    if (p_room.memory._constructionJobLevel <= p_room.controller.level) {
-
-      if (p_room.memory._constructionBuildQueue.length > 0) {
-        this.processBuildQueue(p_room);
-       // return;
-      }
-
-      let constructionSites = p_room.find(FIND_CONSTRUCTION_SITES);
-      //let jobQueue = p_room.memory._constructionBuildQueue;
-
-      // console.log('TRACE: Queue contains ' + jobQueue.length + ' jobs');
-      // console.log('TRACE: Room contains ' + constructionSites.length + ' construction sites');
-
-      if (constructionSites.length > 0) {
-        return;
-      }
-
-      this.getJobsForRCLLevel(p_room, p_room.memory._constructionJobLevel);
-
-      p_room.memory._constructionJobLevel += 1;
-    } else {
-      // TODO run periodically rather than every tick.
-
-     // p_room.memory._constructionJobLevel = 0
-    }
-  },
-
 }
 
 const constructionJobsTemplate = [{
