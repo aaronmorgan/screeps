@@ -46,7 +46,7 @@ module.exports = function () {
             this._structures.all = allStructures;
         }
 
-        console.log('_structures', JSON.stringify(this._structures))
+        //console.log('_structures', JSON.stringify(this._structures))
         return this._structures;
     };
 

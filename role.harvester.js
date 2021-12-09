@@ -10,6 +10,7 @@ var roleHarvester = {
     /** @param {Creep} creep **/
     harvest: function (p_creep) {
         if (p_creep.store.getFreeCapacity() > 0) {
+            // TODO Store sources in Memory as they're immutable.
             let sources = p_creep.room.find(FIND_SOURCES);
 
             if (p_creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
