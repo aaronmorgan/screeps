@@ -37,27 +37,31 @@ module.exports.loop = function () {
 
     //let towers = structures.filter(x => x.structureType == STRUCTURE_TOWER);
 
-    room.structures().tower.forEach(tower => {
-        //console.log('INFO: Processing Tower '+ tower.id + '...');
-        
-        let hostiles = room.find(FIND_HOSTILE_CREEPS);
+    const structures = room.structures();
 
-        if (hostiles.length) {
-            console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
-            tower.attack(hostiles[0]);
-            //towers.forEach(t => t.attack(hostiles[0]));
-        } else {
-            let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: (structure) => structure.hits < structure.hitsMax
-            });
-            if (closestDamagedStructure) {
-                console.log('DEFENCE: Repairing damaged structure');
-                tower.repair(closestDamagedStructure);
+    if (structures.tower) {
+        structures.tower.forEach(tower => {
+            //console.log('INFO: Processing Tower '+ tower.id + '...');
+
+            let hostiles = room.find(FIND_HOSTILE_CREEPS);
+
+            if (hostiles.length) {
+                console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
+                tower.attack(hostiles[0]);
+                //towers.forEach(t => t.attack(hostiles[0]));
+            } else {
+                let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => structure.hits < structure.hitsMax
+                });
+                if (closestDamagedStructure) {
+                    console.log('DEFENCE: Repairing damaged structure');
+                    tower.repair(closestDamagedStructure);
+                }
             }
-        }
-    });
+        });
+    }
 
-    if (_.isEmpty(room.structures().tower)) {
+    if (_.isEmpty(structures.tower)) {
         console.log('WARNING: No towers!');
     }
 
