@@ -1,8 +1,6 @@
 var roleHarvester = {
 
     createHarvester: function (p_spawn, p_name, p_body) {
-        Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], 'Worker1');
-        return;
         let name = p_name + Game.time;
         console.log('Spawning new HARVESTER: ' + name + ', [' + p_body + ']');
 
@@ -17,12 +15,9 @@ var roleHarvester = {
     run: function (p_creep) {
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-        console.log('creepFillPercentage', creepFillPercentage);
-
         if (p_creep.store.getFreeCapacity() > 0) {
-            console.log('dsdfdsf', p_creep.room.sources[0]);
-            if (p_creep.harvest(p_creep.room.sources[0]) == ERR_NOT_IN_RANGE) {
-                p_creep.moveTo(p_creep.room.sources[0], {
+            if (p_creep.harvest(p_creep.room.memory.sources[0]) == ERR_NOT_IN_RANGE) {
+                p_creep.moveTo(p_creep.room.memory.sources[0], {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }

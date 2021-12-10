@@ -89,8 +89,11 @@ module.exports.loop = function () {
     let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
 
     // Harvesters
-    // Should have MAX_HARVESTER_CREEPS but reduce numbers when drop miners start to appear.
-    room.memory.maxHarvesterCreeps = harvesters.length == 0 ? MAX_HARVESTER_CREEPS : MIN_HARVESTER_CREEPS;
+    if (dropminers.length > 0 && haulers.length > 0) {
+        room.memory.maxHarvesterCreeps = Math.min(MAX_HARVESTER_CREEPS, haulers.length);
+    } else {
+        room.memory.maxHarvesterCreeps = Math.max(harvesters.length, MAX_HARVESTER_CREEPS);
+    }
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
@@ -98,7 +101,7 @@ module.exports.loop = function () {
     room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
 
     // Haulers
-    room.memory.maxHaulerCreeps = harvesters.length * sources.length;
+    room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : harvesters.length * sources.length;
 
     // Builders
     let constructionSites = room.getConstructionSites().length;
