@@ -116,7 +116,7 @@ var infrastructureTasks = {
         let tile = tileObjects[0];
 
         if (!tile.structure) {
-          console.log('*** ERROR ***: ' + JSON.stringify(tile));
+          console.log('⛔ Error: ' + JSON.stringify(tile));
           p_room.memory._constructionBuildQueue.shift();
 
           return;

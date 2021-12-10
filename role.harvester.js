@@ -16,8 +16,10 @@ var roleHarvester = {
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
         if (p_creep.store.getFreeCapacity() > 0) {
-            if (p_creep.harvest(p_creep.room.memory.sources[0]) == ERR_NOT_IN_RANGE) {
-                p_creep.moveTo(p_creep.room.memory.sources[0], {
+            let source = Game.getObjectById(p_creep.room.memory.sources[0].id);
+
+            if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                p_creep.moveTo(source, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }
@@ -41,7 +43,7 @@ var roleHarvester = {
                         }
                     });
 
-                    p_creep.say('⚡ mining')
+                    p_creep.say('⚡ ' + creepFillPercentage + '%')
                 }
             }
         }

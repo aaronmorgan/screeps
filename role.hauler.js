@@ -32,6 +32,8 @@ var roleHauler = {
       //console.log('droppedResources', JSON.stringify(droppedResources));
 
       let droppedEnergyByAmount = _.sortBy(droppedResources, 'energy');
+      if (!_.isEmpty(droppedEnergyByAmount)) { return; }
+
       //console.log('droppedEnergyByAmount', JSON.stringify(droppedEnergyByAmount));
 
       let largestDroppedEnergy = droppedEnergyByAmount[droppedEnergyByAmount.length - 1];
