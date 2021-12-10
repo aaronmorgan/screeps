@@ -72,7 +72,6 @@ module.exports = function () {
                 return this.find(FIND_SOURCES);
             }
 
-
             let sources = _.filter(this.find(FIND_SOURCES), (s) => {
                 for (var i = 0; i < dropMiners.length; i++) {
                     if (dropMiners[i].memory.sourceId != s.id) {

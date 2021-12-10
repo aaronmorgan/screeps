@@ -70,6 +70,11 @@ module.exports.loop = function () {
             delete Memory.creeps[name];
             console.log('INFO: Clearing creep memory:', name);
         }
+
+        // if (_.isEmpty(Game.creeps[name])) {
+        //     Memory.creeps.shift();
+        //     console.log('WARNING: Attempting to force clear \'empty\' creep:', name);
+        // }
     }
 
     console.log('INFO: Processing Creeps...');
@@ -78,22 +83,22 @@ module.exports.loop = function () {
     //console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
 
     let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    let dropMiners = _.filter(Game.creeps, (creep) => creep.memory.role == 'dropminer');
+    let dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == 'dropminer');
     let haulers = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
     let builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
     let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
 
     // Harvesters
     // Should have MAX_HARVESTER_CREEPS but reduce numbers when drop miners start to appear.
-    room.memory.maxHarvesterCreeps = dropMiners.length == 0 ? MAX_HARVESTER_CREEPS : MIN_HARVESTER_CREEPS;
+    room.memory.maxHarvesterCreeps = harvesters.length == 0 ? MAX_HARVESTER_CREEPS : MIN_HARVESTER_CREEPS;
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
     //room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
-    room.memory.maxDropMinerCreeps = (harvesters.length == 0 && dropMiners.length == 0) ? 0 : room.getMaxSourceAccessPoints();
+    room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
 
     // Haulers
-    room.memory.maxHaulerCreeps = dropMiners.length * sources.length;
+    room.memory.maxHaulerCreeps = harvesters.length * sources.length;
 
     // Builders
     let constructionSites = room.getConstructionSites().length;
@@ -104,17 +109,61 @@ module.exports.loop = function () {
 
     // Upgraders
     // Should be a set value + number of containers * 2?
-    let maxUpgraderCreeps = (harvesters.length == 0 && dropMiners.length == 0) ? 0 : MAX_UPGRADER_CREEPS + (1 * 2);
+    let maxUpgraderCreeps = (harvesters.length == 0 && harvesters.length == 0) ? 0 : MAX_UPGRADER_CREEPS + (1 * 2);
 
     // Summary of actual vs target numbers.
     console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps);
-    console.log('  Drop Miners: ' + dropMiners.length + '/' + room.memory.maxDropMinerCreeps);
+    console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps);
     console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps);
     console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps);
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
-    room.memory.sufficientDropMiners = dropMiners.length >= room.memory.maxDropMinerCreeps;
-    room.memory.sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
+    room.memory.sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
+    const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
+
+    if (!sufficientHarvesters) {
+        let bodyType = [];
+
+        if (energyAvailable >= 200) {
+            bodyType = [WORK, CARRY, MOVE];
+        } else {
+            console.log('DEBUG: Insufficient energy to build HARVESTER creep.');
+        }
+
+        if (!_.isEmpty(bodyType)) {
+            // let targetSourceId = undefined;
+
+            // if (harvesters.length == 0) {
+            //     targetSourceId = room.memory.sources[0].id;
+            // }
+
+            // for (let i = 0; i < room.memory.sources.length; i++) {
+            //     const source = room.memory.sources[i];
+
+            //     let creepsForThisSource = _.countBy(harvesters, x => x.memory.sourceId == source.id).true;
+
+            //     if (creepsForThisSource == source.accessPoints) {
+            //         continue;
+            //     }
+
+            //     if (creepsForThisSource > source.accessPoints) {
+            //         console.log('WARNING: Too many HARVESTER creeps for source ' + source.id);
+
+            //         // TODO Remove excess creeps.
+            //         continue;
+            //     }
+
+            //     targetSourceId = source.id;
+            //     break;
+            // }
+
+            // if (!targetSourceId) {
+            //     console.log('ERROR: Attempting to create HAVESTER with an assigned source');
+            // } else {
+            roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Harvester', bodyType);
+            // }
+        }
+    }
 
     if (!room.memory.sufficientDropMiners) {
         let bodyType = [];
@@ -134,36 +183,36 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            let dropMinerSourceId = undefined;
+            let targetSourceId = undefined;
 
-            if (dropMiners.length == 0) {
-                dropMinerSourceId = room.memory.sources[0].id;
+            if (dropminers.length == 0) {
+                targetSourceId = room.memory.sources[0].id;
             }
 
             for (let i = 0; i < room.memory.sources.length; i++) {
                 const source = room.memory.sources[i];
 
-                let dropMinersForThisSource = Math.min(room.memory.minersPerSource, _.countBy(dropMiners, x => x.memory.sourceId == source.id).true);
+                let creepsForThisSource = Math.min(room.memory.minersPerSource, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
 
-                if (dropMinersForThisSource == source.accessPoints) {
+                if (creepsForThisSource == source.accessPoints) {
                     continue;
                 }
 
-                if (dropMinersForThisSource > source.accessPoints) {
+                if (creepsForThisSource > source.accessPoints) {
                     console.log('WARNING: Too many DROPMINER creeps for source ' + source.id);
 
                     // TODO Remove excess creeps.
                     continue;
                 }
 
-                dropMinerSourceId = source.id;
+                targetSourceId = source.id;
                 break;
             }
 
-            if (!dropMinerSourceId) {
+            if (!targetSourceId) {
                 console.log('ERROR: Attempting to create DROPMINER with an assigned source');
             } else {
-                roleDropMiner.createMiner(room, Game.spawns['Spawn1'], 'DropMiner', bodyType, dropMinerSourceId)
+                roleDropMiner.createMiner(room, Game.spawns['Spawn1'], 'DropMiner', bodyType, targetSourceId)
             }
         }
     }
@@ -184,24 +233,6 @@ module.exports.loop = function () {
 
         if (bodyType) {
             roleHauler.createHauler(Game.spawns['Spawn1'], 'Hauler', bodyType, room);
-        }
-    }
-
-    if (!room.memory.sufficientHarvesters) {
-        let bodyType = [];
-
-        if (energyAvailable >= 150) {
-            bodyType = [WORK, CARRY, MOVE];
-        } else {
-            bodyType = undefined;
-            console.log('DEBUG: Insufficient energy to build HARVESTER creep.');
-        }
-
-        if (bodyType) {
-            room.memory.buildingHarvester = true;
-            roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Harvester', bodyType);
-        } else {
-            room.memory.buildingHarvester = false;
         }
     }
 
@@ -279,7 +310,7 @@ module.exports.loop = function () {
         let creep = Game.creeps[name];
 
         if (creep.memory.role == 'harvester') {
-            roleHarvester.harvest(creep);
+            roleHarvester.run(creep);
         }
         if (creep.memory.role == 'dropminer') {
             roleDropMiner.harvest(creep);
