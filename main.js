@@ -61,8 +61,8 @@ module.exports.loop = function () {
         });
     }
 
-    if (_.isEmpty(structures.tower)) {
-        console.log('WARNING: No towers!');
+    if (_.isEmpty(structures.tower) && room.controller.level >= 3) {
+        console.log('⚠️ WARNING: No towers!');
     }
 
     for (let name in Memory.creeps) {
