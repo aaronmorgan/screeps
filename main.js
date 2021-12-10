@@ -95,6 +95,7 @@ module.exports.loop = function () {
         room.memory.maxHarvesterCreeps = Math.max(harvesters.length, MAX_HARVESTER_CREEPS);
     }
 
+
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
     //room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
@@ -103,10 +104,14 @@ module.exports.loop = function () {
     // Haulers
     room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : harvesters.length * sources.length;
 
+    const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
+    const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
+    const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
+
     // Builders
     let constructionSites = room.getConstructionSites().length;
 
-    room.memory.maxBuilderCreeps = constructionSites > 0 ?
+    room.memory.maxBuilderCreeps = (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && constructionSites > 0 ?
         Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750)) :
         MIN_BUILDER_CREEPS;
 
@@ -114,16 +119,17 @@ module.exports.loop = function () {
     // Should be a set value + number of containers * 2?
     let maxUpgraderCreeps = (harvesters.length == 0 && harvesters.length == 0) ? 0 : MAX_UPGRADER_CREEPS + (1 * 2);
 
+
+    const sufficientBuilders = builders.length < room.memory.maxBuilderCreeps;
+
     // Summary of actual vs target numbers.
-    console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps);
-    console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps);
-    console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps);
-    console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps);
+    console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));
+    console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '❌'));
+    console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '❌'));
+    console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
 
-    room.memory.sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
-    const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
-
+    // HARVESTER creep
     if (!sufficientHarvesters) {
         let bodyType = [];
 
@@ -168,7 +174,8 @@ module.exports.loop = function () {
         }
     }
 
-    if (!room.memory.sufficientDropMiners) {
+    // DROPMINER creep
+    if (!sufficientDropMiners) {
         let bodyType = [];
 
         if (energyAvailable >= 600) {
@@ -181,11 +188,10 @@ module.exports.loop = function () {
             bodyType = [WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
         } else {
-            bodyType = undefined;
             console.log('DEBUG: Insufficient energy to build dropMiner creep.');
         }
 
-        if (bodyType) {
+        if (!_.isEmpty(bodyType)) {
             let targetSourceId = undefined;
 
             if (dropminers.length == 0) {
@@ -220,6 +226,7 @@ module.exports.loop = function () {
         }
     }
 
+    // HAULER creep
     if (haulers.length < room.memory.maxHaulerCreeps) {
         let bodyType = [];
 
@@ -230,16 +237,16 @@ module.exports.loop = function () {
         } else if (energyAvailable >= 200) {
             bodyType = [CARRY, MOVE, MOVE, MOVE];
         } else {
-            bodyType = undefined;
-            console.log('DEBUG: Insufficient energy to build hauler creep.');
+            console.log('DEBUG: Insufficient energy to build HAULER creep.');
         }
 
-        if (bodyType) {
+        if (!_.isEmpty(bodyType)) {
             roleHauler.createHauler(Game.spawns['Spawn1'], 'Hauler', bodyType, room);
         }
     }
 
-    if (builders.length < room.memory.maxBuilderCreeps) {
+    // BUILDER creep
+    if (!sufficientBuilders && ((sufficientDropMiners && sufficientHaulers) || sufficientHarvesters)) {
         let bodyType = [];
 
         if (energyAvailable >= 900) {
@@ -255,17 +262,17 @@ module.exports.loop = function () {
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
         } else {
-            bodyType = undefined;
-            console.log('DEBUG: Insufficient energy to build builder creep.');
+            console.log('DEBUG: Insufficient energy to build BUILDER creep.');
         }
 
-        if (bodyType) {
+        if (!_.isEmpty(bodyType)) {
             roleBuilder.createBuilder(Game.spawns['Spawn1'], 'Builder', bodyType);
         }
     }
 
+    // UPGRADER creeps
     // TODO: ...and < min drop miners
-    if ((room.memory.sufficientHarvesters || room.memory.sufficientDropMiners) && upgraders.length < maxUpgraderCreeps) {
+    if ((sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && upgraders.length < maxUpgraderCreeps) {
         let bodyType = [];
 
         if (room.storage && energyAvailable >= 1750) {
@@ -287,12 +294,11 @@ module.exports.loop = function () {
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
         } else {
-            bodyType = undefined;
-            console.log('DEBUG: Insufficient energy to build upgrader creep.');
+            console.log('DEBUG: Insufficient energy to build UPGRADER creep.');
             // TODO Should queue the upgrader here and not build any more until it's removed from the queue.
         }
 
-        if (bodyType) {
+        if (!_.isEmpty(bodyType)) {
             roleUpgrader.createUpgrader(Game.spawns['Spawn1'], 'Upgrader', bodyType);
         }
     }
