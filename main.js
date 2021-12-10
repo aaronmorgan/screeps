@@ -33,7 +33,7 @@ module.exports.loop = function () {
 
     room.structures();
 
-    let sources = room.getSources();
+    let sources = room.memory.sources;
 
     //let towers = structures.filter(x => x.structureType == STRUCTURE_TOWER);
 

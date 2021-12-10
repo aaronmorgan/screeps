@@ -39,7 +39,7 @@ var offsets = [{
 module.exports = function () {
 
     // Should be called once per tick and then the cached result should be used.
-    Room.prototype.structures = function() {
+    Room.prototype.structures = function () {
         if (!this._structures || _.isEmpty(this._structures)) {
             const allStructures = this.find(FIND_STRUCTURES);
             this._structures = _.groupBy(allStructures, "structureType");
@@ -61,15 +61,6 @@ module.exports = function () {
 
         return this.memory._cacheRoomConstructionSites;
     };
-
-    /**
-     * Returns the sources in this room.
-     * @returns {*}
-     */
-    Room.prototype.getSources =
-        function () {
-            return this.find(FIND_SOURCES);
-        };
 
     /**
      * Returns the stored amount of energy in the room.
@@ -106,7 +97,7 @@ module.exports = function () {
 
                 const source = sources[i];
 
-                console.log('source', JSON.stringify(source));
+                // console.log('source', JSON.stringify(source));
 
                 var fields = this.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
                 //console.log('fields', JSON.stringify(fields));
@@ -139,45 +130,9 @@ module.exports = function () {
         },
 
         /**
-         * Gets how many harvest points are around the sources you specify.
-         * @param sources
-         * @returns {*}
+         * Garbage Collect - set used variables to undefined
          */
-        Room.prototype.getHarvestPoints =
-        function (sources) {
-            if (this.memory.harvestPoints === undefined) {
-                let harvestPoints = 0
-                for (var sourceKey in sources) {
-                    if (!sources.hasOwnProperty(sourceKey)) {
-                        continue;
-                    }
-                    let source = sources[sourceKey];
-                    let initial = source.pos;
-
-                    for (var offsetKey in offsets) {
-                        let offset = offsets[offsetKey];
-                        let newPos = new RoomPosition(initial.x + offset.x, initial.y + offset.y, initial.roomName);
-                        let terrain = Game.map.getTerrainAt(newPos);
-
-                        if (terrain == "plain") {
-                            harvestPoints++;
-                        }
-                        if (terrain == "swamp") {
-                            harvestPoints++;
-                        }
-                    }
-                }
-                this.memory.harvestPoints = harvestPoints;
-                return harvestPoints;
-            } else {
-                return this.memory.harvestPoints;
-            }
-        };
-
-    /**
-     * Garbage Collect - set used variables to undefined
-     */
-    Room.prototype.gc =
+        Room.prototype.gc =
         function () {
             this._storedEnergyInRoom = undefined;
             this._sources = undefined;
