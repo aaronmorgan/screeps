@@ -86,13 +86,10 @@ module.exports.loop = function () {
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
     //room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
-    room.memory.maxDropMinerCreeps = room.getMaxSourceAccessPoints();
+    room.memory.maxDropMinerCreeps = (harvesters.length == 0 && dropMiners.length == 0) ? 0 : room.getMaxSourceAccessPoints();
 
     // Haulers
-    if (!room.memory.maxHaulerCreepsModifier) {
-        room.memory.maxHaulerCreepsModifier = 1;
-    }
-    room.memory.maxHaulerCreeps = Math.max(room.getSources().length, Math.floor(dropMiners.length * room.memory.maxHaulerCreepsModifier));
+    room.memory.maxHaulerCreeps = dropMiners.length * sources.length;
 
     // Builders
     let constructionSites = room.getConstructionSites().length;
@@ -103,7 +100,7 @@ module.exports.loop = function () {
 
     // Upgraders
     // Should be a set value + number of containers * 2?
-    let maxUpgraderCreeps = MAX_UPGRADER_CREEPS + (1 * 2);
+    let maxUpgraderCreeps = (harvesters.length == 0 && dropMiners.length == 0) ? 0 : MAX_UPGRADER_CREEPS + (1 * 2);
 
     // Summary of actual vs target numbers.
     console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps);
@@ -121,15 +118,12 @@ module.exports.loop = function () {
         if (energyAvailable >= 600) {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
             room.memory.minersPerSource = 1;
-            room.memory.maxHaulerCreepsModifier = 0.75
         } else if (energyAvailable >= 300) {
             bodyType = [WORK, WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
-            room.memory.maxHaulerCreepsModifier = 0.35;
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
-            room.memory.maxHaulerCreepsModifier = 0.25;
         } else {
             bodyType = undefined;
             console.log('DEBUG: Insufficient energy to build dropMiner creep.');
@@ -145,7 +139,7 @@ module.exports.loop = function () {
             for (let i = 0; i < room.memory.sources.length; i++) {
                 const source = room.memory.sources[i];
 
-                let dropMinersForThisSource = _.countBy(dropMiners, x => x.memory.sourceId == source.id).true;
+                let dropMinersForThisSource = Math.min(room.memory.minersPerSource, _.countBy(dropMiners, x => x.memory.sourceId == source.id).true);
 
                 if (dropMinersForThisSource == source.accessPoints) {
                     continue;
@@ -185,7 +179,7 @@ module.exports.loop = function () {
         }
 
         if (bodyType) {
-            roleHauler.createHauler(Game.spawns['Spawn1'], 'Hauler', bodyType);
+            roleHauler.createHauler(Game.spawns['Spawn1'], 'Hauler', bodyType, room);
         }
     }
 
