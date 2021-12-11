@@ -63,11 +63,11 @@ module.exports = function () {
     };
 
     Room.prototype.droppedResources = function () {
-        if (!this._droppedResources || _.isEmpty(this._droppedResources)) {
-            const allDroppedResources = this.find(FIND_DROPPED_RESOURCES);
+        if (!this._droppedResources) {//} || _.isEmpty(this._droppedResources)) {
+            let resourceEnergy = this.find(FIND_DROPPED_RESOURCES, { filter: (o) => o.resourceType === RESOURCE_ENERGY });
+            //console.log('res', JSON.stringify(resourceEnergy));
 
-            let droppedResourcesByAmount = _.sortBy(allDroppedResources, x => x.energy);
-            this._droppedResources = droppedResourcesByAmount;
+            this._droppedResources = _.sortBy(resourceEnergy, x => x.energy);
         }
 
         return this._droppedResources;
@@ -156,6 +156,10 @@ module.exports = function () {
             this._storage = undefined;
             this._storedEnergyInRoom = undefined;
             this._harvestedEnergy = undefined;
+
+
+            this._droppedResources = undefined;
+            
             this.lastInit = Game.time;
         };
 };
