@@ -102,7 +102,7 @@ module.exports.loop = function () {
     room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
 
     // Haulers
-    room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : harvesters.length * sources.length;
+    room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : dropminers.length * sources.length;
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
     const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
@@ -188,7 +188,7 @@ module.exports.loop = function () {
             bodyType = [WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
         } else {
-            console.log('DEBUG: Insufficient energy to build dropMiner creep.');
+            console.log('DEBUG: Insufficient energy to build DROPMINER creep.');
         }
 
         if (!_.isEmpty(bodyType)) {

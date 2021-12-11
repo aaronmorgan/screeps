@@ -62,6 +62,17 @@ module.exports = function () {
         return this.memory._cacheRoomConstructionSites;
     };
 
+    Room.prototype.droppedResources = function () {
+        if (!this._droppedResources || _.isEmpty(this._droppedResources)) {
+            const allDroppedResources = this.find(FIND_DROPPED_RESOURCES);
+
+            let droppedResourcesByAmount = _.sortBy(allDroppedResources, x => x.energy);
+            this._droppedResources = droppedResourcesByAmount;
+        }
+
+        return this._droppedResources;
+    };
+
     /**
      * Returns the stored amount of energy in the room.
      * @returns {number|*}

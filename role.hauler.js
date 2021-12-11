@@ -7,6 +7,7 @@ var roleHauler = {
     p_spawn.spawnCreep(p_body, name, {
       memory: {
         role: 'hauler',
+        harvesting: true,
         targetedDroppedEnergy: {
           id: 0,
           pos: new RoomPosition(1, 1, p_room.name)
@@ -27,17 +28,10 @@ var roleHauler = {
 
     if (creepFillPercentage < 30 && creep.memory.harvesting == true) {
       creep.say('⚡ ' + creepFillPercentage + '%');
-      let droppedResources = creep.room.find(FIND_DROPPED_RESOURCES);
 
-      //console.log('droppedResources', JSON.stringify(droppedResources));
-
-      let droppedEnergyByAmount = _.sortBy(droppedResources, 'energy');
-      if (!_.isEmpty(droppedEnergyByAmount)) { return; }
-
-      //console.log('droppedEnergyByAmount', JSON.stringify(droppedEnergyByAmount));
-
-      let largestDroppedEnergy = droppedEnergyByAmount[droppedEnergyByAmount.length - 1];
-      //  console.log('largestDroppedEnergy', JSON.stringify(largestDroppedEnergy));
+      let largestDroppedEnergy = _.last(creep.room.droppedResources());
+  //    console.log('creep.room.droppedResources', JSON.stringify(creep.room.droppedResources()))
+  //      console.log('largestDroppedEnergy', JSON.stringify(largestDroppedEnergy));
 
       // const targets = [
       //   creep.room.getPositionAt(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y),
@@ -47,16 +41,30 @@ var roleHauler = {
       //  console.log('largestDroppedEnergy', JSON.stringify(largestDroppedEnergy));
 
       if (creep.memory.targetedDroppedEnergy.id == 0) {
+        console.log('⛔ Error: Hauler ' + creep.name + ' has no target set');
+
         creep.memory.targetedDroppedEnergy.id = largestDroppedEnergy.id;
         creep.memory.targetedDroppedEnergy.pos = largestDroppedEnergy.pos;
       }
 
       const a = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
+      if (!a || !largestDroppedEnergy) {
+        console.log('⛔ Warning: Previous target no longer exists');
+
+        const newTarget = creep.room.droppedResources()[0];
+        
+        console.log('newTarget', JSON.stringify(newTarget));
+
+        creep.memory.targetedDroppedEnergy.id = newTarget.id;
+        creep.memory.targetedDroppedEnergy.pos = newTarget.pos;
+      }
 
       //if (largestDroppedEnergy && creep.pickup(largestDroppedEnergy) == ERR_NOT_IN_RANGE) {
       //      if (creep.pickup(largestDroppedEnergy) == ERR_NOT_IN_RANGE) {
       if (creep.pickup(a) == ERR_NOT_IN_RANGE) {
+        creep.say('⚡' + creepFillPercentage + '%');
+
         creep.memory.harvesting = true;
 
         if (creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) {
