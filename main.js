@@ -10,6 +10,7 @@ var infrastructureTasks = require('tasks.infrastructure');
 var creepTasks = require('tasks.creeps');
 
 var MAX_HARVESTER_CREEPS = 5;
+var MIN_HARVESTER_CREEPS = 0;
 var MAX_UPGRADER_CREEPS = 2;
 var MAX_BUILDER_CREEPS = 5;
 var MIN_HARVESTER_CREEPS = 0;
@@ -34,6 +35,7 @@ module.exports.loop = function () {
     room.structures();
 
     let sources = room.memory.sources;
+    room.droppedResources();
 
     //let towers = structures.filter(x => x.structureType == STRUCTURE_TOWER);
 
@@ -89,8 +91,8 @@ module.exports.loop = function () {
     let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
 
     // Harvesters
-    if (dropminers.length > 0 && haulers.length > 0) {
-        room.memory.maxHarvesterCreeps = Math.min(MAX_HARVESTER_CREEPS, haulers.length);
+    if (dropminers.length >= 2 && haulers.length >= 2) {
+        room.memory.maxHarvesterCreeps = MIN_HARVESTER_CREEPS;
     } else {
         room.memory.maxHarvesterCreeps = Math.max(harvesters.length, MAX_HARVESTER_CREEPS);
     }
@@ -120,7 +122,7 @@ module.exports.loop = function () {
     let maxUpgraderCreeps = (harvesters.length == 0 && harvesters.length == 0) ? 0 : MAX_UPGRADER_CREEPS + (1 * 2);
 
 
-    const sufficientBuilders = builders.length < room.memory.maxBuilderCreeps;
+    const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
 
     // Summary of actual vs target numbers.
     console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));

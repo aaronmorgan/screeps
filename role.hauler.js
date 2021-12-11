@@ -30,15 +30,6 @@ var roleHauler = {
       creep.say('⚡ ' + creepFillPercentage + '%');
 
       let largestDroppedEnergy = _.last(creep.room.droppedResources());
-  //    console.log('creep.room.droppedResources', JSON.stringify(creep.room.droppedResources()))
-  //      console.log('largestDroppedEnergy', JSON.stringify(largestDroppedEnergy));
-
-      // const targets = [
-      //   creep.room.getPositionAt(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y),
-      //   creep.room.getPositionAt(creep.memory.targetedDroppedEnergy.pos.x, creep.memory.targetedDroppedEnergy.pos.y)
-      // ];
-
-      //  console.log('largestDroppedEnergy', JSON.stringify(largestDroppedEnergy));
 
       if (creep.memory.targetedDroppedEnergy.id == 0) {
         console.log('⛔ Error: Hauler ' + creep.name + ' has no target set');
@@ -50,12 +41,18 @@ var roleHauler = {
       const a = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
       if (!a || !largestDroppedEnergy) {
-        console.log('⛔ Warning: Previous target no longer exists');
+        console.log('⚠️ Warning: Previous target no longer exists');
 
         const newTarget = creep.room.droppedResources()[0];
-        
+
         console.log('newTarget', JSON.stringify(newTarget));
 
+        if (!newTarget) {
+          console.log('⚠️ Warning: NO NEW TARGET');
+          console.log('creep.room.droppedResources()', JSON.stringify(creep.room.droppedResources()))
+
+          return;
+        }
         creep.memory.targetedDroppedEnergy.id = newTarget.id;
         creep.memory.targetedDroppedEnergy.pos = newTarget.pos;
       }
@@ -137,7 +134,6 @@ var roleHauler = {
           //console.log('largestDroppedEnergy', JSON.stringify(largestDroppedEnergy));
 
           let energyTarget = targets.find(x => x.pos.x == inRangeTargets.x && x.pos.y == inRangeTargets.y)
-          console.log('energyTargetr ' + creep.id, JSON.stringify(energyTarget));
 
           creep.memory.targetedDroppedEnergy = {
             id: energyTarget.id,
