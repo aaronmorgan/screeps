@@ -115,7 +115,7 @@ module.exports.loop = function () {
     const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
 
     // Builders
-    let constructionSites = room.getConstructionSites().length;
+    let constructionSites = room.constructionSites().length;
 
     room.memory.maxBuilderCreeps = (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && constructionSites > 0 ?
         Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750)) :

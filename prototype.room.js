@@ -50,17 +50,13 @@ module.exports = function () {
         return this._structures;
     };
 
-    Room.prototype.getConstructionSites = function () {
-        return this.find(FIND_CONSTRUCTION_SITES);
-
-        if (!this.memory._cacheRoomConstructionSites) {
-            console.log('DEBUG: Refreshing CONSTRUCTION_SITES cache...');
-
-            this.memory._cacheRoomConstructionSites = this.find(FIND_CONSTRUCTION_SITES);
-        }
-
-        return this.memory._cacheRoomConstructionSites;
-    };
+    Room.prototype.constructionSites = function () {
+            if (!this._constructionSites || _.isEmpty(this._constructionSites)) {
+                this._constructionSites = this.find(FIND_CONSTRUCTION_SITES);
+            }
+    
+            return this._constructionSites;
+        };
 
     Room.prototype.droppedResources = function () {
         if (!this._droppedResources) {//} || _.isEmpty(this._droppedResources)) {

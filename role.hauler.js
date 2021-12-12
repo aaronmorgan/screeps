@@ -28,12 +28,11 @@ var roleHauler = {
         console.log('⚠️ Warning: Previous target no longer exists');
 
         const newTarget = creep.room.droppedResources()[0];
-
-        console.log('newTarget', JSON.stringify(newTarget));
+        //console.log('newTarget', JSON.stringify(newTarget));
 
         if (!newTarget) {
           console.log('⚠️ Warning: NO NEW TARGET');
-          console.log('creep.room.droppedResources()', JSON.stringify(creep.room.droppedResources()))
+          //console.log('creep.room.droppedResources()', JSON.stringify(creep.room.droppedResources()))
 
           return;
         }

@@ -1,12 +1,14 @@
 var infrastructureTasks = {
 
   buildLinks: function (p_room) {
+    //this.resetBuildQueue(p_room);
+
     if (!p_room.memory._constructionBuildQueue) {
       p_room.memory._constructionBuildQueue = [];
     }
 
     if (!p_room.memory._constructionJobLevel) {
-      p_room.memory._constructionJobLevel = 1;
+      p_room.memory._constructionJobLevel = 0;
     }
 
     if (p_room.memory._constructionJobLevel <= p_room.controller.level) {
@@ -25,19 +27,23 @@ var infrastructureTasks = {
         this.getJobsForRCLLevel(p_room, i);
       }
 
-      //p_room.memory._constructionJobLevel += 1;
       p_room.memory._constructionJobLevel = p_room.controller.level;
-    } else {
-      // Periodically check whether we need to rebuild anything by resetting the construction job level.
-      // This could be further improved to increase the frequency to per tick during times of war.
-      if (Game.time % 10) {
-        console.log('🛈 INFO: Resetting room._constructionJobLevel');
-        p_room.memory._constructionJobLevel = 1;
-
-        console.log('🛈 INFO: Clearing room construction build queue');
-        p_room.memory._constructionBuildQueue = [];
-      }
     }
+
+    // Periodically check whether we need to rebuild anything by resetting the construction job level.
+    // This could be further improved to increase the frequency to per tick during times of war.
+    if (Game.time % 20 == 0) {
+      //console.log('DEBUG: Game.time=' + Game.time);
+      this.resetBuildQueue(p_room);
+    }
+  },
+
+  resetBuildQueue: function (p_room) {
+    console.log('⚠️ INFO: Resetting room._constructionJobLevel');
+    p_room.memory._constructionJobLevel = 0;
+
+    console.log('⚠️ INFO: Clearing room construction build queue');
+    p_room.memory._constructionBuildQueue = [];
   },
 
   getJobsForRCLLevel: function (p_room, p_level) {
@@ -59,6 +65,10 @@ var infrastructureTasks = {
   },
 
   queueJob: function (p_room, p_type, p_x, p_y) {
+    if (p_room.memory._constructionBuildQueue.length >= 1) {
+      return;
+    }
+
     let tileObjects = p_room.lookAt(p_x, p_y);
 
     if (tileObjects.find(x => x.type == 'constructionSite')) {
@@ -79,7 +89,6 @@ var infrastructureTasks = {
 
   processBuildQueue: function (p_room) {
     if (!p_room.memory._constructionBuildQueue || p_room.memory._constructionBuildQueue.length == 0) {
-      //console.log('TRACE: No construction jobs queued');
       return;
     }
 
@@ -107,9 +116,9 @@ var infrastructureTasks = {
         return;
       }
 
-      //console.log('objects', JSON.stringify(objects));
+      console.log('objects', JSON.stringify(objects));
 
-      if (objects.length == 1 && objects[0].type == 'terrain') {
+      if (objects.length < 3 && objects[0].type == 'terrain') {
         p_room.createConstructionSite(job.x, job.y, job.name);
       } else {
         let tile = tileObjects[0];
@@ -133,12 +142,6 @@ var infrastructureTasks = {
 
 const constructionJobsTemplate = [{
     stage: 1,
-    type: "container",
-    x: 3,
-    y: 2
-  },
-  {
-    stage: 1,
     type: "extension",
     x: 3,
     y: -1
@@ -154,6 +157,12 @@ const constructionJobsTemplate = [{
     type: "extension",
     x: 3,
     y: -2
+  },
+  {
+    stage: 1,
+    type: "container",
+    x: 3,
+    y: 2
   },
   {
     stage: 1,
