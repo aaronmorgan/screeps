@@ -2,7 +2,7 @@ var creepFactory = {
 
     createJob: function (p_room, p_spawn, p_name, p_body, p_memory) {
         if (p_spawn.spawning) {
-            if (p_name == Game.spawns['Spawn1'].spawning.name) {
+            if (p_name == p_spawn.spawning.name) {
                 console.log('INFO: Creep of type \'' + p_name + '\' already being built');
                 return;
             }
@@ -37,7 +37,7 @@ var creepFactory = {
 
     processBuildQueue: function (p_room, p_spawn) {
         //console.log('DEBUG: p_room.memory._creepBuildQueue length=' + p_room.memory._creepBuildQueue.length)
-        
+
         if (p_room.memory._creepBuildQueue.length == 0) {
             return;
         }
@@ -58,14 +58,12 @@ var creepFactory = {
 
         p_room.memory._creepBuildQueue.shift();
         console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + ' jobs remaining');
+    },
 
+    showSpawningCreepInfo: function (p_room, p_spawn) {
         if (p_spawn.spawning) {
-            let creepName = p_spawn.spawning.name;
-
-            let spawningCreep = Game.creeps[creepName];
-            p_room.memory._creepBuildType = creepName;
-
-            room.visual.text(
+            let spawningCreep = Game.creeps[p_spawn.spawning.name];
+            p_room.visual.text(
                 '🛠️' + spawningCreep.memory.role,
                 p_spawn.pos.x + 1,
                 p_spawn.pos.y, {

@@ -107,7 +107,7 @@ var infrastructureTasks = {
         return;
       }
 
-      console.log('objects', JSON.stringify(objects));
+      //console.log('objects', JSON.stringify(objects));
 
       if (objects.length == 1 && objects[0].type == 'terrain') {
         p_room.createConstructionSite(job.x, job.y, job.name);

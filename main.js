@@ -33,7 +33,8 @@ function bodyCost(body) {
 
 module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
-    let room = Game.spawns['Spawn1'].room;
+    let spawn = Game.spawns['Spawn1'];
+    let room = spawn.room;
 
     room.determineSourceAccessPoints();
 
@@ -172,7 +173,7 @@ module.exports.loop = function () {
             // if (!targetSourceId) {
             //     console.log('ERROR: Attempting to create HAVESTER with an assigned source');
             // } else {
-            creepFactory.createJob(room, Game.spawns['Spawn1'], role.HARVESTER, bodyType, {
+            creepFactory.createJob(room, spawn, role.HARVESTER, bodyType, {
                 role: role.HARVESTER
             });
         }
@@ -182,7 +183,10 @@ module.exports.loop = function () {
     if (!sufficientDropMiners) {
         let bodyType = [];
 
-        if (energyAvailable >= 600) {
+        if (energyAvailable >= 700) {
+            bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE];
+            room.memory.minersPerSource = 1;
+        } else if (energyAvailable >= 600) {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
             room.memory.minersPerSource = 1;
         } else if (energyAvailable >= 300) {
@@ -203,7 +207,7 @@ module.exports.loop = function () {
             for (let i = 0; i < room.memory.sources.length; i++) {
                 const source = room.memory.sources[i];
 
-                let creepsForThisSource = Math.min(room.memory.minersPerSource, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
+                let creepsForThisSource = Math.min(source.accessPoints, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
 
                 if (creepsForThisSource == source.accessPoints) {
                     continue;
@@ -223,7 +227,7 @@ module.exports.loop = function () {
             if (!targetSourceId) {
                 console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
             } else {
-                creepFactory.createJob(room, Game.spawns['Spawn1'], role.DROPMINER, bodyType, {
+                creepFactory.createJob(room, spawn, role.DROPMINER, bodyType, {
                     role: role.DROPMINER,
                     sourceId: targetSourceId
                 });
@@ -244,7 +248,7 @@ module.exports.loop = function () {
         }
 
         if (!_.isEmpty(bodyType)) {
-            creepFactory.createJob(room, Game.spawns['Spawn1'], role.HAULER, bodyType, {
+            creepFactory.createJob(room, spawn, role.HAULER, bodyType, {
                 role: role.HAULER,
                 harvesting: true,
                 targetedDroppedEnergy: {
@@ -274,7 +278,7 @@ module.exports.loop = function () {
         }
 
         if (!_.isEmpty(bodyType)) {
-            creepFactory.createJob(room, Game.spawns['Spawn1'], role.BUILDER, bodyType, {
+            creepFactory.createJob(room, spawn, role.BUILDER, bodyType, {
                 role: role.BUILDER
             });
         }
@@ -306,13 +310,14 @@ module.exports.loop = function () {
         }
 
         if (!_.isEmpty(bodyType)) {
-            creepFactory.createJob(room, Game.spawns['Spawn1'], role.UPGRADER, bodyType, {
+            creepFactory.createJob(room, spawn, role.UPGRADER, bodyType, {
                 role: role.UPGRADER
             });
         }
     }
 
-    creepFactory.processBuildQueue(room, Game.spawns['Spawn1']);
+    creepFactory.processBuildQueue(room, spawn);
+    creepFactory.showSpawningCreepInfo(room, spawn)
 
     console.log('INFO: Running Creeps...');
     for (let name in Game.creeps) {
