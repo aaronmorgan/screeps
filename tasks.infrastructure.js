@@ -20,8 +20,8 @@ var infrastructureTasks = {
         return;
       }
 
-      for (let i = 0; i < p_room.controller.level; i++) {
-        
+      for (let i = 1; i <= p_room.controller.level; i++) {
+
         this.getJobsForRCLLevel(p_room, i);
       }
 
@@ -41,9 +41,8 @@ var infrastructureTasks = {
   },
 
   getJobsForRCLLevel: function (p_room, p_level) {
+    //console.log('getJobsForRCLLevel, room=' + p_room + ', level=' + p_level)
     let rclLevelJobs = constructionJobsTemplate.filter(x => x.stage == p_level);
-
-    //console.log('RCL', JSON.stringify(rclLevelJobs));
 
     let spawn = p_room.find(FIND_MY_STRUCTURES, {
       filter: (structure) => {
