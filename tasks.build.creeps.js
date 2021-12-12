@@ -1,3 +1,7 @@
+var {
+    EXIT_CODES
+} = require('game.constants');
+
 var creepFactory = {
 
     createJob: function (p_room, p_spawn, p_name, p_body, p_memory) {
@@ -52,7 +56,7 @@ var creepFactory = {
         });
 
         if (result != OK) {
-            console.log('⛔ Error: Failed to spawn new creep, error=' + SPAWN_CREEP_CODES[result]);
+            console.log('⛔ Error: Failed to spawn new creep, error=' + EXIT_CODES[result]);
             return;
         }
 
@@ -73,15 +77,5 @@ var creepFactory = {
         }
     }
 };
-
-SPAWN_CREEP_CODES = {
-    '0': 'OK',
-    '-1': 'ERR_NOT_OWNER',
-    '-3': 'ERR_NAME_EXISTS',
-    '-4': 'ERR_BUSY',
-    '-6': 'ERR_NOT_ENOUGH_ENERGY',
-    '-10': 'ERR_INVALID_ARGS',
-    '-14': 'ERR_RCL_NOT_ENOUGH'
-}
 
 module.exports = creepFactory;
