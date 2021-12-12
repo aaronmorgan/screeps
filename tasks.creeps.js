@@ -1,3 +1,7 @@
+var {
+    role
+} = require('game.constants');
+
 var creepTasks = {
 
     suicideCreep: function (p_room) {
@@ -10,11 +14,11 @@ var creepTasks = {
             return;
         }
 
-        let harvesters = _.filter(creeps, (creep) => creep.memory.role == 'harvester');
-        let dropMiners = _.filter(creeps, (creep) => creep.memory.role == 'dropminer');
-        let haulers = _.filter(creeps, (creep) => creep.memory.role == 'hauler');
-        let builders = _.filter(creeps, (creep) => creep.memory.role == 'builder');
-        let upgraders = _.filter(creeps, (creep) => creep.memory.role == 'upgrader');
+        let harvesters = _.filter(creeps, (creep) => creep.memory.role == role.HARVESTER);
+        let dropMiners = _.filter(creeps, (creep) => creep.memory.role == role.DROPMINER);
+        let haulers = _.filter(creeps, (creep) => creep.memory.role == role.HAULER);
+        let builders = _.filter(creeps, (creep) => creep.memory.role == role.BUILDER);
+        let upgraders = _.filter(creeps, (creep) => creep.memory.role == role.UPGRADER);
 
         let creepsToRemove = [];
 

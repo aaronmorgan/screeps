@@ -15,7 +15,7 @@ var infrastructureTasks = require('tasks.infrastructure');
 var creepTasks = require('tasks.creeps');
 var creepFactory = require('tasks.build.creeps');
 
-var MIN_HARVESTER_CREEPS = 2;
+var MIN_HARVESTER_CREEPS = 0;
 var MAX_HARVESTER_CREEPS = 5;
 var MAX_UPGRADER_CREEPS = 2;
 var MIN_BUILDER_CREEPS = 0;
