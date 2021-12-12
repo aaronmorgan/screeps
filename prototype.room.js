@@ -144,22 +144,7 @@ module.exports = function () {
          */
         Room.prototype.gc =
         function () {
-            this._storedEnergyInRoom = undefined;
-            this._sources = undefined;
-            this._extensions = undefined;
-            this._hostiles = undefined;
-            this._hostile_structures = undefined;
-            this._mineral = undefined;
-            this._labs = undefined;
-            this._usedEnergy = undefined;
-            this._towers = undefined;
-            this._storage = undefined;
-            this._storedEnergyInRoom = undefined;
-            this._harvestedEnergy = undefined;
-
-
             this._droppedResources = undefined;
-            
-            this.lastInit = Game.time;
+            //this.lastInit = Game.time;
         };
 };

@@ -1,20 +1,25 @@
 require('prototype.room')();
 
+var {
+    role
+} = require('game.constants');
+
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleDropMiner = require('role.dropminer');
 var roleHauler = require('role.hauler');
+var roleHauler = require('role.hauler');
 
 var infrastructureTasks = require('tasks.infrastructure');
 var creepTasks = require('tasks.creeps');
+var creepFactory = require('tasks.build.creeps');
 
+var MIN_HARVESTER_CREEPS = 2;
 var MAX_HARVESTER_CREEPS = 5;
-var MIN_HARVESTER_CREEPS = 0;
 var MAX_UPGRADER_CREEPS = 2;
-var MAX_BUILDER_CREEPS = 5;
-var MIN_HARVESTER_CREEPS = 0;
 var MIN_BUILDER_CREEPS = 0;
+var MAX_BUILDER_CREEPS = 5;
 
 function bodyCost(body) {
     let sum = 0;
@@ -79,16 +84,14 @@ module.exports.loop = function () {
         // }
     }
 
-    console.log('INFO: Processing Creeps...');
-
     let energyAvailable = room.energyAvailable;
     //console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
 
-    let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    let dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == 'dropminer');
-    let haulers = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
-    let builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-    let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
+    let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
+    let dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == role.DROPMINER);
+    let haulers = _.filter(Game.creeps, (creep) => creep.memory.role == role.HAULER);
+    let builders = _.filter(Game.creeps, (creep) => creep.memory.role == role.BUILDER);
+    let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
 
     // Harvesters
     if (dropminers.length >= 2 && haulers.length >= 2) {
@@ -137,8 +140,6 @@ module.exports.loop = function () {
 
         if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
-        } else {
-            console.log('DEBUG: Insufficient energy to build HARVESTER creep.');
         }
 
         if (!_.isEmpty(bodyType)) {
@@ -171,8 +172,9 @@ module.exports.loop = function () {
             // if (!targetSourceId) {
             //     console.log('ERROR: Attempting to create HAVESTER with an assigned source');
             // } else {
-            roleHarvester.createHarvester(Game.spawns['Spawn1'], 'Harvester', bodyType);
-            // }
+            creepFactory.createJob(room, Game.spawns['Spawn1'], role.HARVESTER, bodyType, {
+                role: role.HARVESTER
+            });
         }
     }
 
@@ -189,8 +191,6 @@ module.exports.loop = function () {
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, MOVE, MOVE];
             room.memory.minersPerSource = 3;
-        } else {
-            console.log('DEBUG: Insufficient energy to build DROPMINER creep.');
         }
 
         if (!_.isEmpty(bodyType)) {
@@ -221,9 +221,12 @@ module.exports.loop = function () {
             }
 
             if (!targetSourceId) {
-                console.log('ERROR: Attempting to create DROPMINER with an assigned source');
+                console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
             } else {
-                roleDropMiner.createMiner(room, Game.spawns['Spawn1'], 'DropMiner', bodyType, targetSourceId)
+                creepFactory.createJob(room, Game.spawns['Spawn1'], role.DROPMINER, bodyType, {
+                    role: role.DROPMINER,
+                    sourceId: targetSourceId
+                });
             }
         }
     }
@@ -238,12 +241,17 @@ module.exports.loop = function () {
             bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 200) {
             bodyType = [CARRY, MOVE, MOVE, MOVE];
-        } else {
-            console.log('DEBUG: Insufficient energy to build HAULER creep.');
         }
 
         if (!_.isEmpty(bodyType)) {
-            roleHauler.createHauler(Game.spawns['Spawn1'], 'Hauler', bodyType, room);
+            creepFactory.createJob(room, Game.spawns['Spawn1'], role.HAULER, bodyType, {
+                role: role.HAULER,
+                harvesting: true,
+                targetedDroppedEnergy: {
+                    id: 0,
+                    pos: new RoomPosition(1, 1, room.name)
+                }
+            });
         }
     }
 
@@ -263,12 +271,12 @@ module.exports.loop = function () {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
-        } else {
-            console.log('DEBUG: Insufficient energy to build BUILDER creep.');
         }
 
         if (!_.isEmpty(bodyType)) {
-            roleBuilder.createBuilder(Game.spawns['Spawn1'], 'Builder', bodyType);
+            creepFactory.createJob(room, Game.spawns['Spawn1'], role.BUILDER, bodyType, {
+                role: role.BUILDER
+            });
         }
     }
 
@@ -295,44 +303,34 @@ module.exports.loop = function () {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
-        } else {
-            console.log('DEBUG: Insufficient energy to build UPGRADER creep.');
-            // TODO Should queue the upgrader here and not build any more until it's removed from the queue.
         }
 
         if (!_.isEmpty(bodyType)) {
-            roleUpgrader.createUpgrader(Game.spawns['Spawn1'], 'Upgrader', bodyType);
+            creepFactory.createJob(room, Game.spawns['Spawn1'], role.UPGRADER, bodyType, {
+                role: role.UPGRADER
+            });
         }
     }
 
-    if (Game.spawns['Spawn1'].spawning) {
-        let spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
-        room.visual.text(
-            '🛠️' + spawningCreep.memory.role,
-            Game.spawns['Spawn1'].pos.x + 1,
-            Game.spawns['Spawn1'].pos.y, {
-                align: 'left',
-                opacity: 0.8
-            });
-    }
+    creepFactory.processBuildQueue(room, Game.spawns['Spawn1']);
 
     console.log('INFO: Running Creeps...');
     for (let name in Game.creeps) {
         let creep = Game.creeps[name];
 
-        if (creep.memory.role == 'harvester') {
+        if (creep.memory.role == role.HARVESTER) {
             roleHarvester.run(creep);
         }
-        if (creep.memory.role == 'dropminer') {
+        if (creep.memory.role == role.DROPMINER) {
             roleDropMiner.harvest(creep);
         }
-        if (creep.memory.role == 'hauler') {
+        if (creep.memory.role == role.HAULER) {
             roleHauler.run(creep);
         }
-        if (creep.memory.role == 'upgrader') {
+        if (creep.memory.role == role.UPGRADER) {
             roleUpgrader.run(creep);
         }
-        if (creep.memory.role == 'builder') {
+        if (creep.memory.role == role.BUILDER) {
             roleBuilder.run(creep);
         }
     }

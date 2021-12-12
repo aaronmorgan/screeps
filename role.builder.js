@@ -1,16 +1,5 @@
 var roleBuilder = {
 
-    createBuilder: function (p_spawn, p_name, p_body) {
-        let name = p_name + Game.time;
-        console.log('Spawning new builder: ' + name + ', [' + p_body + ']');
-
-        p_spawn.spawnCreep(p_body, name, {
-            memory: {
-                role: 'builder'
-            }
-        });
-    },
-
     /** @param {Creep} creep **/
     run: function (creep) {
 
@@ -21,7 +10,8 @@ var roleBuilder = {
         if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
             creep.memory.building = true;
             creep.memory.harvesting = false;
-            creep.say('🚧 building');
+//            creep.say('🚧 building');
+            creep.say('🔧 build');
         }
 
         if (creep.memory.building) {

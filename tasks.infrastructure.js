@@ -31,10 +31,10 @@ var infrastructureTasks = {
       // Periodically check whether we need to rebuild anything by resetting the construction job level.
       // This could be further improved to increase the frequency to per tick during times of war.
       if (Game.time % 10) {
-        console.log('INFO: Resetting room._constructionJobLevel');
+        console.log('🛈 INFO: Resetting room._constructionJobLevel');
         p_room.memory._constructionJobLevel = 1;
 
-        console.log('INFO: Clearing room construction build queue');
+        console.log('🛈 INFO: Clearing room construction build queue');
         p_room.memory._constructionBuildQueue = [];
       }
     }

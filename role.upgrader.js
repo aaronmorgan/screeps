@@ -1,12 +1,5 @@
 var roleUpgrader = {
 
-  createUpgrader: function (p_spawn, p_name, p_body) {
-    let name = p_name + Game.time;
-
-    console.log('Spawning new upgrader: ' + name + ', [' + p_body + ']');
-    p_spawn.spawnCreep(p_body, name, { memory: { role: 'upgrader' } });
-  },
-
   /** @param {Creep} creep **/
   run: function (creep) {
     if (creep.memory.upgrading && creep.store[RESOURCE_ENERGY] == 0) {
@@ -21,15 +14,18 @@ var roleUpgrader = {
 
     if (creep.memory.upgrading) {
       if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: '#4189d0' } });
+        creep.moveTo(creep.room.controller, {
+          visualizePathStyle: {
+            stroke: '#4189d0'
+          }
+        });
       }
-    }
-    else {
+    } else {
       let targets = creep.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
           return (
-            structure.structureType == STRUCTURE_CONTAINER ||
-            structure.structureType == STRUCTURE_STORAGE) &&
+              structure.structureType == STRUCTURE_CONTAINER ||
+              structure.structureType == STRUCTURE_STORAGE) &&
             structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity();
         }
       });
@@ -37,15 +33,22 @@ var roleUpgrader = {
         let dropSite = creep.pos.findClosestByPath(targets);
 
         if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(dropSite, { visualizePathStyle: { stroke: '#3370ac' } });
+          creep.moveTo(dropSite, {
+            visualizePathStyle: {
+              stroke: '#3370ac'
+            }
+          });
         }
-      }
-      else {
+      } else {
         let sources = creep.room.find(FIND_SOURCES);
         let nearestSource = creep.pos.findClosestByPath(sources);
 
         if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(nearestSource, { visualizePathStyle: { stroke: '#3370ac' } });
+          creep.moveTo(nearestSource, {
+            visualizePathStyle: {
+              stroke: '#3370ac'
+            }
+          });
         }
       }
     }

@@ -1,21 +1,5 @@
 var roleHauler = {
 
-  createHauler: function (p_spawn, p_name, p_body, p_room) {
-    let name = p_name + Game.time;
-
-    console.log('Spawning new HAULER: ' + name + ', [' + p_body + ']');
-    p_spawn.spawnCreep(p_body, name, {
-      memory: {
-        role: 'hauler',
-        harvesting: true,
-        targetedDroppedEnergy: {
-          id: 0,
-          pos: new RoomPosition(1, 1, p_room.name)
-        }
-      }
-    });
-  },
-
   /** @param {Creep} creep **/
   run: function (creep) {
     // TODO: Determine time to live and whether it's better to suicide while empty than with full energy store.

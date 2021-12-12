@@ -1,7 +1,7 @@
 var creepTasks = {
 
     suicideCreep: function (p_room) {
-        console.log('DEBUG: Checking for creeps to remove in room ' + p_room.name);
+        //console.log('DEBUG: Checking for creeps to remove in room ' + p_room.name);
 
         let creeps = p_room.find(FIND_MY_CREEPS);
 
@@ -91,7 +91,7 @@ var creepTasks = {
                 creep.suicide();
             }
         } else {
-            console.log('DEBUG: None found for room ' + p_room.name);
+            //console.log('DEBUG: None found for room ' + p_room.name);
         }
     }
 }
