@@ -122,7 +122,11 @@ module.exports.loop = function () {
     if (!sufficientHarvesters) {
         let bodyType = [];
 
-        if (energyAvailable >= 200) {
+        if (energyAvailable >= 500) {
+            bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 300) {
+            bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
         }
 
