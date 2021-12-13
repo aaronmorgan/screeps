@@ -17,7 +17,7 @@ var creepFactory = require('tasks.build.creeps');
 
 var MIN_HARVESTER_CREEPS = 0;
 var MAX_HARVESTER_CREEPS = 5;
-var MAX_UPGRADER_CREEPS = 2;
+var MAX_UPGRADER_CREEPS = 5;
 var MIN_BUILDER_CREEPS = 0;
 var MAX_BUILDER_CREEPS = 5;
 
@@ -123,17 +123,17 @@ module.exports.loop = function () {
 
     // Upgraders
     // Should be a set value + number of containers * 2?
-    let maxUpgraderCreeps = (harvesters.length == 0 && harvesters.length == 0) ? 0 : MAX_UPGRADER_CREEPS + (1 * 2);
-
+    room.memory.maxUpgraderCreeps = (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) ? MAX_UPGRADER_CREEPS + (1 * 2) : 0;
 
     const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
+    const sufficientUpgraders = (upgraders.length >= room.memory.maxUpgraderCreeps) || (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && upgraders.length < room.memory.maxUpgraderCreeps;
 
     // Summary of actual vs target numbers.
     console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));
     console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '❌'));
     console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '❌'));
     console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
-    console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps);
+    console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
 
     // HARVESTER creep
     if (!sufficientHarvesters) {
@@ -286,7 +286,7 @@ module.exports.loop = function () {
 
     // UPGRADER creeps
     // TODO: ...and < min drop miners
-    if ((sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && upgraders.length < maxUpgraderCreeps) {
+    if (!sufficientUpgraders) {
         let bodyType = [];
 
         if (room.storage && energyAvailable >= 1750) {

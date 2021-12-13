@@ -27,8 +27,6 @@ var creepFactory = {
             p_room.memory._creepBuildQueue = [];
         }
 
-        console.log(p_room.memory._creepBuildQueue.length);
-
         // Temporarily only allow one queued creep job.
         if (p_room.memory._creepBuildQueue.length >= 1) {
             return;

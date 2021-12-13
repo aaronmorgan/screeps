@@ -89,7 +89,8 @@ var creepTasks = {
 
                 if (!creep) { continue; }
 
-                if (creep.memory.role == 'hauler' && creep.store.getUsedCapacity() > 0) { continue; }
+                if (creep.memory.role == role.HAULER && creep.store.getUsedCapacity() > 0) { continue; }
+                if (creep.memory.role == role.UPGRADER && creep.store.getUsedCapacity() > 0) { continue; }
 
                 console.log('Removing creep ' + creep.id)
                 creep.suicide();
