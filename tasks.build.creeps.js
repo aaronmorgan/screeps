@@ -21,11 +21,15 @@ var creepFactory = {
             });
     },
 
-    enqueueBuildJob: function (p_room, p_spawn, p_buildJob) {
+    validateCache: function(p_room) {
         if (!p_room.memory._creepBuildQueue) {
             console.log('INFO: Creating creep build queue...');
             p_room.memory._creepBuildQueue = [];
         }
+    },
+
+    enqueueBuildJob: function (p_room, p_spawn, p_buildJob) {
+        this.validateCache(p_room);
 
         // Temporarily only allow one queued creep job.
         if (p_room.memory._creepBuildQueue.length >= 1) {
@@ -38,6 +42,7 @@ var creepFactory = {
     },
 
     processBuildQueue: function (p_room, p_spawn) {
+        this.validateCache(p_room);
         //console.log('DEBUG: p_room.memory._creepBuildQueue length=' + p_room.memory._creepBuildQueue.length)
 
         if (p_room.memory._creepBuildQueue.length == 0) {
