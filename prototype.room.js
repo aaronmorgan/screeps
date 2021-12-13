@@ -130,8 +130,6 @@ module.exports = function () {
                 accessPoints += this.memory.sources[i].accessPoints;
             }
 
-            console.log('accessPoints', accessPoints);
-
             return accessPoints;
         },
 

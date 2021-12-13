@@ -32,11 +32,9 @@ var infrastructureTasks = {
     let constructionSites = p_room.constructionSites();
 
     if (constructionSites.length > 0) {
-      console.log('⚠️ Information: Room already has construction sites present');
+      //console.log('⚠️ Information: Room already has construction sites present');
       return;
     }
-
-    //console.log('constructionSites', JSON.stringify(constructionSites));
 
     let currentRCLLevel = p_room.controller.level;
 

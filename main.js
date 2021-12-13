@@ -37,26 +37,20 @@ module.exports.loop = function () {
     let room = spawn.room;
 
     room.determineSourceAccessPoints();
-
     room.structures();
-
-    let sources = room.memory.sources;
     room.droppedResources();
 
-    //let towers = structures.filter(x => x.structureType == STRUCTURE_TOWER);
+    let sources = room.memory.sources;
 
     const structures = room.structures();
 
     if (structures.tower) {
         structures.tower.forEach(tower => {
-            //console.log('INFO: Processing Tower '+ tower.id + '...');
-
             let hostiles = room.find(FIND_HOSTILE_CREEPS);
 
             if (hostiles.length) {
                 console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
                 tower.attack(hostiles[0]);
-                //towers.forEach(t => t.attack(hostiles[0]));
             } else {
                 let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
                     filter: (structure) => structure.hits < structure.hitsMax
@@ -78,15 +72,9 @@ module.exports.loop = function () {
             delete Memory.creeps[name];
             console.log('INFO: Clearing creep memory:', name);
         }
-
-        // if (_.isEmpty(Game.creeps[name])) {
-        //     Memory.creeps.shift();
-        //     console.log('WARNING: Attempting to force clear \'empty\' creep:', name);
-        // }
     }
 
     let energyAvailable = room.energyAvailable;
-    //console.log('DEBUG: energyAvailable: ' + energyAvailable + '/' + energyCapacityAvailable);
 
     let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
     let dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == role.DROPMINER);
@@ -95,12 +83,7 @@ module.exports.loop = function () {
     let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
 
     // Harvesters
-    if (dropminers.length >= 2 && haulers.length >= 2) {
-        room.memory.maxHarvesterCreeps = MIN_HARVESTER_CREEPS;
-    } else {
-        room.memory.maxHarvesterCreeps = Math.max(harvesters.length, MAX_HARVESTER_CREEPS);
-    }
-
+    room.memory.maxHarvesterCreeps = room.getMaxSourceAccessPoints() - dropminers.length;
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
@@ -111,14 +94,14 @@ module.exports.loop = function () {
     room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : dropminers.length * sources.length;
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
-    const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
-    const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
+    const sufficientDropMiners = room.controller.level >= 2 && dropminers.length >= room.memory.maxDropMinerCreeps;
+    const sufficientHaulers = room.controller.level >= 2 && dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
 
     // Builders
     let constructionSites = room.constructionSites().length;
 
     room.memory.maxBuilderCreeps = (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && constructionSites > 0 ?
-        Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750)) :
+        Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750 == 0)) :
         MIN_BUILDER_CREEPS;
 
     // Upgraders
@@ -333,11 +316,11 @@ module.exports.loop = function () {
         if (creep.memory.role == role.HAULER) {
             roleHauler.run(creep);
         }
-        if (creep.memory.role == role.UPGRADER) {
-            roleUpgrader.run(creep);
-        }
         if (creep.memory.role == role.BUILDER) {
             roleBuilder.run(creep);
+        }
+        if (creep.memory.role == role.UPGRADER) {
+            roleUpgrader.run(creep);
         }
     }
 
