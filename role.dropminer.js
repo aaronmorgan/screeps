@@ -1,7 +1,7 @@
 var roleDropMiner = {
 
     /** @param {Creep} creep **/
-    harvest: function (p_creep) {
+    run: function (p_creep) {
         let source = Game.getObjectById(p_creep.memory.sourceId);
 
         if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {

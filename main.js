@@ -173,7 +173,7 @@ module.exports.loop = function () {
             // if (!targetSourceId) {
             //     console.log('ERROR: Attempting to create HAVESTER with an assigned source');
             // } else {
-            creepFactory.createJob(room, spawn, role.HARVESTER, bodyType, {
+            creepFactory.create(room, spawn, role.HARVESTER, bodyType, {
                 role: role.HARVESTER
             });
         }
@@ -201,6 +201,7 @@ module.exports.loop = function () {
             let targetSourceId = undefined;
 
             if (dropminers.length == 0) {
+                // TODO select the closet one.
                 targetSourceId = room.memory.sources[0].id;
             }
 
@@ -227,7 +228,7 @@ module.exports.loop = function () {
             if (!targetSourceId) {
                 console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
             } else {
-                creepFactory.createJob(room, spawn, role.DROPMINER, bodyType, {
+                creepFactory.create(room, spawn, role.DROPMINER, bodyType, {
                     role: role.DROPMINER,
                     sourceId: targetSourceId
                 });
@@ -248,7 +249,7 @@ module.exports.loop = function () {
         }
 
         if (!_.isEmpty(bodyType)) {
-            creepFactory.createJob(room, spawn, role.HAULER, bodyType, {
+            creepFactory.create(room, spawn, role.HAULER, bodyType, {
                 role: role.HAULER,
                 harvesting: true,
                 targetedDroppedEnergy: {
@@ -278,7 +279,7 @@ module.exports.loop = function () {
         }
 
         if (!_.isEmpty(bodyType)) {
-            creepFactory.createJob(room, spawn, role.BUILDER, bodyType, {
+            creepFactory.create(room, spawn, role.BUILDER, bodyType, {
                 role: role.BUILDER
             });
         }
@@ -310,7 +311,7 @@ module.exports.loop = function () {
         }
 
         if (!_.isEmpty(bodyType)) {
-            creepFactory.createJob(room, spawn, role.UPGRADER, bodyType, {
+            creepFactory.create(room, spawn, role.UPGRADER, bodyType, {
                 role: role.UPGRADER
             });
         }
@@ -327,7 +328,7 @@ module.exports.loop = function () {
             roleHarvester.run(creep);
         }
         if (creep.memory.role == role.DROPMINER) {
-            roleDropMiner.harvest(creep);
+            roleDropMiner.run(creep);
         }
         if (creep.memory.role == role.HAULER) {
             roleHauler.run(creep);

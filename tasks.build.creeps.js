@@ -4,7 +4,7 @@ var {
 
 var creepFactory = {
 
-    createJob: function (p_room, p_spawn, p_name, p_body, p_memory) {
+    create: function (p_room, p_spawn, p_name, p_body, p_memory) {
         if (p_spawn.spawning) {
             if (p_name == p_spawn.spawning.name) {
                 console.log('INFO: Creep of type \'' + p_name + '\' already being built');
