@@ -126,7 +126,7 @@ module.exports.loop = function () {
     room.memory.maxUpgraderCreeps = (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) ? MAX_UPGRADER_CREEPS + (1 * 2) : 0;
 
     const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
-    const sufficientUpgraders = (upgraders.length >= room.memory.maxUpgraderCreeps) || (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && upgraders.length < room.memory.maxUpgraderCreeps;
+    const sufficientUpgraders = upgraders.length >= room.memory.maxUpgraderCreeps;
 
     // Summary of actual vs target numbers.
     console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));
