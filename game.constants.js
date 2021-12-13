@@ -1,4 +1,4 @@
-module.exports.EXIT_CODES = {
+module.exports.EXIT_CODE = {
     '0': 'OK',
     '-1': 'ERR_NOT_OWNER',
     '-3': 'ERR_NAME_EXISTS',

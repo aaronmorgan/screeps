@@ -1,13 +1,13 @@
 var {
-    EXIT_CODES
+    EXIT_CODE
 } = require('game.constants');
 
 var creepFactory = {
 
-    create: function (p_room, p_spawn, p_name, p_body, p_memory) {
+    create: function (p_room, p_spawn, p_role, p_body, p_memory) {
         if (p_spawn.spawning) {
-            if (p_name == p_spawn.spawning.name) {
-                console.log('INFO: Creep of type \'' + p_name + '\' already being built');
+            if (p_role == p_spawn.spawning.name) {
+                console.log('INFO: Creep of type \'' + p_role + '\' already being built');
                 return;
             }
         }
@@ -16,7 +16,7 @@ var creepFactory = {
             p_room,
             p_spawn, {
                 body: p_body,
-                name: p_name,
+                name: p_role,
                 memory: p_memory
             });
     },
@@ -31,12 +31,21 @@ var creepFactory = {
     enqueueBuildJob: function (p_room, p_spawn, p_buildJob) {
         this.validateCache(p_room);
 
+        if (!Memory.creeps) {
+            console.log('⛔ Error: WTF?');
+
+            Memory.creeps = {};
+        }
+
+        console.log('p_room.memory._creepBuildQueue', JSON.stringify(p_room.memory._creepBuildQueue));
+
         // Temporarily only allow one queued creep job.
         if (p_room.memory._creepBuildQueue.length >= 1) {
             return;
         }
 
         p_room.memory._creepBuildQueue.push(p_buildJob);
+        console.log('p_room.memory._creepBuildQueue', JSON.stringify(p_room.memory._creepBuildQueue));
 
         console.log('INFO: New creep build job added, ' + p_room.memory._creepBuildQueue.length + ' jobs queued');
     },
@@ -51,6 +60,9 @@ var creepFactory = {
 
         var job = p_room.memory._creepBuildQueue[0];
 
+        console.log('p_room.memory._creepBuildQueue', JSON.stringify(p_room.memory._creepBuildQueue));
+        console.log('job to enqueue: ', JSON.stringify(job));
+
         let name = job.name + Game.time;
         console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory));
 
@@ -59,7 +71,7 @@ var creepFactory = {
         });
 
         if (result != OK) {
-            console.log('⛔ Error: Failed to spawn new creep, error=' + EXIT_CODES[result]);
+            console.log('⛔ Error: Failed to spawn new creep, error=' + EXIT_CODE[result]);
             return;
         }
 
@@ -69,7 +81,17 @@ var creepFactory = {
 
     showSpawningCreepInfo: function (p_room, p_spawn) {
         if (p_spawn.spawning) {
+            console.log('p_spawn.spawning.name', p_spawn.spawning.name);
+
             let spawningCreep = Game.creeps[p_spawn.spawning.name];
+
+            if (_.isEmpty(spawningCreep.memory)) {
+                console.log('⛔ Error: New creep job contains no \'memory\' object!');
+                return;
+            }
+
+            console.log('spawningCreep.memory', JSON.stringify(spawningCreep.memory));
+
             p_room.visual.text(
                 '🛠️' + spawningCreep.memory.role,
                 p_spawn.pos.x + 1,

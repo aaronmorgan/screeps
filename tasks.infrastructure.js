@@ -1,5 +1,5 @@
 var {
-  EXIT_CODES
+  EXIT_CODE
 } = require('game.constants');
 
 var infrastructureTasks = {
@@ -69,7 +69,7 @@ var infrastructureTasks = {
         let result = p_room.createConstructionSite(x, y, job.type);
 
         if (result != OK) {
-          console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODES[result]);
+          console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result]);
           console.log('job', JSON.stringify(job));
           continue;
         }
