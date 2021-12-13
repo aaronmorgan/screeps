@@ -237,7 +237,7 @@ module.exports.loop = function () {
     }
 
     // HAULER creep
-    if (haulers.length < room.memory.maxHaulerCreeps) {
+    if (!sufficientHaulers) {
         let bodyType = [];
 
         if (energyAvailable >= 450 && room.memory.minersPerSource == 1) {
@@ -261,7 +261,7 @@ module.exports.loop = function () {
     }
 
     // BUILDER creep
-    if (!sufficientBuilders && ((sufficientDropMiners && sufficientHaulers) || sufficientHarvesters)) {
+    if (!sufficientBuilders) {
         let bodyType = [];
 
         if (energyAvailable >= 900) {
