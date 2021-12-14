@@ -4,20 +4,49 @@ var roleHarvester = {
     run: function (p_creep) {
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-        if (p_creep.store.getFreeCapacity() > 0) {
+        if (creepFillPercentage < 30) {
+
+        //if (p_creep.store.getFreeCapacity() > 0) {
             if (_.isEmpty(p_creep.room.memory.sources)) {
                 return;
             }
 
-            let source = Game.getObjectById(p_creep.room.memory.sources[0].id);
+            let resourceEnergy = p_creep.room.find(FIND_DROPPED_RESOURCES, {
+                filter: (o) => o.resourceType === RESOURCE_ENERGY
+            });
 
-            if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                p_creep.moveTo(source, {
-                    visualizePathStyle: {
-                        stroke: '#ffaa00'
-                    }
-                });
-                p_creep.say('⚡ ' + creepFillPercentage + '%')
+            let droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+            let energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+
+            //console.log('droppedResources', JSON.stringify(energyTarget));
+            //let droppedResources = _.sortBy(resourceEnergy, x => x.energy);
+            let source = undefined;
+
+            if (!_.isEmpty(energyTarget)) {
+                source = Game.getObjectById(energyTarget.id);
+
+                console.log('droppe');
+                if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
+                    p_creep.moveTo(source, {
+                        visualizePathStyle: {
+                            stroke: '#ffaa00'
+                        }
+                    });
+                    p_creep.say('⚡ ' + creepFillPercentage + '%')
+                }
+
+            } else {
+                source = Game.getObjectById(p_creep.room.memory.sources[0].id);
+
+                console.log('mine');
+                if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    p_creep.moveTo(source, {
+                        visualizePathStyle: {
+                            stroke: '#ffaa00'
+                        }
+                    });
+                    p_creep.say('⚡ ' + creepFillPercentage + '%')
+                }
             }
         } else {
             let targets = p_creep.room.find(FIND_STRUCTURES, {
