@@ -29,8 +29,7 @@ var infrastructureTasks = {
 
     // Periodically check whether we need to rebuild anything by resetting the construction job level.
     // This could be further improved to increase the frequency to per tick during times of war.
-    if (Game.time % 20 == 0) {
-      console.log('DEBUG: Game.time=' + Game.time);
+    if (Game.time % (p_room.controller.level * 10) == 0) {
       index = 0;
     }
 
@@ -242,19 +241,19 @@ const constructionJobsTemplate = [{
     y: 1
   },
   {
-    rclLevel: 3,
+    rclLevel: 4,
     type: "extension",
     x: -2,
     y: -2
   },
   {
-    rclLevel: 3,
+    rclLevel: 4,
     type: "extension",
     x: -3,
     y: -2
   },
   {
-    rclLevel: 3,
+    rclLevel: 4,
     type: "extension",
     x: -3,
     y: -1
