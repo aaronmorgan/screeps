@@ -278,7 +278,6 @@ module.exports.loop = function () {
     }
 
     // UPGRADER creeps
-    // TODO: ...and < min drop miners
     if (!sufficientUpgraders) {
         let bodyType = [];
 
@@ -294,10 +293,14 @@ module.exports.loop = function () {
                 CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE
             ];
-        } else if (room.storage && energyAvailable >= 550) {
+        } else if (energyAvailable >= 550) {
             bodyType = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        } else if (energyAvailable >= 350) {
+            bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
+        } else if (energyAvailable >= 250) {
+            bodyType = [WORK, CARRY, CARRY, MOVE];
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
         }
