@@ -1,33 +1,33 @@
 var roleHauler = {
 
-  /** @param {Creep} creep **/
-  run: function (creep) {
+  /** @param {Creep} p_creep **/
+  run: function (p_creep) {
     // TODO: Determine time to live and whether it's better to suicide while empty than with full energy store.
 
-    if (creep.store.getFreeCapacity() == 0) {
-      creep.memory.harvesting = false;
+    if (p_creep.store.getFreeCapacity() == 0) {
+      p_creep.memory.harvesting = false;
     }
 
-    let creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+    let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-    if (creepFillPercentage < 30 && creep.memory.harvesting == true) {
-      creep.say('⚡ ' + creepFillPercentage + '%');
+    if (p_creep.memory.harvesting == true) {
+      p_creep.say('⚡ ' + creepFillPercentage + '%');
 
-      let largestDroppedEnergy = _.last(creep.room.droppedResources());
+      let largestDroppedEnergy = _.last(p_creep.room.droppedResources());
 
-      if (creep.memory.targetedDroppedEnergy.id == 0) {
-        console.log('⛔ Error: Hauler ' + creep.name + ' has no target set');
+      if (p_creep.memory.targetedDroppedEnergy.id == 0) {
+        console.log('⛔ Error: Hauler ' + p_creep.name + ' has no target set');
 
-        creep.memory.targetedDroppedEnergy.id = largestDroppedEnergy.id;
-        creep.memory.targetedDroppedEnergy.pos = largestDroppedEnergy.pos;
+        p_creep.memory.targetedDroppedEnergy.id = largestDroppedEnergy.id;
+        p_creep.memory.targetedDroppedEnergy.pos = largestDroppedEnergy.pos;
       }
 
-      const targetedDroppedEnergy = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
+      const targetedDroppedEnergy = Game.getObjectById(p_creep.memory.targetedDroppedEnergy.id);
 
       if (!targetedDroppedEnergy || !largestDroppedEnergy) {
         //console.log('⚠️ Warning: Previous target no longer exists');
 
-        const newTarget = creep.room.droppedResources()[0];
+        const newTarget = p_creep.room.droppedResources()[0];
         //console.log('newTarget', JSON.stringify(newTarget));
 
         if (!newTarget) {
@@ -36,113 +36,78 @@ var roleHauler = {
 
           return;
         }
-        creep.memory.targetedDroppedEnergy.id = newTarget.id;
-        creep.memory.targetedDroppedEnergy.pos = newTarget.pos;
+        p_creep.memory.targetedDroppedEnergy.id = newTarget.id;
+        p_creep.memory.targetedDroppedEnergy.pos = newTarget.pos;
       }
 
-      //if (largestDroppedEnergy && creep.pickup(largestDroppedEnergy) == ERR_NOT_IN_RANGE) {
-      //      if (creep.pickup(largestDroppedEnergy) == ERR_NOT_IN_RANGE) {
-      if (creep.pickup(targetedDroppedEnergy) == ERR_NOT_IN_RANGE) {
-        creep.say('⚡' + creepFillPercentage + '%');
+      if (p_creep.pickup(targetedDroppedEnergy) == ERR_NOT_IN_RANGE) {
+        p_creep.say('⚡' + creepFillPercentage + '%');
 
-        creep.memory.harvesting = true;
-
-        if (creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) {
-
-          //   creep.say('⚡ new');
-          //     creep.moveTo(largestDroppedEnergy, {
-          //       visualizePathStyle: {
-          //         stroke: '#ffaa00'
-          //       }
-          //     });
-          //  } else {
-
-
-          //if (creep.memory.targetedDroppedEnergy.pos == largestDroppedEnergy.pos) { 
-          //   let b = creep.memory.targetedDroppedEnergy.pos;
-          //   let c = largestDroppedEnergy.pos;
-          // if (_.isEqual(b, c)) { 
-          //   console.log('same')
-          // }
-
-
-          // if (!creep.memory.targetedDroppedEnergy.pos) {
-          //   creep.memory.targetedDroppedEnergy.pos = new RoomPosition(1, 1, creep.room.name);
-          //   console.log('WTF')
-          // }
-
-          // if (creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) { 
-          //   // creep.moveTo(creep.memory.targetedDroppedEnergy.pos, {
-          //   //   visualizePathStyle: {
-          //   //     stroke: '#ffaa00'
-          //   //   }
-          //   // });
-
-
-          //   console.log('here')
-
-          //   //return;
-          //  }
-
-          // Creep has suddenly changed target due to the targed energy no longer being the 'largest'.
-          // if (creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) {
-          //   console.log('Found new energy that isn\'t current target')
-          // }
-
+        if (p_creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) {
           // ...instead check the new target against the old and determine the closest.
+
+
+
+
           const targets = [{
               id: largestDroppedEnergy.id,
-              pos: creep.room.getPositionAt(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y)
+              pos: p_creep.room.getPositionAt(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y)
             },
             {
-              id: creep.memory.targetedDroppedEnergy.id,
-              pos: creep.room.getPositionAt(creep.memory.targetedDroppedEnergy.pos.x, creep.memory.targetedDroppedEnergy.pos.y)
+              id: p_creep.memory.targetedDroppedEnergy.id,
+              pos: p_creep.room.getPositionAt(p_creep.memory.targetedDroppedEnergy.pos.x, p_creep.memory.targetedDroppedEnergy.pos.y)
             }
           ];
 
-          // const targets = [
-          //     creep.room.getPositionAt(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y),
-          //    creep.room.getPositionAt(creep.memory.targetedDroppedEnergy.pos.x, creep.memory.targetedDroppedEnergy.pos.y)
-          // ];
+          const inRangeTargets = p_creep.pos.findClosestByPath(targets.map(x => x.pos));
 
-          //console.log('targets', JSON.stringify(targets));
+          // if (creepFillPercentage > 60) {
+          //   let spawn = p_creep.room.find(FIND_MY_STRUCTURES, {
+          //     filter: (structure) => {
+          //       return structure.structureType == STRUCTURE_SPAWN;
+          //     }
+          //   })[0];
 
-          const inRangeTargets = creep.pos.findClosestByPath(targets.map(x => x.pos))
-          //const inRangeTargets = creep.pos.findInRange(targets, 10);
+          //   const b = p_creep.pos.findClosestByPath([{
+          //       id: spawn.id,
+          //       pos: spawn.pos
+          //     },
+          //     {
+          //       id: inRangeTargets.id,
+          //       pos: {
+          //         x: inRangeTargets.x,
+          //         y: inRangeTargets.y
+          //       }
+          //     }
+          //   ].map(x => x.pos));
 
-          //  console.log('target in range', JSON.stringify(inRangeTargets));
+          //   if (b.id == spawn.id) {
+          //     p_creep.memory.harvesting = false;
+          //     return;
+          //   }
+          // }
 
-
-
-          //console.log('largestDroppedEnergy', JSON.stringify(largestDroppedEnergy));
 
           let energyTarget = targets.find(x => x.pos.x == inRangeTargets.x && x.pos.y == inRangeTargets.y)
 
-          creep.memory.targetedDroppedEnergy = {
+          p_creep.memory.targetedDroppedEnergy = {
             id: energyTarget.id,
-            //            roomPosition: new RoomPosition(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y, creep.room.name)
             pos: energyTarget.pos
           };
-
-
         }
 
-        const source = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
+        const source = Game.getObjectById(p_creep.memory.targetedDroppedEnergy.id);
 
-        creep.moveTo(source, {
+        p_creep.moveTo(source, {
           visualizePathStyle: {
             stroke: '#ffaa00'
           }
         });
-
-        //             }
-
       }
     } else {
-      creep.memory.harvesting = false;
-      creep.say('⚡ ' + creepFillPercentage + '%');
+      p_creep.say('⚡ ' + creepFillPercentage + '%');
 
-      let structures = creep.room.find(FIND_STRUCTURES);
+      let structures = p_creep.room.find(FIND_STRUCTURES);
 
       let targets = structures.filter(function (structure) {
         return (
@@ -168,19 +133,19 @@ var roleHauler = {
         });
       }
 
-      let dropSite = creep.pos.findClosestByPath(targets);
+      let dropSite = p_creep.pos.findClosestByPath(targets);
 
-      if (creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+      if (p_creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
         //creep.say('⚡  transfer ');
-        creep.moveTo(dropSite, {
+        p_creep.moveTo(dropSite, {
           visualizePathStyle: {
             stroke: '#ffffff'
           }
         });
       }
 
-      if (creep.store.getUsedCapacity() == 0) {
-        creep.memory.harvesting = true;
+      if (p_creep.store.getUsedCapacity() == 0) {
+        p_creep.memory.harvesting = true;
       }
     }
   }

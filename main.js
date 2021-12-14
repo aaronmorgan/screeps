@@ -18,8 +18,8 @@ var creepFactory = require('tasks.build.creeps');
 var MIN_HARVESTER_CREEPS = 0;
 var MAX_HARVESTER_CREEPS = 5;
 var MAX_UPGRADER_CREEPS = 5;
-var MIN_BUILDER_CREEPS = 0;
-var MAX_BUILDER_CREEPS = 5;
+var MIN_BUILDER_CREEPS = 2;
+var MAX_BUILDER_CREEPS = 4;
 
 function bodyCost(body) {
     let sum = 0;
@@ -81,9 +81,9 @@ module.exports.loop = function () {
     let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
 
     // Harvesters
-    room.memory.maxHarvesterCreeps = (dropminers.length == 0 || haulers.length == 0)
-        ? room.getMaxSourceAccessPoints()
-        : 0;
+    room.memory.maxHarvesterCreeps = (dropminers.length == 0 || haulers.length == 0) ?
+        room.getMaxSourceAccessPoints() :
+        0;
 
     if (haulers.length == 0) {
         room.memory.maxHarvesterCreeps = dropminers.length;
@@ -105,8 +105,8 @@ module.exports.loop = function () {
     let constructionSites = room.constructionSites().length;
 
     room.memory.maxBuilderCreeps = constructionSites > 0 ?
-        Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750 == 0)) :
-        MIN_BUILDER_CREEPS;
+        MAX_BUILDER_CREEPS :
+        0;
 
     // Upgraders
     // Should be a set value + number of containers * 2?
@@ -231,7 +231,7 @@ module.exports.loop = function () {
     if (room.controller.level >= 2 && !sufficientHaulers) {
         let bodyType = [];
 
-        if (energyAvailable >= 450 && room.memory.minersPerSource == 1) {
+        if (energyAvailable >= 450) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 400) {
             bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
@@ -277,7 +277,8 @@ module.exports.loop = function () {
 
         if (!_.isEmpty(bodyType)) {
             creepFactory.create(room, spawn, role.BUILDER, bodyType, {
-                role: role.BUILDER
+                role: role.BUILDER,
+                building: true
             });
         }
     }
@@ -298,8 +299,8 @@ module.exports.loop = function () {
                 CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE
             ];
-        // Prioritise movement overy carry capaciity. If the container is repeatedly low
-        // on energy we don't want to be waiting.
+            // Prioritise movement overy carry capaciity. If the container is repeatedly low
+            // on energy we don't want to be waiting.
         } else if (energyAvailable >= 550) {
             bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 400) {

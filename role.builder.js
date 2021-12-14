@@ -1,27 +1,27 @@
 var roleBuilder = {
 
-    /** @param {Creep} creep **/
-    run: function (creep) {
+    /** @param {Creep} p_creep **/
+    run: function (p_creep) {
 
-        if (creep.memory.building && creep.carry.energy == 0) {
-            creep.memory.building = false;
-            creep.say('harvesting');
+        if (p_creep.memory.building && p_creep.carry.energy == 0) {
+            p_creep.memory.building = false;
+            p_creep.say('harvesting');
         }
-        if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
-            creep.memory.building = true;
-            creep.memory.harvesting = false;
+        if (!p_creep.memory.building && p_creep.carry.energy == p_creep.carryCapacity) {
+            p_creep.memory.building = true;
+            p_creep.memory.harvesting = false;
 //            creep.say('🚧 building');
-            creep.say('🔧 build');
+            p_creep.say('🔧 build');
         }
 
-        if (creep.memory.building) {
-            let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+        if (p_creep.memory.building) {
+            let targets = p_creep.room.find(FIND_CONSTRUCTION_SITES);
             if (targets.length) {
                 targets.sort(function (a, b) {
                     return a.progress > b.progress ? -1 : 1
                 });
-                if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], {
+                if (p_creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
+                    p_creep.moveTo(targets[0], {
                         reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffffff'
@@ -30,22 +30,22 @@ var roleBuilder = {
                 }
             }
         } else {
-            var targets = creep.room.find(FIND_STRUCTURES, {
+            var targets = p_creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_CONTAINER ||
                             structure.structureType == STRUCTURE_STORAGE ||
                             structure.structureType == STRUCTURE_EXTENSION ||
                             structure.structureType == STRUCTURE_SPAWN) &&
-                        structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity();
+                        structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity();
                 }
             });
 
-            if (!creep.memory.harvesting && targets.length > 0) {
-                var dropSite = creep.pos.findClosestByPath(targets);
+            if (!p_creep.memory.harvesting && targets.length > 0) {
+                var dropSite = p_creep.pos.findClosestByPath(targets);
 
-                if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.say('⚡ withdraw ');
-                    return creep.moveTo(dropSite, {
+                if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    p_creep.say('⚡ withdraw ');
+                    return p_creep.moveTo(dropSite, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
@@ -54,13 +54,13 @@ var roleBuilder = {
             }
 
             // Local energy sources
-            let sources = creep.room.find(FIND_SOURCES);
-            let nearestSource = creep.pos.findClosestByPath(sources);
+            let sources = p_creep.room.find(FIND_SOURCES);
+            let nearestSource = p_creep.pos.findClosestByPath(sources);
 
-            if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                creep.memory.harvesting = true;
-                creep.say('⛏ harvest ');
-                return creep.moveTo(nearestSource, {
+            if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+                p_creep.memory.harvesting = true;
+                p_creep.say('⛏ harvest ');
+                return p_creep.moveTo(nearestSource, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }

@@ -125,6 +125,80 @@ const constructionJobsTemplate = [{
     x: 2,
     y: 2
   },
+  // Roads, north, south, east, west
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 1,
+    y: 0
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 2,
+    y: 0
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 3,
+    y: 0
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 0,
+    y: 1
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 0,
+    y: 2
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 0,
+    y: 3
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: -1,
+    y: 0
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: -2,
+    y: 0
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: -3,
+    y: 0
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 0,
+    y: -1
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 0,
+    y: -2
+  },
+  {
+    rclLevel: 2,
+    type: "road",
+    x: 0,
+    y: -3
+  },
+
   {
     rclLevel: 3, // RCL caps us at 5 extensions until level 3.
     type: "extension",
