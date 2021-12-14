@@ -5,7 +5,7 @@ var roleBuilder = {
 
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
-            p_creep.say('harvesting');
+            p_creep.say('⛏ withdraw');
         }
         if (!p_creep.memory.building && p_creep.carry.energy == p_creep.carryCapacity) {
             p_creep.memory.building = true;

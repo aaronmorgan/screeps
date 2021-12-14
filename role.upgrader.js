@@ -1,50 +1,50 @@
 var roleUpgrader = {
 
-  /** @param {Creep} creep **/
-  run: function (creep) {
-    if (creep.memory.upgrading && creep.store[RESOURCE_ENERGY] == 0) {
-      creep.memory.upgrading = false;
-      creep.say('⛏ withdraw');
+  /** @param {Creep} p_creep **/
+  run: function (p_creep) {
+    if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
+      p_creep.memory.upgrading = false;
+      p_creep.say('⛏ withdraw');
     }
 
-    if (!creep.memory.upgrading && creep.store.getFreeCapacity() == 0) {
-      creep.memory.upgrading = true;
-      creep.say('🔧 upgrade');
+    if (!p_creep.memory.upgrading && p_creep.store.getFreeCapacity() == 0) {
+      p_creep.memory.upgrading = true;
+      p_creep.say('🔧 upgrade');
     }
 
-    if (creep.memory.upgrading) {
-      if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(creep.room.controller, {
+    if (p_creep.memory.upgrading) {
+      if (p_creep.upgradeController(p_creep.room.controller) == ERR_NOT_IN_RANGE) {
+        p_creep.moveTo(p_creep.room.controller, {
           visualizePathStyle: {
             stroke: '#4189d0'
           }
         });
       }
     } else {
-      let targets = creep.room.find(FIND_STRUCTURES, {
+      let targets = p_creep.room.find(FIND_STRUCTURES, {
         filter: (structure) => {
           return (
               structure.structureType == STRUCTURE_CONTAINER ||
               structure.structureType == STRUCTURE_STORAGE) &&
-            structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity();
+            structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity();
         }
       });
       if (targets.length > 0) {
-        let dropSite = creep.pos.findClosestByPath(targets);
+        let dropSite = p_creep.pos.findClosestByPath(targets);
 
-        if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(dropSite, {
+        if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          p_creep.moveTo(dropSite, {
             visualizePathStyle: {
               stroke: '#3370ac'
             }
           });
         }
       } else {
-        let sources = creep.room.find(FIND_SOURCES);
-        let nearestSource = creep.pos.findClosestByPath(sources);
+        let sources = p_creep.room.find(FIND_SOURCES);
+        let nearestSource = p_creep.pos.findClosestByPath(sources);
 
-        if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(nearestSource, {
+        if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+          p_creep.moveTo(nearestSource, {
             visualizePathStyle: {
               stroke: '#3370ac'
             }
