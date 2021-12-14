@@ -93,7 +93,7 @@ module.exports.loop = function () {
     room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
 
     // Haulers
-    room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : Math.floor(dropminers.length * 1.5);
+    room.memory.maxHaulerCreeps = dropminers.length;// == 0 ? 0 : Math.floor(dropminers.length * 1.5);
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
     const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
@@ -108,7 +108,7 @@ module.exports.loop = function () {
 
     // Upgraders
     // Should be a set value + number of containers * 2?
-    room.memory.maxUpgraderCreeps = (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) ? MAX_UPGRADER_CREEPS + (1 * 2) : 0;
+    room.memory.maxUpgraderCreeps = 3;//(sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) ? MAX_UPGRADER_CREEPS + (1 * 2) : 0;
 
     const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
     const sufficientUpgraders = upgraders.length >= room.memory.maxUpgraderCreeps;
