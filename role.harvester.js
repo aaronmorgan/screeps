@@ -6,7 +6,6 @@ var roleHarvester = {
 
         if (creepFillPercentage < 30) {
 
-        //if (p_creep.store.getFreeCapacity() > 0) {
             if (_.isEmpty(p_creep.room.memory.sources)) {
                 return;
             }
@@ -25,7 +24,6 @@ var roleHarvester = {
             if (!_.isEmpty(energyTarget)) {
                 source = Game.getObjectById(energyTarget.id);
 
-                console.log('droppe');
                 if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(source, {
                         visualizePathStyle: {

@@ -31,39 +31,25 @@ var creepFactory = {
     enqueueBuildJob: function (p_room, p_spawn, p_buildJob) {
         this.validateCache(p_room);
 
-        if (!Memory.creeps) {
-            console.log('⛔ Error: WTF?');
-
-            Memory.creeps = {};
-        }
-
-        console.log('p_room.memory._creepBuildQueue', JSON.stringify(p_room.memory._creepBuildQueue));
-
         // Temporarily only allow one queued creep job.
         if (p_room.memory._creepBuildQueue.length >= 1) {
             return;
         }
 
         p_room.memory._creepBuildQueue.push(p_buildJob);
-        console.log('p_room.memory._creepBuildQueue', JSON.stringify(p_room.memory._creepBuildQueue));
-
-        console.log('INFO: New creep build job added, ' + p_room.memory._creepBuildQueue.length + ' jobs queued');
+        //console.log('INFO: New creep build job added, ' + p_room.memory._creepBuildQueue.length + ' jobs queued');
     },
 
     processBuildQueue: function (p_room, p_spawn) {
         this.validateCache(p_room);
-        //console.log('DEBUG: p_room.memory._creepBuildQueue length=' + p_room.memory._creepBuildQueue.length)
 
         if (p_room.memory._creepBuildQueue.length == 0) {
             return;
         }
 
-        var job = p_room.memory._creepBuildQueue[0];
+        const job = p_room.memory._creepBuildQueue[0];
+        const name = job.name + Game.time;
 
-        console.log('p_room.memory._creepBuildQueue', JSON.stringify(p_room.memory._creepBuildQueue));
-        console.log('job to enqueue: ', JSON.stringify(job));
-
-        let name = job.name + Game.time;
         console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory));
 
         let result = p_spawn.spawnCreep(job.body, name, {
@@ -76,7 +62,7 @@ var creepFactory = {
         }
 
         p_room.memory._creepBuildQueue.shift();
-        console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + ' jobs remaining');
+        //console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + ' jobs remaining');
     },
 
     showSpawningCreepInfo: function (p_room, p_spawn) {

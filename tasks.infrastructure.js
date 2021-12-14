@@ -52,12 +52,10 @@ var infrastructureTasks = {
         continue;
       }
 
-      let x = spawn.pos.x + job.x;
-      let y = spawn.pos.y + job.y;
+      const x = spawn.pos.x + job.x;
+      const y = spawn.pos.y + job.y;
 
-      let tileObjects = p_room.lookAt(x, y);
-
-      var objects = tileObjects.filter(function (x) {
+      let tileObjects = p_room.lookAt(x, y).filter(function (x) {
         return (
           x.type != 'resource' &&
           x.type != 'energy' &&
@@ -65,7 +63,7 @@ var infrastructureTasks = {
           x.type != 'creep');
       });
 
-      if (objects.length < 3 && objects[0].type == 'terrain') {
+      if (tileObjects.length < 3 && tileObjects[0].type == 'terrain') {
         let result = p_room.createConstructionSite(x, y, job.type);
 
         if (result != OK) {

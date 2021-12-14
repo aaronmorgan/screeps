@@ -22,9 +22,9 @@ var roleHauler = {
         creep.memory.targetedDroppedEnergy.pos = largestDroppedEnergy.pos;
       }
 
-      const a = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
+      const targetedDroppedEnergy = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
-      if (!a || !largestDroppedEnergy) {
+      if (!targetedDroppedEnergy || !largestDroppedEnergy) {
         //console.log('⚠️ Warning: Previous target no longer exists');
 
         const newTarget = creep.room.droppedResources()[0];
@@ -42,7 +42,7 @@ var roleHauler = {
 
       //if (largestDroppedEnergy && creep.pickup(largestDroppedEnergy) == ERR_NOT_IN_RANGE) {
       //      if (creep.pickup(largestDroppedEnergy) == ERR_NOT_IN_RANGE) {
-      if (creep.pickup(a) == ERR_NOT_IN_RANGE) {
+      if (creep.pickup(targetedDroppedEnergy) == ERR_NOT_IN_RANGE) {
         creep.say('⚡' + creepFillPercentage + '%');
 
         creep.memory.harvesting = true;
