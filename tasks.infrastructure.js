@@ -229,6 +229,12 @@ const constructionJobsTemplate = [{
     y: 1
   },
   {
+    rclLevel: 3,
+    type: "container",
+    x: -3,
+    y: -2
+  },
+  {
     rclLevel: 4,
     type: "storage",
     x: -2,
@@ -249,13 +255,25 @@ const constructionJobsTemplate = [{
   {
     rclLevel: 4,
     type: "extension",
-    x: -3,
-    y: -2
+    x: -2,
+    y: -1
   },
   {
     rclLevel: 4,
     type: "extension",
     x: -3,
+    y: -1
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: -1,
+    y: -2
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: -1,
     y: -1
   },
 ];
