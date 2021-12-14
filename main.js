@@ -41,6 +41,7 @@ module.exports.loop = function () {
     room.droppedResources();
 
     let sources = room.memory.sources;
+    let currentRCLLevel = room.controller.level
 
     const structures = room.structures();
 
@@ -84,6 +85,7 @@ module.exports.loop = function () {
 
     // Harvesters
     room.memory.maxHarvesterCreeps = room.getMaxSourceAccessPoints() - dropminers.length;
+    if (haulers.length == 0) { room.memory.maxHarvesterCreeps = dropminers.length; } // TODO could be refined?
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
@@ -91,16 +93,16 @@ module.exports.loop = function () {
     room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
 
     // Haulers
-    room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : dropminers.length * sources.length;
+    room.memory.maxHaulerCreeps = dropminers.length == 0 ? 0 : Math.floor(dropminers.length * 1.5);
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
-    const sufficientDropMiners = room.controller.level >= 2 && dropminers.length >= room.memory.maxDropMinerCreeps;
-    const sufficientHaulers = room.controller.level >= 2 && dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
+    const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
+    const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
 
     // Builders
     let constructionSites = room.constructionSites().length;
 
-    room.memory.maxBuilderCreeps = (sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) && constructionSites > 0 ?
+    room.memory.maxBuilderCreeps = constructionSites > 0 ?
         Math.min(MAX_BUILDER_CREEPS, constructionSites + (energyAvailable % 750 == 0)) :
         MIN_BUILDER_CREEPS;
 
@@ -126,7 +128,7 @@ module.exports.loop = function () {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 300) {
             bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 200) {
+        } else if (energyAvailable >= 200 && harvesters.length == 0) {
             bodyType = [WORK, CARRY, MOVE];
         }
 
@@ -167,7 +169,7 @@ module.exports.loop = function () {
     }
 
     // DROPMINER creep
-    if (!sufficientDropMiners) {
+    if (room.controller.level >= 2 && !sufficientDropMiners) {
         let bodyType = [];
 
         if (energyAvailable >= 700) {
@@ -224,7 +226,7 @@ module.exports.loop = function () {
     }
 
     // HAULER creep
-    if (!sufficientHaulers) {
+    if (room.controller.level >= 2 && !sufficientHaulers) {
         let bodyType = [];
 
         if (energyAvailable >= 450 && room.memory.minersPerSource == 1) {
@@ -307,7 +309,6 @@ module.exports.loop = function () {
     creepFactory.processBuildQueue(room, spawn);
     creepFactory.showSpawningCreepInfo(room, spawn)
 
-    console.log('INFO: Running Creeps...');
     for (let name in Game.creeps) {
         let creep = Game.creeps[name];
 
