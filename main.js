@@ -105,7 +105,7 @@ module.exports.loop = function () {
     let constructionSites = room.constructionSites().length;
 
     room.memory.maxBuilderCreeps = constructionSites > 0 ?
-        MAX_BUILDER_CREEPS :
+        room.controller.level :
         0;
 
     // Upgraders
