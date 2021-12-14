@@ -110,7 +110,7 @@ module.exports.loop = function () {
 
     // Upgraders
     // Should be a set value + number of containers * 2?
-    room.memory.maxUpgraderCreeps = 3; //(sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) ? MAX_UPGRADER_CREEPS + (1 * 2) : 0;
+    room.memory.maxUpgraderCreeps = MAX_UPGRADER_CREEPS;
 
     const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
     const sufficientUpgraders = upgraders.length >= room.memory.maxUpgraderCreeps;
@@ -298,14 +298,16 @@ module.exports.loop = function () {
                 CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE
             ];
+        // Prioritise movement overy carry capaciity. If the container is repeatedly low
+        // on energy we don't want to be waiting.
         } else if (energyAvailable >= 550) {
-            bodyType = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
+            bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 400) {
-            bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 350) {
-            bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
+            bodyType = [WORK, WORK, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 250) {
-            bodyType = [WORK, CARRY, CARRY, MOVE];
+            bodyType = [WORK, CARRY, MOVE, MOVE];
         } else if (energyAvailable >= 200) {
             bodyType = [WORK, CARRY, MOVE];
         }
