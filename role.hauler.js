@@ -96,6 +96,13 @@ var roleHauler = {
 
         const source = Game.getObjectById(p_creep.memory.targetedDroppedEnergy.id);
 
+        if (source.energy < p_creep.store.getFreeCapacity()) {
+          p_creep.memory.targetedDroppedEnergy = {
+            id: largestDroppedEnergy.id,
+            pos: largestDroppedEnergy.pos
+          };
+        }
+
         p_creep.moveTo(source, {
           visualizePathStyle: {
             stroke: '#ffaa00'
