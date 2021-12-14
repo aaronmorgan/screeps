@@ -81,8 +81,13 @@ module.exports.loop = function () {
     let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
 
     // Harvesters
-    room.memory.maxHarvesterCreeps = room.getMaxSourceAccessPoints() - dropminers.length;
-    if (haulers.length == 0) { room.memory.maxHarvesterCreeps = dropminers.length; } // TODO could be refined?
+    room.memory.maxHarvesterCreeps = (dropminers.length == 0 || haulers.length == 0)
+        ? room.getMaxSourceAccessPoints()
+        : 0;
+
+    if (haulers.length == 0) {
+        room.memory.maxHarvesterCreeps = dropminers.length;
+    } // TODO could be refined?
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
@@ -90,7 +95,7 @@ module.exports.loop = function () {
     room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
 
     // Haulers
-    room.memory.maxHaulerCreeps = dropminers.length;// == 0 ? 0 : Math.floor(dropminers.length * 1.5);
+    room.memory.maxHaulerCreeps = dropminers.length; // == 0 ? 0 : Math.floor(dropminers.length * 1.5);
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
     const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
@@ -105,7 +110,7 @@ module.exports.loop = function () {
 
     // Upgraders
     // Should be a set value + number of containers * 2?
-    room.memory.maxUpgraderCreeps = 3;//(sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) ? MAX_UPGRADER_CREEPS + (1 * 2) : 0;
+    room.memory.maxUpgraderCreeps = 3; //(sufficientHarvesters || (sufficientDropMiners && sufficientHaulers)) ? MAX_UPGRADER_CREEPS + (1 * 2) : 0;
 
     const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
     const sufficientUpgraders = upgraders.length >= room.memory.maxUpgraderCreeps;
