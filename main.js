@@ -40,9 +40,6 @@ module.exports.loop = function () {
     room.structures();
     room.droppedResources();
 
-    let sources = room.memory.sources;
-    let currentRCLLevel = room.controller.level
-
     const structures = room.structures();
 
     if (structures.tower) {
@@ -231,6 +228,12 @@ module.exports.loop = function () {
 
         if (energyAvailable >= 450 && room.memory.minersPerSource == 1) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 400) {
+            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 350) {
+            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+        } else if (energyAvailable >= 300) {
+            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 250) {
             bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 200) {
