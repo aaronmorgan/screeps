@@ -10,7 +10,7 @@ var roleHauler = {
 
     let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-    if (p_creep.memory.harvesting == true) {
+    if (creepFillPercentage < 60 && p_creep.memory.harvesting == true) {
       p_creep.say('⚡ ' + creepFillPercentage + '%');
 
       let largestDroppedEnergy = _.last(p_creep.room.droppedResources());
@@ -45,10 +45,6 @@ var roleHauler = {
 
         if (p_creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) {
           // ...instead check the new target against the old and determine the closest.
-
-
-
-
           const targets = [{
               id: largestDroppedEnergy.id,
               pos: p_creep.room.getPositionAt(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y)
@@ -76,12 +72,14 @@ var roleHauler = {
           //       id: inRangeTargets.id,
           //       pos: {
           //         x: inRangeTargets.x,
-          //         y: inRangeTargets.y
+          //         y: inRangeTargets.y,
+          //         name: p_creep.room.name
           //       }
           //     }
           //   ].map(x => x.pos));
 
           //   if (b.id == spawn.id) {
+          //     console.log('b is closer', JSON.stringify(b));
           //     p_creep.memory.harvesting = false;
           //     return;
           //   }
