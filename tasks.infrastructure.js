@@ -5,28 +5,8 @@ var {
 var infrastructureTasks = {
 
   buildLinks: function (p_room) {
-    // if (!p_room.memory._constructionBuildQueue) {
-    //   p_room.memory._constructionBuildQueue = [];
-    // }
-
-    // if (!p_room.memory._constructionJobLevel) {
-    //   p_room.memory._constructionJobLevel = 0;
-    // }
-
     this.findNextBuildJob(p_room)
-
-    // Periodically check whether we need to rebuild anything by resetting the construction job level.
-    // This could be further improved to increase the frequency to per tick during times of war.
-    if (Game.time % 20 == 0) {
-      //console.log('DEBUG: Game.time=' + Game.time);
-      //     this.resetBuildQueue(p_room);
-    }
   },
-
-  // resetBuildQueue: function (p_room) {
-  //   console.log('⚠️ INFO: Resetting room._constructionJobLevel');
-  //   p_room.memory._constructionJobLevel = 0;
-  // },
 
   findNextBuildJob: function (p_room) {
     let constructionSites = p_room.constructionSites();
@@ -45,8 +25,17 @@ var infrastructureTasks = {
       }
     })[0];
 
-    for (let index = 0; index < constructionJobsTemplate.length; index++) {
-      const job = constructionJobsTemplate[index];
+    let index = p_room.controller.level;
+
+    // Periodically check whether we need to rebuild anything by resetting the construction job level.
+    // This could be further improved to increase the frequency to per tick during times of war.
+    if (Game.time % 20 == 0) {
+      console.log('DEBUG: Game.time=' + Game.time);
+      index = 0;
+    }
+
+    for (let i = index; i < constructionJobsTemplate.length; i++) {
+      const job = constructionJobsTemplate[i];
 
       if (job.rclLevel > currentRCLLevel) {
         continue;
@@ -130,6 +119,12 @@ const constructionJobsTemplate = [{
     type: "extension",
     x: 3,
     y: 1
+  },
+  {
+    rclLevel: 2,
+    type: "container",
+    x: 1,
+    y: -1
   },
   {
     rclLevel: 3,
@@ -228,7 +223,12 @@ const constructionJobsTemplate = [{
     x: -3,
     y: 2
   },
-
+  {
+    rclLevel: 3,
+    type: "container",
+    x: -1,
+    y: 1
+  },
   {
     rclLevel: 4,
     type: "storage",
