@@ -25,7 +25,7 @@ var roleHauler = {
       const a = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
       if (!a || !largestDroppedEnergy) {
-        console.log('⚠️ Warning: Previous target no longer exists');
+        //console.log('⚠️ Warning: Previous target no longer exists');
 
         const newTarget = creep.room.droppedResources()[0];
         //console.log('newTarget', JSON.stringify(newTarget));

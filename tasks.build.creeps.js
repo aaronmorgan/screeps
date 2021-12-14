@@ -81,16 +81,12 @@ var creepFactory = {
 
     showSpawningCreepInfo: function (p_room, p_spawn) {
         if (p_spawn.spawning) {
-            console.log('p_spawn.spawning.name', p_spawn.spawning.name);
-
             let spawningCreep = Game.creeps[p_spawn.spawning.name];
 
             if (_.isEmpty(spawningCreep.memory)) {
                 console.log('⛔ Error: New creep job contains no \'memory\' object!');
                 return;
             }
-
-            console.log('spawningCreep.memory', JSON.stringify(spawningCreep.memory));
 
             p_room.visual.text(
                 '🛠️' + spawningCreep.memory.role,
