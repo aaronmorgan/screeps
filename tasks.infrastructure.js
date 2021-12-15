@@ -40,8 +40,8 @@ var infrastructureTasks = {
         continue;
       }
 
-      const x = spawn.pos.x + job.x;
-      const y = spawn.pos.y + job.y;
+      let x = spawn.pos.x + job.x;
+      let y = spawn.pos.y + job.y;
 
       let tileObjects = p_room.lookAt(x, y).filter(function (x) {
         return (
@@ -52,12 +52,41 @@ var infrastructureTasks = {
       });
 
       if (tileObjects.length < 3 && tileObjects[0].type == 'terrain') {
-        let result = p_room.createConstructionSite(x, y, job.type);
+        switch (job.type) {
+          // Build a container near the RCL
+          case 'rcl.container': {
+            var path = p_room.findPath(spawn.pos, p_room.controller.pos, {
+              ignoreDestructibleStructures: true,
+              ignoreCreeps: true
+            });
 
-        if (result != OK) {
-          console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result]);
-          console.log('job', JSON.stringify(job));
-          continue;
+            if (path) {
+              console.log('Information: Found a path to the RCL');
+
+              // Far enough away for Upgraders to have it at their backs while working
+              // but not so close that it gets in the way or too far that they have to 
+              // travel unnecessarily.
+              // TODO check that all surrounding tiles are empty and if not move 
+              // further away from the RCL until condition satisfied/
+              let newPos = path[path.length - 5];
+              job.type = 'container';
+              x = newPos.x;
+              y = newPos.y;
+
+              console.log(JSON.stringify(job))
+
+            } else {
+              console.log('⛔ Error: calling createConstructionSite for rcl.container, ' + EXIT_CODE[result]);
+            }
+          }
+
+          let result = p_room.createConstructionSite(x, y, job.type);
+
+          if (result != OK) {
+            console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result]);
+            console.log('job', JSON.stringify(job));
+            continue;
+          }
         }
       } else {
         let tile = tileObjects[0];
@@ -114,16 +143,16 @@ const constructionJobsTemplate = [{
     y: 2
   },
   {
-    rclLevel: 3, // RCL caps us at 5 extensions until level 3.
-    type: "extension",
-    x: 3,
-    y: 1
-  },
-  {
     rclLevel: 2,
     type: "container",
     x: 1,
     y: -1
+  },
+  {
+    rclLevel: 3, // RCL caps us at 5 extensions until level 3.
+    type: "extension",
+    x: 3,
+    y: 1
   },
   {
     rclLevel: 3,
@@ -234,7 +263,10 @@ const constructionJobsTemplate = [{
     x: -3,
     y: -2
   },
-
+  {
+    rclLevel: 3,
+    type: "rcl.container"
+  },
   {
     rclLevel: 3,
     type: "road",
@@ -369,12 +401,6 @@ const constructionJobsTemplate = [{
     y: -1
   },
   {
-    rclLevel: 5,
-    type: "tower",
-    x: -2,
-    y: 1
-  },
-  {
     rclLevel: 4,
     type: "extension",
     x: -2,
@@ -409,6 +435,12 @@ const constructionJobsTemplate = [{
     type: "extension",
     x: 1,
     y: -2
+  },
+  {
+    rclLevel: 5,
+    type: "tower",
+    x: -2,
+    y: 1
   },
 ];
 
