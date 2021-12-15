@@ -234,6 +234,134 @@ const constructionJobsTemplate = [{
     x: -3,
     y: -2
   },
+
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 1,
+    y: -3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 2,
+    y: -3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 3,
+    y: -3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 4,
+    y: 0
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 4,
+    y: -1
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 4,
+    y: -2
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 4,
+    y: 1
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 4,
+    y: 2
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 3,
+    y: 3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 2,
+    y: 3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: 1,
+    y: 3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -1,
+    y: 3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -2,
+    y: 3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -3,
+    y: 3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -4,
+    y: 2
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -4,
+    y: 1
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -4,
+    y: -1
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -4,
+    y: -2
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -3,
+    y: -3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -2,
+    y: -3
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -1,
+    y: -3
+  },
+
   {
     rclLevel: 4,
     type: "storage",
@@ -275,6 +403,12 @@ const constructionJobsTemplate = [{
     type: "extension",
     x: -1,
     y: -1
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: 1,
+    y: -2
   },
 ];
 
