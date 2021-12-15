@@ -1,3 +1,13 @@
+/*
+BUGS: 
+
+IMPROVEMENTS:
+1. Don't despawn a hauler as soon as the DropMiner count changes. Wait 10 ticks or so to ensure it's still necessary to remove it.
+2. Set the 'max dropminers per source' when producing the top DropMiner.
+3. All creeps with Carry feature should drop resources when ticks to live < 2.
+
+*/
+
 require('prototype.room')();
 
 var {
@@ -54,7 +64,7 @@ module.exports.loop = function () {
                     filter: (structure) => structure.hits < structure.hitsMax
                 });
                 if (closestDamagedStructure) {
-                    console.log('DEFENCE: Repairing damaged structure');
+                    //console.log('DEFENCE: Repairing damaged structure');
                     tower.repair(closestDamagedStructure);
                 }
             }

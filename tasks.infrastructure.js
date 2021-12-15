@@ -408,8 +408,8 @@ const constructionJobsTemplate = [{
   {
     rclLevel: 4,
     type: "extension",
-    x: -2,
-    y: -1
+    x: 1,
+    y: 1
   },
   {
     rclLevel: 4,

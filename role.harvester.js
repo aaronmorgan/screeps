@@ -6,6 +6,7 @@ var roleHarvester = {
 
         if (creepFillPercentage < 30) {
 
+            // Cater for the siuation where the creep wanders into another room.
             if (_.isEmpty(p_creep.room.memory.sources)) {
                 return;
             }
