@@ -21,7 +21,7 @@ var creepFactory = {
             });
     },
 
-    validateCache: function(p_room) {
+    validateCache: function (p_room) {
         if (!p_room.memory._creepBuildQueue) {
             console.log('INFO: Creating creep build queue...');
             p_room.memory._creepBuildQueue = [];
@@ -41,6 +41,10 @@ var creepFactory = {
     },
 
     processBuildQueue: function (p_room, p_spawn) {
+        if (p_spawn.spawning) {
+            return;
+        }
+
         this.validateCache(p_room);
 
         if (p_room.memory._creepBuildQueue.length == 0) {
