@@ -5,10 +5,6 @@ var {
 var infrastructureTasks = {
 
   buildLinks: function (p_room) {
-    this.findNextBuildJob(p_room)
-  },
-
-  findNextBuildJob: function (p_room) {
     let constructionSites = p_room.constructionSites();
 
     if (constructionSites.length > 0) {
@@ -30,6 +26,7 @@ var infrastructureTasks = {
     // Periodically check whether we need to rebuild anything by resetting the construction job level.
     // This could be further improved to increase the frequency to per tick during times of war.
     if (Game.time % (p_room.controller.level * 10) == 0) {
+      console.log('Information: Resetting construction queue index to 0');
       index = 0;
     }
 
@@ -37,6 +34,7 @@ var infrastructureTasks = {
       const job = constructionJobsTemplate[i];
 
       if (job.rclLevel > currentRCLLevel) {
+        console.log('Exiting at job: ', JSON.stringify(job));
         continue;
       }
 
@@ -61,6 +59,7 @@ var infrastructureTasks = {
             });
 
             if (path) {
+              console.log('tileobjects', JSON.stringify(tileObjects));
               console.log('Information: Found a path to the RCL');
 
               // Far enough away for Upgraders to have it at their backs while working
@@ -69,6 +68,7 @@ var infrastructureTasks = {
               // TODO check that all surrounding tiles are empty and if not move 
               // further away from the RCL until condition satisfied/
               let newPos = path[path.length - 5];
+              console.log('newPos', JSON.stringify(newPos));
               job.type = 'container';
               x = newPos.x;
               y = newPos.y;
@@ -79,14 +79,14 @@ var infrastructureTasks = {
               console.log('⛔ Error: calling createConstructionSite for rcl.container, ' + EXIT_CODE[result]);
             }
           }
+        }
 
-          let result = p_room.createConstructionSite(x, y, job.type);
+        let result = p_room.createConstructionSite(x, y, job.type);
 
-          if (result != OK) {
-            console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result]);
-            console.log('job', JSON.stringify(job));
-            continue;
-          }
+        if (result != OK) {
+          console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result]);
+          console.log('job', JSON.stringify(job));
+          continue;
         }
       } else {
         let tile = tileObjects[0];
@@ -361,6 +361,12 @@ const constructionJobsTemplate = [{
     rclLevel: 3,
     type: "road",
     x: -4,
+    y: 0
+  },
+  {
+    rclLevel: 3,
+    type: "road",
+    x: -4,
     y: 1
   },
   {
@@ -392,13 +398,6 @@ const constructionJobsTemplate = [{
     type: "road",
     x: -1,
     y: -3
-  },
-
-  {
-    rclLevel: 4,
-    type: "storage",
-    x: -2,
-    y: -1
   },
   {
     rclLevel: 4,
@@ -437,11 +436,17 @@ const constructionJobsTemplate = [{
     y: -2
   },
   {
+    rclLevel: 4,
+    type: "storage",
+    x: -2,
+    y: -1
+  },
+  {
     rclLevel: 5,
     type: "tower",
     x: -2,
     y: 1
-  },
+  }
 ];
 
 module.exports = infrastructureTasks;
