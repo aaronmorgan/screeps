@@ -2,6 +2,20 @@ var roleBuilder = {
 
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
+        if (p_creep.memory.ticksToDie) {
+            p_creep.memory.ticksToDie -= 1;
+
+            if (p_creep.memory.ticksToDie <= 0) {
+                console.log('💀 Removing BUILDER creep ' + p_creep.id)
+
+                // Drop all resources.
+                for (const resourceType in p_creep.carry) {
+                    p_creep.drop(resourceType);
+                }
+
+                p_creep.suicide();
+            }
+        }
 
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
@@ -10,7 +24,7 @@ var roleBuilder = {
         if (!p_creep.memory.building && p_creep.carry.energy == p_creep.carryCapacity) {
             p_creep.memory.building = true;
             p_creep.memory.harvesting = false;
-//            creep.say('🚧 building');
+            //            creep.say('🚧 building');
             p_creep.say('🔧 build');
         }
 

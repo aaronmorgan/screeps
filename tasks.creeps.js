@@ -73,9 +73,17 @@ var creepTasks = {
                 console.log('DEBUG: Found ' + creepsToDelete + ' BUILDER creeps to remove...');
 
                 for (var i = 0; i <= creepsToDelete; i++) {
-                    creepsToRemove.push(builders[i]);
+                    let creep = builders[i];
+
+                    if (!creep.memory.ticksToDie) {
+                        creep.memory.ticksToDie = 50;
+                    }
                 }
             }
+        } else {
+            builders.forEach(creep => {
+                creep.ticksToDie = undefined;
+            });
         }
 
         if (upgraders.length > p_room.memory.maxUpgraderCreeps) {
@@ -102,6 +110,14 @@ var creepTasks = {
                 if (creep.memory.role == role.UPGRADER && creep.store.getUsedCapacity() > 0) {
                     continue;
                 }
+
+                if (creep.memory.role == role.HAULER ||
+                    creep.memory.role == role.BUILDER) {
+
+                    console.log('⛔ Error: creep with role ' + creep.memory.role + ' should manage it\'s own cleanup');
+                    continue;
+                }
+
 
                 console.log('Removing creep ' + creep.id)
                 creep.suicide();
