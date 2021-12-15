@@ -2,6 +2,21 @@ var roleHauler = {
 
   /** @param {Creep} p_creep **/
   run: function (p_creep) {
+    if (p_creep.memory.ticksToDie) {
+      p_creep.memory.ticksToDie -= 1;
+
+      if (p_creep.memory.ticksToDie <= 0) {
+        console.log('💀 Removing HAULER creep ' + p_creep.id)
+
+        // Drop all resources.
+        for (const resourceType in p_creep.carry) {
+          p_creep.drop(resourceType);
+        }
+
+        p_creep.suicide();
+      }
+    }
+
     // TODO: Determine time to live and whether it's better to suicide while empty than with full energy store.
 
     if (p_creep.store.getFreeCapacity() == 0) {
@@ -36,6 +51,7 @@ var roleHauler = {
 
           return;
         }
+
         p_creep.memory.targetedDroppedEnergy.id = newTarget.id;
         p_creep.memory.targetedDroppedEnergy.pos = newTarget.pos;
       }
