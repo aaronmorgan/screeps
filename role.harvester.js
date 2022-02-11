@@ -37,7 +37,7 @@ var roleHarvester = {
             } else {
                 source = Game.getObjectById(p_creep.room.memory.sources[0].id);
 
-                console.log('mine');
+                //console.log('mine');
                 if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(source, {
                         visualizePathStyle: {

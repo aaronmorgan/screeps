@@ -1,5 +1,6 @@
 /*
 BUGS: 
+1. If there are no Harvesters or Haulers/Dropminers then Builders etc should not get energy from the spawn. It blocks creeps from spawning.
 
 IMPROVEMENTS:
 1. Don't despawn a hauler as soon as the DropMiner count changes. Wait 10 ticks or so to ensure it's still necessary to remove it.
@@ -30,13 +31,6 @@ var MAX_HARVESTER_CREEPS = 5;
 var MAX_UPGRADER_CREEPS = 5;
 var MIN_BUILDER_CREEPS = 2;
 var MAX_BUILDER_CREEPS = 4;
-
-function bodyCost(body) {
-    let sum = 0;
-    for (let i in body)
-        sum += BODYPART_COST[body[i]];
-    return sum;
-}
 
 // TODO:
 // 1. Hauler should drop at spawn if no storage and builders should pickup dropped energy.
@@ -95,7 +89,7 @@ module.exports.loop = function () {
         room.getMaxSourceAccessPoints() :
         0;
 
-    if (haulers.length == 0) {
+    if (haulers.length == 0 && dropminers.length > 0) {
         room.memory.maxHarvesterCreeps = dropminers.length;
     } // TODO could be refined?
 
@@ -140,7 +134,9 @@ module.exports.loop = function () {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyAvailable >= 300) {
             bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 200 && harvesters.length == 0) {
+        // } else if (energyAvailable >= 200 && harvesters.length == 0) {
+        //     bodyType = [WORK, CARRY, MOVE];
+        } else {
             bodyType = [WORK, CARRY, MOVE];
         }
 
@@ -331,6 +327,7 @@ module.exports.loop = function () {
     }
 
     creepFactory.processBuildQueue(room, spawn);
+    creepFactory.logBuildQueueDetails(room);
     creepFactory.showSpawningCreepInfo(room, spawn)
 
     for (let name in Game.creeps) {
