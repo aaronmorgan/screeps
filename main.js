@@ -12,7 +12,8 @@ IMPROVEMENTS:
 require('prototype.room')();
 
 var {
-    role
+    role,
+    game
 } = require('game.constants');
 
 var roleHarvester = require('role.harvester');
@@ -126,203 +127,176 @@ module.exports.loop = function () {
     console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
     console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
 
-    // HARVESTER creep
-    if (!sufficientHarvesters) {
-        let bodyType = [];
+    if (room.memory._creepBuildQueue && (room.memory._creepBuildQueue.length < game.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
+        // HARVESTER creep
+        if (!sufficientHarvesters) {
+            let bodyType = [];
 
-        if (energyAvailable >= 500) {
-            bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 300) {
-            bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
-        // } else if (energyAvailable >= 200 && harvesters.length == 0) {
-        //     bodyType = [WORK, CARRY, MOVE];
-        } else {
-            bodyType = [WORK, CARRY, MOVE];
-        }
-
-        if (!_.isEmpty(bodyType)) {
-            // let targetSourceId = undefined;
-
-            // if (harvesters.length == 0) {
-            //     targetSourceId = room.memory.sources[0].id;
-            // }
-
-            // for (let i = 0; i < room.memory.sources.length; i++) {
-            //     const source = room.memory.sources[i];
-
-            //     let creepsForThisSource = _.countBy(harvesters, x => x.memory.sourceId == source.id).true;
-
-            //     if (creepsForThisSource == source.accessPoints) {
-            //         continue;
-            //     }
-
-            //     if (creepsForThisSource > source.accessPoints) {
-            //         console.log('WARNING: Too many HARVESTER creeps for source ' + source.id);
-
-            //         // TODO Remove excess creeps.
-            //         continue;
-            //     }
-
-            //     targetSourceId = source.id;
-            //     break;
-            // }
-
-            // if (!targetSourceId) {
-            //     console.log('ERROR: Attempting to create HAVESTER with an assigned source');
-            // } else {
-            creepFactory.create(room, spawn, role.HARVESTER, bodyType, {
-                role: role.HARVESTER
-            });
-        }
-    }
-
-    // DROPMINER creep
-    if (room.controller.level >= 2 && !sufficientDropMiners) {
-        let bodyType = [];
-
-        if (energyAvailable >= 700) {
-            bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE];
-            room.memory.minersPerSource = 1;
-        } else if (energyAvailable >= 600) {
-            bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
-            room.memory.minersPerSource = 1;
-        } else if (energyAvailable >= 300) {
-            bodyType = [WORK, WORK, MOVE, MOVE];
-            room.memory.minersPerSource = 3;
-        } else if (energyAvailable >= 200) {
-            bodyType = [WORK, MOVE, MOVE];
-            room.memory.minersPerSource = 3;
-        }
-
-        if (!_.isEmpty(bodyType)) {
-            let targetSourceId = undefined;
-
-            if (dropminers.length == 0) {
-                // TODO select the closet one.
-                targetSourceId = room.memory.sources[0].id;
-            }
-
-            for (let i = 0; i < room.memory.sources.length; i++) {
-                const source = room.memory.sources[i];
-
-                let creepsForThisSource = Math.min(source.accessPoints, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
-
-                if (creepsForThisSource == source.accessPoints) {
-                    continue;
-                }
-
-                if (creepsForThisSource > source.accessPoints) {
-                    console.log('WARNING: Too many DROPMINER creeps for source ' + source.id);
-
-                    // TODO Remove excess creeps.
-                    continue;
-                }
-
-                targetSourceId = source.id;
-                break;
-            }
-
-            if (!targetSourceId) {
-                console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
+            if (energyAvailable >= 500) {
+                bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 300) {
+                bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
+                // } else if (energyAvailable >= 200 && harvesters.length == 0) {
+                //     bodyType = [WORK, CARRY, MOVE];
             } else {
-                creepFactory.create(room, spawn, role.DROPMINER, bodyType, {
-                    role: role.DROPMINER,
-                    sourceId: targetSourceId
+                bodyType = [WORK, CARRY, MOVE];
+            }
+
+            if (!_.isEmpty(bodyType)) {
+                creepFactory.create(room, spawn, role.HARVESTER, bodyType, {
+                    role: role.HARVESTER
                 });
             }
         }
-    }
 
-    // HAULER creep
-    if (room.controller.level >= 2 && !sufficientHaulers) {
-        let bodyType = [];
+        // DROPMINER creep
+        if (room.controller.level >= 2 && !sufficientDropMiners) {
+            let bodyType = [];
 
-        if (energyAvailable >= 450) {
-            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 400) {
-            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 350) {
-            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 300) {
-            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 250) {
-            bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 200) {
-            bodyType = [CARRY, MOVE, MOVE, MOVE];
-        }
+            if (energyAvailable >= 700) {
+                bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE];
+                room.memory.minersPerSource = 1;
+            } else if (energyAvailable >= 600) {
+                bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
+                room.memory.minersPerSource = 1;
+            } else if (energyAvailable >= 300) {
+                bodyType = [WORK, WORK, MOVE, MOVE];
+                room.memory.minersPerSource = 3;
+            } else if (energyAvailable >= 200) {
+                bodyType = [WORK, MOVE, MOVE];
+                room.memory.minersPerSource = 3;
+            }
 
-        if (!_.isEmpty(bodyType)) {
-            creepFactory.create(room, spawn, role.HAULER, bodyType, {
-                role: role.HAULER,
-                harvesting: true,
-                targetedDroppedEnergy: {
-                    id: 0,
-                    pos: new RoomPosition(1, 1, room.name)
+            if (!_.isEmpty(bodyType)) {
+                let targetSourceId = undefined;
+
+                if (dropminers.length == 0) {
+                    // TODO select the closet one.
+                    targetSourceId = room.memory.sources[0].id;
                 }
-            });
-        }
-    }
 
-    // BUILDER creep
-    if (!sufficientBuilders) {
-        let bodyType = [];
+                for (let i = 0; i < room.memory.sources.length; i++) {
+                    const source = room.memory.sources[i];
 
-        if (energyAvailable >= 900) {
-            bodyType = [
-                WORK, WORK, WORK, WORK, WORK,
-                CARRY, CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE
-            ];
-        } else if (energyAvailable >= 400) {
-            bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-        } else if (energyAvailable >= 300) {
-            bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
-        } else if (energyAvailable >= 200) {
-            bodyType = [WORK, CARRY, MOVE];
-        }
+                    let creepsForThisSource = Math.min(source.accessPoints, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
 
-        if (!_.isEmpty(bodyType)) {
-            creepFactory.create(room, spawn, role.BUILDER, bodyType, {
-                role: role.BUILDER,
-                building: true
-            });
-        }
-    }
+                    if (creepsForThisSource == source.accessPoints) {
+                        continue;
+                    }
 
-    // UPGRADER creeps
-    if (!sufficientUpgraders) {
-        let bodyType = [];
+                    if (creepsForThisSource > source.accessPoints) {
+                        console.log('WARNING: Too many DROPMINER creeps for source ' + source.id);
 
-        if (room.storage && energyAvailable >= 1750) {
-            bodyType = [
-                WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
-                CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE, MOVE, MOVE
-            ];
-        } else if (room.storage && energyAvailable >= 1000) {
-            bodyType = [
-                WORK, WORK, WORK, WORK, WORK, WORK,
-                CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE, MOVE
-            ];
-            // Prioritise movement overy carry capaciity. If the container is repeatedly low
-            // on energy we don't want to be waiting.
-        } else if (energyAvailable >= 550) {
-            bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 400) {
-            bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
-        } else if (energyAvailable >= 350) {
-            bodyType = [WORK, WORK, CARRY, MOVE, MOVE];
-        } else if (energyAvailable >= 250) {
-            bodyType = [WORK, CARRY, MOVE, MOVE];
-        } else if (energyAvailable >= 200) {
-            bodyType = [WORK, CARRY, MOVE];
+                        // TODO Remove excess creeps.
+                        continue;
+                    }
+
+                    targetSourceId = source.id;
+                    break;
+                }
+
+                if (!targetSourceId) {
+                    console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
+                } else {
+                    creepFactory.create(room, spawn, role.DROPMINER, bodyType, {
+                        role: role.DROPMINER,
+                        sourceId: targetSourceId
+                    });
+                }
+            }
         }
 
-        if (!_.isEmpty(bodyType)) {
-            creepFactory.create(room, spawn, role.UPGRADER, bodyType, {
-                role: role.UPGRADER
-            });
+        // HAULER creep
+        if (room.controller.level >= 2 && !sufficientHaulers) {
+            let bodyType = [];
+
+            if (energyAvailable >= 450) {
+                bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 400) {
+                bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 350) {
+                bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 300) {
+                bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 250) {
+                bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 200) {
+                bodyType = [CARRY, MOVE, MOVE, MOVE];
+            }
+
+            if (!_.isEmpty(bodyType)) {
+                creepFactory.create(room, spawn, role.HAULER, bodyType, {
+                    role: role.HAULER,
+                    harvesting: true,
+                    targetedDroppedEnergy: {
+                        id: 0,
+                        pos: new RoomPosition(1, 1, room.name)
+                    }
+                });
+            }
+        }
+
+        // BUILDER creep
+        if (!sufficientBuilders) {
+            let bodyType = [];
+
+            if (energyAvailable >= 900) {
+                bodyType = [
+                    WORK, WORK, WORK, WORK, WORK,
+                    CARRY, CARRY, CARRY, CARRY, CARRY,
+                    MOVE, MOVE, MOVE
+                ];
+            } else if (energyAvailable >= 400) {
+                bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            } else if (energyAvailable >= 300) {
+                bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
+            } else if (energyAvailable >= 200) {
+                bodyType = [WORK, CARRY, MOVE];
+            }
+
+            if (!_.isEmpty(bodyType)) {
+                creepFactory.create(room, spawn, role.BUILDER, bodyType, {
+                    role: role.BUILDER,
+                    building: true
+                });
+            }
+        }
+
+        // UPGRADER creeps
+        if (!sufficientUpgraders) {
+            let bodyType = [];
+
+            if (room.storage && energyAvailable >= 1750) {
+                bodyType = [
+                    WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
+                    CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+                    MOVE, MOVE, MOVE, MOVE, MOVE
+                ];
+            } else if (room.storage && energyAvailable >= 1000) {
+                bodyType = [
+                    WORK, WORK, WORK, WORK, WORK, WORK,
+                    CARRY, CARRY, CARRY, CARRY,
+                    MOVE, MOVE, MOVE, MOVE
+                ];
+                // Prioritise movement overy carry capaciity. If the container is repeatedly low
+                // on energy we don't want to be waiting.
+            } else if (energyAvailable >= 550) {
+                bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 400) {
+                bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+            } else if (energyAvailable >= 350) {
+                bodyType = [WORK, WORK, CARRY, MOVE, MOVE];
+            } else if (energyAvailable >= 250) {
+                bodyType = [WORK, CARRY, MOVE, MOVE];
+            } else if (energyAvailable >= 200) {
+                bodyType = [WORK, CARRY, MOVE];
+            }
+
+            if (!_.isEmpty(bodyType)) {
+                creepFactory.create(room, spawn, role.UPGRADER, bodyType, {
+                    role: role.UPGRADER
+                });
+            }
         }
     }
 

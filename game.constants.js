@@ -17,3 +17,7 @@ module.exports.role = {
     BUILDER: 'Builder',
     UPGRADER: 'Upgrader'
 };
+
+module.exports.game = {
+    MAX_CREEP_BUILD_QUEUE_LENGTH: 1
+};

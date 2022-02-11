@@ -1,7 +1,8 @@
 var BODYPART_COST = { "move": 50, "work": 100, "attack": 80, "carry": 50, "heal": 250, "ranged_attack": 150, "tough": 10, "claim": 600 };
 
 var {
-    EXIT_CODE
+    EXIT_CODE,
+    game
 } = require('game.constants');
 
 var creepFactory = {
@@ -34,12 +35,12 @@ var creepFactory = {
         this.validateCache(p_room);
 
         // Temporarily only allow one queued creep job.
-        if (p_room.memory._creepBuildQueue.length >= 1) {
+        if (p_room.memory._creepBuildQueue.length >= game.MAX_CREEP_BUILD_QUEUE_LENGTH) {
             return;
         }
 
         p_room.memory._creepBuildQueue.push(p_buildJob);
-        //console.log('INFO: New creep build job added, ' + p_room.memory._creepBuildQueue.length + ' jobs queued');
+        console.log('INFO: New creep build job added, ' + p_room.memory._creepBuildQueue.length + ' jobs queued');
     },
 
     processBuildQueue: function (p_room, p_spawn) {
@@ -56,11 +57,11 @@ var creepFactory = {
         const job = p_room.memory._creepBuildQueue[0];
         const name = job.name + Game.time;
 
-        let bodyCost = this.bodyCost(job.body);
+        const bodyCost = this.bodyCost(job.body);
 
         if (bodyCost > p_room.energyAvailable) { return; }
         
-        console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory), + 'Cost: ' + bodyCost);
+        console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory), + ', cost=' + bodyCost);
 
         let result = p_spawn.spawnCreep(job.body, name, {
             memory: job.memory
@@ -76,7 +77,7 @@ var creepFactory = {
     },
 
     logBuildQueueDetails: function (p_room) {
-        console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + ' jobs remaining');
+        console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + '/' + game.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining');
     },
 
     showSpawningCreepInfo: function (p_room, p_spawn) {
