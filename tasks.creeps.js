@@ -75,7 +75,7 @@ var creepTasks = {
                 for (var i = 0; i <= creepsToDelete; i++) {
                     let creep = builders[i];
 
-                    if (!creep.memory.ticksToDie) {
+                    if (creep && !creep.memory.ticksToDie) {
                         creep.memory.ticksToDie = 50;
                     }
                 }
