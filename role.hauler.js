@@ -3,7 +3,7 @@ var roleHauler = {
   /** @param {Creep} p_creep **/
   run: function (p_creep) {
     if (p_creep.memory.ticksToDie) {
-      p_creep.memory.ticksToDie -= 1;
+      //     p_creep.memory.ticksToDie -= 1;
 
       if (p_creep.memory.ticksToDie <= 0) {
         console.log('💀 Removing HAULER creep ' + p_creep.id)
@@ -31,7 +31,8 @@ var roleHauler = {
       let largestDroppedEnergy = _.last(p_creep.room.droppedResources());
 
       if (p_creep.memory.targetedDroppedEnergy.id == 0) {
-        console.log('⛔ Error: Hauler ' + p_creep.name + ' has no target set');
+        console.log('ℹ️ INFO: Hauler aquiring new dropped energy target...');
+
 
         p_creep.memory.targetedDroppedEnergy.id = largestDroppedEnergy.id;
         p_creep.memory.targetedDroppedEnergy.pos = largestDroppedEnergy.pos;
@@ -40,14 +41,10 @@ var roleHauler = {
       const targetedDroppedEnergy = Game.getObjectById(p_creep.memory.targetedDroppedEnergy.id);
 
       if (!targetedDroppedEnergy || !largestDroppedEnergy) {
-        //console.log('⚠️ Warning: Previous target no longer exists');
-
         const newTarget = p_creep.room.droppedResources()[0];
-        //console.log('newTarget', JSON.stringify(newTarget));
 
         if (!newTarget) {
           console.log('⚠️ Warning: NO NEW TARGET');
-          //console.log('creep.room.droppedResources()', JSON.stringify(creep.room.droppedResources()))
 
           return;
         }
@@ -72,6 +69,11 @@ var roleHauler = {
           ];
 
           const inRangeTargets = p_creep.pos.findClosestByPath(targets.map(x => x.pos));
+
+          if (!inRangeTargets) {
+            console.log('⚠️ Warning: NO IN RANGE TARGETS FOUND');
+            return;
+          }
 
           // if (creepFillPercentage > 60) {
           //   let spawn = p_creep.room.find(FIND_MY_STRUCTURES, {
@@ -100,7 +102,6 @@ var roleHauler = {
           //     return;
           //   }
           // }
-
 
           let energyTarget = targets.find(x => x.pos.x == inRangeTargets.x && x.pos.y == inRangeTargets.y)
 

@@ -19,13 +19,13 @@ var roleBuilder = {
 
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
-            p_creep.say('⛏ withdraw');
+            p_creep.say('🔌 withdraw');
         }
         if (!p_creep.memory.building && p_creep.carry.energy == p_creep.carryCapacity) {
             p_creep.memory.building = true;
             p_creep.memory.harvesting = false;
             //            creep.say('🚧 building');
-            p_creep.say('🔧 build');
+            p_creep.say('🔨 build');
         }
 
         if (p_creep.memory.building) {
@@ -58,7 +58,7 @@ var roleBuilder = {
                 var dropSite = p_creep.pos.findClosestByPath(targets);
 
                 if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    p_creep.say('⚡ withdraw ');
+                    p_creep.say('🔌 withdraw ');
                     return p_creep.moveTo(dropSite, {
                         visualizePathStyle: {
                             stroke: '#ffffff'

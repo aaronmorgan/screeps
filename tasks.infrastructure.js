@@ -30,6 +30,10 @@ var infrastructureTasks = {
       index = 0;
     }
 
+    if (constructionJobsTemplate.length == 0) {
+      return;
+    }
+
     console.log('INFO: Structure build queue has ' + constructionJobsTemplate.length + ' jobs remaining');
 
     for (let i = index; i < constructionJobsTemplate.length; i++) {

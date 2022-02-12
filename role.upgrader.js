@@ -4,7 +4,7 @@ var roleUpgrader = {
   run: function (p_creep) {
     if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
       p_creep.memory.upgrading = false;
-      p_creep.say('⛏ withdraw');
+      p_creep.say('🔌 withdraw');
     }
 
     if (!p_creep.memory.upgrading && p_creep.store.getFreeCapacity() == 0) {
@@ -26,9 +26,10 @@ var roleUpgrader = {
           return (
               structure.structureType == STRUCTURE_CONTAINER ||
               structure.structureType == STRUCTURE_STORAGE) &&
-            structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity();
+            structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity(); // TODO: Should this getFreeCapacity check be here?
         }
       });
+
       if (targets.length > 0) {
         let dropSite = p_creep.pos.findClosestByPath(targets);
 
