@@ -52,7 +52,7 @@ var roleBuilder = {
             });
 
             if (!p_creep.memory.harvesting && targets.length > 0) {
-                var dropSite = p_creep.pos.findClosestByPath(targets);
+                const dropSite = p_creep.pos.findClosestByPath(targets);
 
                 if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     p_creep.say('🔌 withdraw ');

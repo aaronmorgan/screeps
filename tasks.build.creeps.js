@@ -1,4 +1,4 @@
-var BODYPART_COST = {
+const BODYPART_COST = {
     "move": 50,
     "work": 100,
     "attack": 80,
@@ -9,7 +9,7 @@ var BODYPART_COST = {
     "claim": 600
 };
 
-var {
+const {
     EXIT_CODE,
     global
 } = require('game.constants');

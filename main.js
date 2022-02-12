@@ -12,27 +12,26 @@ IMPROVEMENTS:
 
 require('prototype.room')();
 
-var {
+const {
     role,
     global
 } = require('game.constants');
 
-var roleHarvester = require('role.harvester');
-var roleUpgrader = require('role.upgrader');
-var roleBuilder = require('role.builder');
-var roleDropMiner = require('role.dropminer');
-var roleHauler = require('role.hauler');
-var roleHauler = require('role.hauler');
+let roleHarvester = require('role.harvester');
+let roleUpgrader = require('role.upgrader');
+let roleBuilder = require('role.builder');
+let roleDropMiner = require('role.dropminer');
+let roleHauler = require('role.hauler');
 
-var infrastructureTasks = require('tasks.infrastructure');
-var creepTasks = require('tasks.creeps');
-var creepFactory = require('tasks.build.creeps');
+let infrastructureTasks = require('tasks.infrastructure');
+let creepTasks = require('tasks.creeps');
+let creepFactory = require('tasks.build.creeps');
 
-var MIN_HARVESTER_CREEPS = 0;
-var MAX_HARVESTER_CREEPS = 5;
-var MAX_UPGRADER_CREEPS = 5;
-var MIN_BUILDER_CREEPS = 2;
-var MAX_BUILDER_CREEPS = 4;
+const MIN_HARVESTER_CREEPS = 0;
+const MAX_HARVESTER_CREEPS = 5;
+const MAX_UPGRADER_CREEPS = 5;
+const MIN_BUILDER_CREEPS = 2;
+const MAX_BUILDER_CREEPS = 4;
 
 // TODO:
 // 1. Hauler should drop at spawn if no storage and builders should pickup dropped energy.

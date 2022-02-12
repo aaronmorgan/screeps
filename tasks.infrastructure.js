@@ -1,4 +1,4 @@
-var {
+const {
   EXIT_CODE
 } = require('game.constants');
 
@@ -24,12 +24,6 @@ var infrastructureTasks = {
       index = 0;
     }
 
-    if (constructionJobsTemplate.length == 0) {
-      return;
-    }
-
-    console.log('INFO: Structure build queue has ' + constructionJobsTemplate.length + ' jobs remaining');
-
     for (let i = index; i < constructionJobsTemplate.length; i++) {
       const job = constructionJobsTemplate[i];
 
@@ -53,7 +47,7 @@ var infrastructureTasks = {
         switch (job.type) {
           // Build a container near the RCL
           case 'rcl.container': {
-            var path = p_room.findPath(spawn.pos, p_room.controller.pos, {
+            const path = p_room.findPath(spawn.pos, p_room.controller.pos, {
               ignoreDestructibleStructures: true,
               ignoreCreeps: true
             });
@@ -395,9 +389,9 @@ const constructionJobsTemplate = [{
     y: -3
   },
   {
-    rclLevel: 4,
+    rclLevel: 3,
     type: "extension",
-    x: -2,
+    x: -1,
     y: -2
   },
   {
@@ -416,13 +410,19 @@ const constructionJobsTemplate = [{
     rclLevel: 4,
     type: "extension",
     x: -1,
-    y: -2
+    y: 2
   },
   {
     rclLevel: 4,
     type: "extension",
     x: -1,
     y: -1
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: 1,
+    y: 2
   },
   {
     rclLevel: 4,
