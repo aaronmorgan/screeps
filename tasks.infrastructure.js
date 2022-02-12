@@ -25,16 +25,18 @@ var infrastructureTasks = {
 
     // Periodically check whether we need to rebuild anything by resetting the construction job level.
     // This could be further improved to increase the frequency to per tick during times of war.
-    if (Game.time % (p_room.controller.level * 10) == 0) {
+    if (Game.time % (400 / p_room.controller.level) == 0) {
       console.log('Information: Resetting construction queue index to 0');
       index = 0;
     }
+
+    console.log('INFO: Structure build queue has ' + constructionJobsTemplate.length + ' jobs remaining');
 
     for (let i = index; i < constructionJobsTemplate.length; i++) {
       const job = constructionJobsTemplate[i];
 
       if (job.rclLevel > currentRCLLevel) {
-        console.log('Exiting at job: ', JSON.stringify(job));
+        //console.log('Exiting at job: ', JSON.stringify(job));
         continue;
       }
 
