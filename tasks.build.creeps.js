@@ -92,7 +92,7 @@ var creepFactory = {
             return;
         }
 
-        console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + '/' + game.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining');
+        console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining');
     },
 
     showSpawningCreepInfo: function (p_room, p_spawn) {
