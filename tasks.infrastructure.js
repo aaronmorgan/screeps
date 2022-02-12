@@ -90,8 +90,7 @@ var infrastructureTasks = {
         let result = p_room.createConstructionSite(x, y, job.type);
 
         if (result != OK) {
-          console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result]);
-          console.log('job', JSON.stringify(job));
+          console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result] + ', job=', JSON.stringify(job) + ', x=' + job.x + ', y=' + job.y);
           continue;
         }
       } else {
@@ -268,10 +267,6 @@ const constructionJobsTemplate = [{
     type: "container",
     x: -3,
     y: -2
-  },
-  {
-    rclLevel: 3,
-    type: "rcl.container"
   },
   {
     rclLevel: 3,
