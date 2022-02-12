@@ -49,7 +49,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' HAULER creeps to remove...');
 
-                for (var i = 0; i <= creepsToDelete; i++) {
+                for (let i = 0; i <= creepsToDelete; i++) {
                     const creep = haulers[i];
 
                     if (!creep.memory.ticksToDie) {

@@ -19,7 +19,13 @@ var roleHauler = {
       }
     }
 
-    // TODO: Determine time to live and whether it's better to suicide while empty than with full energy store.
+    // Drop all carried resources before we die.
+    if (p_creep.ticksToLive < 2) {
+      console.log('💡 INFO: ticksToLive=' + p_creep.ticksToLive + ', dropping resources...')
+      for (const resourceType in p_creep.carry) {
+        p_creep.drop(resourceType);
+      }
+    }
 
     if (p_creep.store.getFreeCapacity() == 0) {
       p_creep.memory.harvesting = false;

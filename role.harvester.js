@@ -2,6 +2,14 @@ var roleHarvester = {
 
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
+        // Drop all carried resources before we die.
+        if (p_creep.ticksToLive < 2) {
+            console.log('💡 INFO: ticksToLive=' + p_creep.ticksToLive + ', dropping resources...')
+            for (const resourceType in p_creep.carry) {
+                p_creep.drop(resourceType);
+            }
+        }
+
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
         if (creepFillPercentage < 30) {
@@ -47,11 +55,11 @@ var roleHarvester = {
         } else {
             const targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (
-                    structure.structureType == 'extension' ||
-                    structure.structureType == 'spawn' ||
-                    structure.structureType == 'tower') &&
-                  structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-              });
+                        structure.structureType == 'extension' ||
+                        structure.structureType == 'spawn' ||
+                        structure.structureType == 'tower') &&
+                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+            });
 
             if (targets.length > 0) {
                 if (p_creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

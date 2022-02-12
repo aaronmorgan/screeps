@@ -2,6 +2,14 @@ var roleUpgrader = {
 
   /** @param {Creep} p_creep **/
   run: function (p_creep) {
+    // Drop all carried resources before we die.
+    if (p_creep.ticksToLive < 2) {
+      console.log('💡 INFO: ticksToLive=' + p_creep.ticksToLive + ', dropping resources...')
+      for (const resourceType in p_creep.carry) {
+        p_creep.drop(resourceType);
+      }
+    }
+
     if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
       p_creep.memory.upgrading = false;
       p_creep.say('🔌 withdraw');
@@ -21,7 +29,7 @@ var roleUpgrader = {
         });
       }
     } else {
-      let targets = _.filter(p_creep.room.structures().all, (structure) => {
+      const targets = _.filter(p_creep.room.structures().all, (structure) => {
         return (
             structure.structureType == 'container' ||
             structure.structureType == 'storage') &&
@@ -29,7 +37,7 @@ var roleUpgrader = {
       });
 
       if (targets.length > 0) {
-        let dropSite = p_creep.pos.findClosestByPath(targets);
+        const dropSite = p_creep.pos.findClosestByPath(targets);
 
         if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           p_creep.moveTo(dropSite, {
