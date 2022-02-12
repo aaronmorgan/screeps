@@ -11,9 +11,9 @@ var roleHarvester = {
                 return;
             }
 
-            let resourceEnergy = p_creep.room.droppedResources();
-            let droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
-            let energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+            const resourceEnergy = p_creep.room.droppedResources();
+            const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+            const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
 
             //console.log('droppedResources', JSON.stringify(energyTarget));
             //let droppedResources = _.sortBy(resourceEnergy, x => x.energy);
@@ -45,14 +45,14 @@ var roleHarvester = {
                 }
             }
         } else {
-            let targets = p_creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_EXTENSION ||
-                            structure.structureType == STRUCTURE_SPAWN ||
-                            structure.structureType == STRUCTURE_TOWER) &&
-                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-                }
-            });
+            const targets = _.filter(p_creep.room.structures().all, (structure) => {
+                return (
+                    structure.structureType == 'extension' ||
+                    structure.structureType == 'spawn' ||
+                    structure.structureType == 'tower') &&
+                  structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+              });
+
             if (targets.length > 0) {
                 if (p_creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(targets[0], {
