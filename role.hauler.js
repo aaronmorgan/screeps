@@ -126,20 +126,20 @@ var roleHauler = {
         });
       }
     } else {
-      p_creep.say('⚡ ' + creepFillPercentage + '%');
+      p_creep.say('🚚 ' + creepFillPercentage + '%');
 
       let structures = p_creep.room.find(FIND_STRUCTURES);
 
       let targets = structures.filter(function (structure) {
         return (
-            structure.structureType == STRUCTURE_TOWER) &&
+            structure.structureType == STRUCTURE_SPAWN) &&
           structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
       });
 
       if (!targets || targets.length == 0) {
         targets = structures.filter(function (structure) {
           return (
-              structure.structureType == STRUCTURE_SPAWN ||
+              structure.structureType == STRUCTURE_TOWER ||
               structure.structureType == STRUCTURE_EXTENSION) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
         });
