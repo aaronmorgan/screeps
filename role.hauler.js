@@ -1,3 +1,5 @@
+require('prototype.room')();
+
 var roleHauler = {
 
   /** @param {Creep} p_creep **/
@@ -75,34 +77,6 @@ var roleHauler = {
             return;
           }
 
-          // if (creepFillPercentage > 60) {
-          //   let spawn = p_creep.room.find(FIND_MY_STRUCTURES, {
-          //     filter: (structure) => {
-          //       return structure.structureType == STRUCTURE_SPAWN;
-          //     }
-          //   })[0];
-
-          //   const b = p_creep.pos.findClosestByPath([{
-          //       id: spawn.id,
-          //       pos: spawn.pos
-          //     },
-          //     {
-          //       id: inRangeTargets.id,
-          //       pos: {
-          //         x: inRangeTargets.x,
-          //         y: inRangeTargets.y,
-          //         name: p_creep.room.name
-          //       }
-          //     }
-          //   ].map(x => x.pos));
-
-          //   if (b.id == spawn.id) {
-          //     console.log('b is closer', JSON.stringify(b));
-          //     p_creep.memory.harvesting = false;
-          //     return;
-          //   }
-          // }
-
           let energyTarget = targets.find(x => x.pos.x == inRangeTargets.x && x.pos.y == inRangeTargets.y)
 
           p_creep.memory.targetedDroppedEnergy = {
@@ -129,33 +103,28 @@ var roleHauler = {
     } else {
       p_creep.say('🚚 ' + creepFillPercentage + '%');
 
-      let structures = p_creep.room.find(FIND_STRUCTURES);
+      let structures = p_creep.room.structures();
 
-      let targets = structures.filter(function (structure) {
-        return (
-            structure.structureType == STRUCTURE_SPAWN) &&
-          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-      });
+      let targets = structures.spawn.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
 
       if (!targets || targets.length == 0) {
-        targets = structures.filter(function (structure) {
-          return (
-              structure.structureType == STRUCTURE_TOWER ||
-              structure.structureType == STRUCTURE_EXTENSION) &&
-            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-        });
+        targets = structures.tower.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
       }
 
       if (!targets || targets.length == 0) {
-        targets = structures.filter(function (structure) {
-          return (
-              structure.structureType == STRUCTURE_STORAGE ||
-              structure.structureType == STRUCTURE_CONTAINER) &&
-            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-        });
+        targets = structures.extension.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
       }
 
-      let dropSite = p_creep.pos.findClosestByPath(targets);
+      if (!targets || targets.length == 0) {
+        targets = _.filter(structures, (structure) => {
+          return (
+              structure.structureType == 'container' ||
+              structure.structureType == 'storage') &&
+            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+        });
+      };
+
+      const dropSite = p_creep.pos.findClosestByPath(targets);
 
       if (p_creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
         //creep.say('⚡  transfer ');
