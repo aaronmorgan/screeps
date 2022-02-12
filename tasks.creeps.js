@@ -5,20 +5,17 @@ var {
 var creepTasks = {
 
     suicideCreep: function (p_room) {
-        //console.log('DEBUG: Checking for creeps to remove in room ' + p_room.name);
-
-        let creeps = p_room.myCreeps();
+        const creeps = p_room.myCreeps();
 
         if (!creeps || creeps.length == 0) {
-            console.log('DEBUG: No creeps found in room ' + p_room.name);
             return;
         }
 
-        let harvesters = _.filter(creeps, (creep) => creep.memory.role == role.HARVESTER);
-        let dropMiners = _.filter(creeps, (creep) => creep.memory.role == role.DROPMINER);
-        let haulers = _.filter(creeps, (creep) => creep.memory.role == role.HAULER);
-        let builders = _.filter(creeps, (creep) => creep.memory.role == role.BUILDER);
-        let upgraders = _.filter(creeps, (creep) => creep.memory.role == role.UPGRADER);
+        const harvesters = _.filter(creeps, (creep) => creep.memory.role == role.HARVESTER);
+        const dropMiners = _.filter(creeps, (creep) => creep.memory.role == role.DROPMINER);
+        const haulers = _.filter(creeps, (creep) => creep.memory.role == role.HAULER);
+        const builders = _.filter(creeps, (creep) => creep.memory.role == role.BUILDER);
+        const upgraders = _.filter(creeps, (creep) => creep.memory.role == role.UPGRADER);
 
         let creepsToRemove = [];
 
@@ -28,7 +25,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' HARVESTER creeps to remove...');
 
-                for (var i = 0; i <= creepsToDelete; i++) {
+                for (let i = 0; i <= creepsToDelete; i++) {
                     creepsToRemove.push(harvesters[i]);
                 }
             }
@@ -40,7 +37,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' DROPMINER creeps to remove...');
 
-                for (var i = 0; i <= creepsToDelete; i++) {
+                for (let i = 0; i <= creepsToDelete; i++) {
                     creepsToRemove.push(dropMiners[i]);
                 }
             }
@@ -53,7 +50,7 @@ var creepTasks = {
                 console.log('DEBUG: Found ' + creepsToDelete + ' HAULER creeps to remove...');
 
                 for (var i = 0; i <= creepsToDelete; i++) {
-                    let creep = haulers[i];
+                    const creep = haulers[i];
 
                     if (!creep.memory.ticksToDie) {
                         creep.memory.ticksToDie = 50;
@@ -72,7 +69,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' BUILDER creeps to remove...');
 
-                for (var i = 0; i <= creepsToDelete; i++) {
+                for (let i = 0; i <= creepsToDelete; i++) {
                     let creep = builders[i];
 
                     if (creep && !creep.memory.ticksToDie) {
@@ -92,7 +89,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' UPGRADER creeps to remove...');
 
-                for (var i = 0; i <= creepsToDelete; i++) {
+                for (let i = 0; i <= creepsToDelete; i++) {
                     creepsToRemove.push(upgraders[i]);
                 }
             }
@@ -100,8 +97,8 @@ var creepTasks = {
 
         // Batch remove all unused creeps.
         if (creepsToRemove.length > 0) {
-            for (var i = 0; i < creepsToRemove.length; i++) {
-                let creep = creepsToRemove[i];
+            for (let i = 0; i < creepsToRemove.length; i++) {
+                const creep = creepsToRemove[i];
 
                 if (!creep) {
                     continue;

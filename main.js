@@ -79,13 +79,13 @@ module.exports.loop = function () {
         }
     }
 
-    let energyAvailable = room.energyAvailable;
+    const energyAvailable = room.energyAvailable;
 
-    let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
-    let dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == role.DROPMINER);
-    let haulers = _.filter(Game.creeps, (creep) => creep.memory.role == role.HAULER);
-    let builders = _.filter(Game.creeps, (creep) => creep.memory.role == role.BUILDER);
-    let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
+    const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
+    const dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == role.DROPMINER);
+    const haulers = _.filter(Game.creeps, (creep) => creep.memory.role == role.HAULER);
+    const builders = _.filter(Game.creeps, (creep) => creep.memory.role == role.BUILDER);
+    const upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
 
     // Harvesters
     room.memory.maxHarvesterCreeps = (dropminers.length == 0 || haulers.length == 0) ?
@@ -109,7 +109,7 @@ module.exports.loop = function () {
     const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
 
     // Builders
-    let constructionSites = room.constructionSites().length;
+    const constructionSites = room.constructionSites().length;
 
     room.memory.maxBuilderCreeps = constructionSites > 0 ?
         room.controller.level :
@@ -307,7 +307,7 @@ module.exports.loop = function () {
     creepFactory.showSpawningCreepInfo(room, spawn)
 
     for (let name in Game.creeps) {
-        let creep = Game.creeps[name];
+        const creep = Game.creeps[name];
 
         if (creep.memory.role == role.HARVESTER) {
             roleHarvester.run(creep);
