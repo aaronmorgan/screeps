@@ -3,7 +3,7 @@ var roleBuilder = {
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
         if (p_creep.memory.ticksToDie) {
-            p_creep.memory.ticksToDie -= 1;
+            //        p_creep.memory.ticksToDie -= 1;
 
             if (p_creep.memory.ticksToDie <= 0) {
                 console.log('💀 Removing BUILDER creep ' + p_creep.id)
@@ -29,7 +29,7 @@ var roleBuilder = {
         }
 
         if (p_creep.memory.building) {
-            let targets = p_creep.room.find(FIND_CONSTRUCTION_SITES);
+            let targets = p_creep.room.constructionSites();
             if (targets.length) {
                 targets.sort(function (a, b) {
                     return a.progress > b.progress ? -1 : 1
@@ -44,14 +44,11 @@ var roleBuilder = {
                 }
             }
         } else {
-            var targets = p_creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_CONTAINER ||
-                            structure.structureType == STRUCTURE_STORAGE ||
-                            structure.structureType == STRUCTURE_EXTENSION) &&
-                            // structure.structureType == STRUCTURE_SPAWN) &&
-                        structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity();
-                }
+            let targets = _.filter(p_creep.room.structures().all, (structure) => {
+                return (structure.structureType == 'container' ||
+                        structure.structureType == 'storage' ||
+                        structure.structureType == 'extension') &&
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity();
             });
 
             if (!p_creep.memory.harvesting && targets.length > 0) {
@@ -68,7 +65,7 @@ var roleBuilder = {
             }
 
             // Local energy sources
-            let sources = p_creep.room.find(FIND_SOURCES);
+            let sources = p_creep.room.sources();
             let nearestSource = p_creep.pos.findClosestByPath(sources);
 
             if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {

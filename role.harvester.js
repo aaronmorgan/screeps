@@ -11,10 +11,7 @@ var roleHarvester = {
                 return;
             }
 
-            let resourceEnergy = p_creep.room.find(FIND_DROPPED_RESOURCES, {
-                filter: (o) => o.resourceType === RESOURCE_ENERGY
-            });
-
+            let resourceEnergy = p_creep.room.droppedResources();
             let droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
             let energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
 

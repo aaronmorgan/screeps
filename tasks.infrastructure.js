@@ -14,13 +14,7 @@ var infrastructureTasks = {
 
     let currentRCLLevel = p_room.controller.level;
 
-    // TODO use room.spawn
-    let spawn = p_room.find(FIND_MY_STRUCTURES, {
-      filter: (structure) => {
-        return structure.structureType == STRUCTURE_SPAWN;
-      }
-    })[0];
-
+    let spawn = p_room.structures().spawn[0];
     let index = p_room.controller.level;
 
     // Periodically check whether we need to rebuild anything by resetting the construction job level.

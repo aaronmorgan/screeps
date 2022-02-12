@@ -9,7 +9,7 @@ var roleUpgrader = {
 
     if (!p_creep.memory.upgrading && p_creep.store.getFreeCapacity() == 0) {
       p_creep.memory.upgrading = true;
-      p_creep.say('🔧 upgrade');
+      p_creep.say('⚒️ upgrade');
     }
 
     if (p_creep.memory.upgrading) {
@@ -21,13 +21,11 @@ var roleUpgrader = {
         });
       }
     } else {
-      let targets = p_creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) => {
-          return (
-              structure.structureType == STRUCTURE_CONTAINER ||
-              structure.structureType == STRUCTURE_STORAGE) &&
-            structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity(); // TODO: Should this getFreeCapacity check be here?
-        }
+      let targets = _.filter(p_creep.room.structures().all, (structure) => {
+        return (
+            structure.structureType == 'container' ||
+            structure.structureType == 'storage') &&
+          structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity(); // TODO: Should this getFreeCapacity check be here?
       });
 
       if (targets.length > 0) {
@@ -41,7 +39,9 @@ var roleUpgrader = {
           });
         }
       } else {
-        let sources = p_creep.room.find(FIND_SOURCES);
+        return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
+
+        let sources = p_creep.room.sources();
         let nearestSource = p_creep.pos.findClosestByPath(sources);
 
         if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {

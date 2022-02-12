@@ -116,7 +116,7 @@ var roleHauler = {
       }
 
       if (!targets || targets.length == 0) {
-        targets = _.filter(structures, (structure) => {
+        targets = _.filter(structures.all, (structure) => {
           return (
               structure.structureType == 'container' ||
               structure.structureType == 'storage') &&

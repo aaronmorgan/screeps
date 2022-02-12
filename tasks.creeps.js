@@ -7,7 +7,7 @@ var creepTasks = {
     suicideCreep: function (p_room) {
         //console.log('DEBUG: Checking for creeps to remove in room ' + p_room.name);
 
-        let creeps = p_room.find(FIND_MY_CREEPS);
+        let creeps = p_room.myCreeps();
 
         if (!creeps || creeps.length == 0) {
             console.log('DEBUG: No creeps found in room ' + p_room.name);
