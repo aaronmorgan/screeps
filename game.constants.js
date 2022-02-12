@@ -8,7 +8,10 @@ module.exports.EXIT_CODE = {
         '-6': 'ERR_NOT_ENOUGH_ENERGY',
         '-7': 'ERR_INVALID_TARGET',
         '-8': 'ERR_FULL',
+        '-9': 'ERR_NOT_IN_RANGE	',
         '-10': 'ERR_INVALID_ARGS',
+        '-11': 'ERR_TIRED',
+        '-12': 'ERR_NO_BODYPART',
         '-14': 'ERR_RCL_NOT_ENOUGH'
     },
 
@@ -18,8 +21,8 @@ module.exports.EXIT_CODE = {
         HAULER: 'Hauler',
         BUILDER: 'Builder',
         UPGRADER: 'Upgrader'
-    };
+    },
 
-module.exports.global = {
-    MAX_CREEP_BUILD_QUEUE_LENGTH: 1
-};
+    module.exports.global = {
+        MAX_CREEP_BUILD_QUEUE_LENGTH: 1
+    };
