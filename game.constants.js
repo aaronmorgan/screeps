@@ -1,4 +1,4 @@
-// ICONS ⛔ 
+// ICONS ⛔ 🛠️ 
 
 module.exports.EXIT_CODE = {
         '0': 'OK',
@@ -20,6 +20,6 @@ module.exports.EXIT_CODE = {
         UPGRADER: 'Upgrader'
     };
 
-module.exports.game = {
+module.exports.global = {
     MAX_CREEP_BUILD_QUEUE_LENGTH: 1
 };

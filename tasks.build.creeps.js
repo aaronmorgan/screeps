@@ -1,8 +1,17 @@
-var BODYPART_COST = { "move": 50, "work": 100, "attack": 80, "carry": 50, "heal": 250, "ranged_attack": 150, "tough": 10, "claim": 600 };
+var BODYPART_COST = {
+    "move": 50,
+    "work": 100,
+    "attack": 80,
+    "carry": 50,
+    "heal": 250,
+    "ranged_attack": 150,
+    "tough": 10,
+    "claim": 600
+};
 
 var {
     EXIT_CODE,
-    game
+    global
 } = require('game.constants');
 
 var creepFactory = {
@@ -35,7 +44,7 @@ var creepFactory = {
         this.validateCache(p_room);
 
         // Temporarily only allow one queued creep job.
-        if (p_room.memory._creepBuildQueue.length >= game.MAX_CREEP_BUILD_QUEUE_LENGTH) {
+        if (p_room.memory._creepBuildQueue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
             return;
         }
 
@@ -59,9 +68,11 @@ var creepFactory = {
 
         const bodyCost = this.bodyCost(job.body);
 
-        if (bodyCost > p_room.energyAvailable) { return; }
-        
-        console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory), + ', cost=' + bodyCost);
+        if (bodyCost > p_room.energyAvailable) {
+            return;
+        }
+
+        console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory), +', cost=' + bodyCost);
 
         let result = p_spawn.spawnCreep(job.body, name, {
             memory: job.memory
@@ -77,6 +88,10 @@ var creepFactory = {
     },
 
     logBuildQueueDetails: function (p_room) {
+        if (p_room.memory._creepBuildQueue.length == 0) {
+            return;
+        }
+
         console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + '/' + game.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining');
     },
 
@@ -101,7 +116,7 @@ var creepFactory = {
 
     bodyCost: function (p_body) {
         let sum = 0;
-        
+
         for (let i in p_body) {
             sum += BODYPART_COST[p_body[i]];
         }

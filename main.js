@@ -6,6 +6,7 @@ IMPROVEMENTS:
 1. Don't despawn a hauler as soon as the DropMiner count changes. Wait 10 ticks or so to ensure it's still necessary to remove it.
 2. Set the 'max dropminers per source' when producing the top DropMiner.
 3. All creeps with Carry feature should drop resources when ticks to live < 2.
+4. Structure build queue should only place one construction site at a time.
 
 */
 
@@ -13,7 +14,7 @@ require('prototype.room')();
 
 var {
     role,
-    game
+    global
 } = require('game.constants');
 
 var roleHarvester = require('role.harvester');
@@ -41,6 +42,7 @@ module.exports.loop = function () {
     let spawn = Game.spawns['Spawn1'];
     let room = spawn.room;
 
+   // room.determineRCLAccessPoints();
     room.determineSourceAccessPoints();
     room.structures();
     room.droppedResources();
@@ -121,13 +123,13 @@ module.exports.loop = function () {
     const sufficientUpgraders = upgraders.length >= room.memory.maxUpgraderCreeps;
 
     // Summary of actual vs target numbers.
-    console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));
-    console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '❌'));
-    console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '❌'));
-    console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
-    console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
+    console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '➖'));
+    console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '➖'));
+    console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '➖'));
+    console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '➖'));
+    console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '➖'));
 
-    if (room.memory._creepBuildQueue && (room.memory._creepBuildQueue.length < game.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
+    if (room.memory._creepBuildQueue && (room.memory._creepBuildQueue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
         // HARVESTER creep
         if (!sufficientHarvesters) {
             let bodyType = [];
