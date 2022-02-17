@@ -4,38 +4,39 @@ const {
 
 var infrastructureTasks = {
 
+  // Doesn't use a traditional queue or any cache but instead looks at current construction site objects
+  // to determine whether to continue or not.
   buildLinks: function (p_room) {
-    let constructionSites = p_room.constructionSites();
+    const constructionSites = p_room.constructionSites();
 
     if (constructionSites.length > 0) {
       //console.log('⚠️ Information: Room already has construction sites present');
       return;
     }
 
-    let currentRCLLevel = p_room.controller.level;
-
-    let spawn = p_room.structures().spawn[0];
-    let index = p_room.controller.level;
+    const currentRCLLevel = p_room.controller.level;
+    const spawn = p_room.structures().spawn[0];
+    let index = 0; // p_room.controller.level;
 
     // Periodically check whether we need to rebuild anything by resetting the construction job level.
     // This could be further improved to increase the frequency to per tick during times of war.
-    if (Game.time % (400 / p_room.controller.level) == 0) {
-      console.log('Information: Resetting construction queue index to 0');
-      index = 0;
-    }
+    // if (Game.time % (400 / p_room.controller.level) == 0) {
+    //   console.log('⚠️ Information: Resetting construction queue index to 0');
+    //   index = 0;
+    // }
 
     for (let i = index; i < constructionJobsTemplate.length; i++) {
       const job = constructionJobsTemplate[i];
+      console.log("Processing job: ", JSON.stringify(job));
 
       if (job.rclLevel > currentRCLLevel) {
-        //console.log('Exiting at job: ', JSON.stringify(job));
-        continue;
+        break;
       }
 
-      let x = spawn.pos.x + job.x;
-      let y = spawn.pos.y + job.y;
+      const x = spawn.pos.x + job.x;
+      const y = spawn.pos.y + job.y;
 
-      let tileObjects = p_room.lookAt(x, y).filter(function (x) {
+      const tileObjects = p_room.lookAt(x, y).filter(function (x) {
         return (
           x.type != 'resource' &&
           x.type != 'energy' &&
@@ -44,42 +45,50 @@ var infrastructureTasks = {
       });
 
       if (tileObjects.length < 3 && tileObjects[0].type == 'terrain') {
-        switch (job.type) {
-          // Build a container near the RCL
-          case 'rcl.container': {
-            const path = p_room.findPath(spawn.pos, p_room.controller.pos, {
-              ignoreDestructibleStructures: true,
-              ignoreCreeps: true
-            });
+        // switch (job.type) {
+        //   // Build a container near the RCL
+        //   case 'rcl.container': {
+        //     const path = p_room.findPath(spawn.pos, p_room.controller.pos, {
+        //       ignoreDestructibleStructures: true,
+        //       ignoreCreeps: true
+        //     });
 
-            if (path) {
-              console.log('tileobjects', JSON.stringify(tileObjects));
-              console.log('Information: Found a path to the RCL');
+        //     if (path) {
+        //       console.log('tileobjects', JSON.stringify(tileObjects));
+        //       console.log('Information: Found a path to the RCL');
 
-              // Far enough away for Upgraders to have it at their backs while working
-              // but not so close that it gets in the way or too far that they have to 
-              // travel unnecessarily.
-              // TODO check that all surrounding tiles are empty and if not move 
-              // further away from the RCL until condition satisfied/
-              let newPos = path[path.length - 5];
-              console.log('newPos', JSON.stringify(newPos));
-              job.type = 'container';
-              x = newPos.x;
-              y = newPos.y;
+        //       // Far enough away for Upgraders to have it at their backs while working
+        //       // but not so close that it gets in the way or too far that they have to 
+        //       // travel unnecessarily.
+        //       // TODO check that all surrounding tiles are empty and if not move 
+        //       // further away from the RCL until condition satisfied/
+        //       let newPos = path[path.length - 5];
+        //       console.log('newPos', JSON.stringify(newPos));
+        //       job.type = 'container';
+        //       x = newPos.x;
+        //       y = newPos.y;
 
-              console.log(JSON.stringify(job))
+        //       console.log(JSON.stringify(job))
 
-            } else {
-              console.log('⛔ Error: calling createConstructionSite for rcl.container, ' + EXIT_CODE[result]);
-            }
-          }
-        }
+        //     } else {
+        //       console.log('⛔ Error: calling createConstructionSite for rcl.container, ' + EXIT_CODE[result]);
+        //     }
+        //   }
+        // }
 
         let result = p_room.createConstructionSite(x, y, job.type);
 
-        if (result != OK) {
-          console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result] + ', job=', JSON.stringify(job) + ', x=' + job.x + ', y=' + job.y);
-          continue;
+        switch (result) {
+          case OK: {
+            // Only set down one construction site at a time.
+            console.log('OK');
+            return;
+          }
+          default: {
+            console.log('!OK');
+            console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result] + ', job=', JSON.stringify(job) + ', x=' + job.x + ', y=' + job.y);
+            continue;
+          }
         }
       } else {
         let tile = tileObjects[0];
@@ -99,48 +108,64 @@ var infrastructureTasks = {
   },
 }
 
-const constructionJobsTemplate = [{
-    rclLevel: 2,
-    type: "extension",
-    x: 3,
-    y: -1
+const constructionJobsTemplate = [
+  // Level 0: Roads, 5 Containers
+  {
+    rclLevel: 0,
+    type: "container",
+    x: 4,
+    y: 0
   },
+  {
+    rclLevel: 0,
+    type: "container",
+    x: -4,
+    y: 0
+  },
+
+  // Level 2
   {
     rclLevel: 2,
     type: "extension",
-    x: 3,
+    x: 1,
     y: -2
   },
   {
     rclLevel: 2,
     type: "extension",
-    x: 2,
-    y: -2
-  },
-  {
-    rclLevel: 2,
-    type: "container",
-    x: 3,
-    y: 2
-  },
-  {
-    rclLevel: 2,
-    type: "extension",
-    x: 2,
-    y: 1
-  },
-  {
-    rclLevel: 2,
-    type: "extension",
-    x: 2,
-    y: 2
-  },
-  {
-    rclLevel: 2,
-    type: "container",
     x: 1,
     y: -1
   },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: 2,
+    y: -2
+  },
+  // {
+  //   rclLevel: 2,
+  //   type: "container",
+  //   x: 3,
+  //   y: 2
+  // },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: 3,
+    y: -2
+  },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: 3,
+    y: -1
+  },
+  // {
+  //   rclLevel: 2,
+  //   type: "container",
+  //   x: 1,
+  //   y: -1
+  // },
   {
     rclLevel: 3, // RCL caps us at 5 extensions until level 3.
     type: "extension",
