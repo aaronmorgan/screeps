@@ -136,10 +136,8 @@ module.exports.loop = function () {
 
             if (energyCapacityAvailable >= 500) {
                 bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 300) {
-                bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
             } else {
-                bodyType = [WORK, CARRY, MOVE];
+                bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
             }
 
             if (!_.isEmpty(bodyType)) {
@@ -159,12 +157,9 @@ module.exports.loop = function () {
             } else if (energyCapacityAvailable >= 600) {
                 bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
                 room.memory.minersPerSource = 1;
-            } else if (energyCapacityAvailable >= 300) {
+            } else {
                 bodyType = [WORK, WORK, MOVE, MOVE];
                 room.memory.minersPerSource = 2;
-            } else if (energyCapacityAvailable >= 200) {
-                bodyType = [WORK, MOVE, MOVE];
-                room.memory.minersPerSource = 5;
             }
 
             if (!_.isEmpty(bodyType)) {
@@ -214,12 +209,8 @@ module.exports.loop = function () {
                 bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
             } else if (energyCapacityAvailable >= 350) {
                 bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 300) {
+            } else {
                 bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 250) {
-                bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 200) {
-                bodyType = [CARRY, MOVE, MOVE, MOVE];
             }
 
             if (!_.isEmpty(bodyType)) {
@@ -246,10 +237,8 @@ module.exports.loop = function () {
                 ];
             } else if (energyCapacityAvailable >= 400) {
                 bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 300) {
+            } else {
                 bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 200) {
-                bodyType = [WORK, CARRY, MOVE];
             }
 
             if (!_.isEmpty(bodyType)) {
@@ -284,10 +273,8 @@ module.exports.loop = function () {
                 bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
             } else if (energyCapacityAvailable >= 350) {
                 bodyType = [WORK, WORK, CARRY, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 250) {
+            } else {
                 bodyType = [WORK, CARRY, MOVE, MOVE];
-            } else if (energyCapacityAvailable >= 200) {
-                bodyType = [WORK, CARRY, MOVE];
             }
 
             if (!_.isEmpty(bodyType)) {
