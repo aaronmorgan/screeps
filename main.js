@@ -81,11 +81,21 @@ module.exports.loop = function () {
     //const energyAvailable = room.energyAvailable;
     const energyCapacityAvailable = room.energyCapacityAvailable;
 
+    // TODO Should be room creeps, not game....
     const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
     const dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == role.DROPMINER);
     const haulers = _.filter(Game.creeps, (creep) => creep.memory.role == role.HAULER);
     const builders = _.filter(Game.creeps, (creep) => creep.memory.role == role.BUILDER);
     const upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
+
+    room.memory.creeps = {
+        dropminers: dropminers.length
+    };
+
+    // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
+    if (harvesters.length == 0 && dropminers.length == 0){
+        creepFactory.clearBuildQueue(room);
+    }
 
     // Harvesters
     room.memory.maxHarvesterCreeps = (dropminers.length == 0 || haulers.length == 0) ?
