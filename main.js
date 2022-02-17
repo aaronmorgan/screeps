@@ -78,7 +78,8 @@ module.exports.loop = function () {
         }
     }
 
-    const energyAvailable = room.energyAvailable;
+    //const energyAvailable = room.energyAvailable;
+    const energyCapacityAvailable = room.energyCapacityAvailable;
 
     const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
     const dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == role.DROPMINER);
@@ -133,12 +134,10 @@ module.exports.loop = function () {
         if (!sufficientHarvesters) {
             let bodyType = [];
 
-            if (energyAvailable >= 500) {
+            if (energyCapacityAvailable >= 500) {
                 bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 300) {
+            } else if (energyCapacityAvailable >= 300) {
                 bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
-                // } else if (energyAvailable >= 200 && harvesters.length == 0) {
-                //     bodyType = [WORK, CARRY, MOVE];
             } else {
                 bodyType = [WORK, CARRY, MOVE];
             }
@@ -154,18 +153,18 @@ module.exports.loop = function () {
         if (room.controller.level >= 2 && !sufficientDropMiners) {
             let bodyType = [];
 
-            if (energyAvailable >= 700) {
+            if (energyCapacityAvailable >= 700) {
                 bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE];
                 room.memory.minersPerSource = 1;
-            } else if (energyAvailable >= 600) {
+            } else if (energyCapacityAvailable >= 600) {
                 bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
                 room.memory.minersPerSource = 1;
-            } else if (energyAvailable >= 300) {
+            } else if (energyCapacityAvailable >= 300) {
                 bodyType = [WORK, WORK, MOVE, MOVE];
-                room.memory.minersPerSource = 3;
-            } else if (energyAvailable >= 200) {
+                room.memory.minersPerSource = 2;
+            } else if (energyCapacityAvailable >= 200) {
                 bodyType = [WORK, MOVE, MOVE];
-                room.memory.minersPerSource = 3;
+                room.memory.minersPerSource = 5;
             }
 
             if (!_.isEmpty(bodyType)) {
@@ -176,25 +175,23 @@ module.exports.loop = function () {
                     targetSourceId = room.memory.sources[0].id;
                 }
 
-                for (let i = 0; i < room.memory.sources.length; i++) {
-                    const source = room.memory.sources[i];
-
+                room.memory.sources.every(source => {
                     let creepsForThisSource = Math.min(source.accessPoints, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
 
                     if (creepsForThisSource == source.accessPoints) {
-                        continue;
+                        return true;
                     }
 
                     if (creepsForThisSource > source.accessPoints) {
                         console.log('WARNING: Too many DROPMINER creeps for source ' + source.id);
 
-                        // TODO Remove excess creeps.
-                        continue;
+                        // TODO Remove excess creeps. Remove the creep with the lowest TTL?
+                        return true;
                     }
 
                     targetSourceId = source.id;
-                    break;
-                }
+                    return false;
+                });
 
                 if (!targetSourceId) {
                     console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
@@ -211,17 +208,17 @@ module.exports.loop = function () {
         if (room.controller.level >= 2 && !sufficientHaulers) {
             let bodyType = [];
 
-            if (energyAvailable >= 450) {
+            if (energyCapacityAvailable >= 450) {
                 bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 400) {
+            } else if (energyCapacityAvailable >= 400) {
                 bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 350) {
+            } else if (energyCapacityAvailable >= 350) {
                 bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 300) {
+            } else if (energyCapacityAvailable >= 300) {
                 bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 250) {
+            } else if (energyCapacityAvailable >= 250) {
                 bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 200) {
+            } else if (energyCapacityAvailable >= 200) {
                 bodyType = [CARRY, MOVE, MOVE, MOVE];
             }
 
@@ -241,17 +238,17 @@ module.exports.loop = function () {
         if (!sufficientBuilders) {
             let bodyType = [];
 
-            if (energyAvailable >= 900) {
+            if (energyCapacityAvailable >= 900) {
                 bodyType = [
                     WORK, WORK, WORK, WORK, WORK,
                     CARRY, CARRY, CARRY, CARRY, CARRY,
                     MOVE, MOVE, MOVE
                 ];
-            } else if (energyAvailable >= 400) {
+            } else if (energyCapacityAvailable >= 400) {
                 bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-            } else if (energyAvailable >= 300) {
+            } else if (energyCapacityAvailable >= 300) {
                 bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
-            } else if (energyAvailable >= 200) {
+            } else if (energyCapacityAvailable >= 200) {
                 bodyType = [WORK, CARRY, MOVE];
             }
 
@@ -267,13 +264,13 @@ module.exports.loop = function () {
         if (!sufficientUpgraders) {
             let bodyType = [];
 
-            if (room.storage && energyAvailable >= 1750) {
+            if (room.storage && energyCapacityAvailable >= 1750) {
                 bodyType = [
                     WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                     CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                     MOVE, MOVE, MOVE, MOVE, MOVE
                 ];
-            } else if (room.storage && energyAvailable >= 1000) {
+            } else if (room.storage && energyCapacityAvailable >= 1000) {
                 bodyType = [
                     WORK, WORK, WORK, WORK, WORK, WORK,
                     CARRY, CARRY, CARRY, CARRY,
@@ -281,15 +278,15 @@ module.exports.loop = function () {
                 ];
                 // Prioritise movement overy carry capaciity. If the container is repeatedly low
                 // on energy we don't want to be waiting.
-            } else if (energyAvailable >= 550) {
+            } else if (energyCapacityAvailable >= 550) {
                 bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 400) {
+            } else if (energyCapacityAvailable >= 400) {
                 bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
-            } else if (energyAvailable >= 350) {
+            } else if (energyCapacityAvailable >= 350) {
                 bodyType = [WORK, WORK, CARRY, MOVE, MOVE];
-            } else if (energyAvailable >= 250) {
+            } else if (energyCapacityAvailable >= 250) {
                 bodyType = [WORK, CARRY, MOVE, MOVE];
-            } else if (energyAvailable >= 200) {
+            } else if (energyCapacityAvailable >= 200) {
                 bodyType = [WORK, CARRY, MOVE];
             }
 
