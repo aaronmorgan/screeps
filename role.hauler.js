@@ -113,11 +113,11 @@ var roleHauler = {
 
       let targets = structures.spawn.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
 
-      if (!targets || targets.length == 0) {
+      if (!targets || targets.length == 0 && structures.tower) {
         targets = structures.tower.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
       }
 
-      if (!targets || targets.length == 0) {
+      if (!targets || targets.length == 0 && structures.extension) {
         targets = structures.extension.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
       }
 

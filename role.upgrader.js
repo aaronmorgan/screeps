@@ -47,7 +47,9 @@ var roleUpgrader = {
           });
         }
       } else {
-        return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
+        if (p_creep.room.controller >= 3) {
+            return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
+        }
 
         let sources = p_creep.room.sources();
         let nearestSource = p_creep.pos.findClosestByPath(sources);
