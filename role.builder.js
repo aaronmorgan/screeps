@@ -23,8 +23,6 @@ var roleBuilder = {
         }
         if (!p_creep.memory.building && p_creep.carry.energy == p_creep.carryCapacity) {
             p_creep.memory.building = true;
-            p_creep.memory.harvesting = false;
-            //            creep.say('🚧 building');
             p_creep.say('🔨 build');
         }
 
@@ -46,21 +44,46 @@ var roleBuilder = {
         } else {
             let targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (structure.structureType == 'container' ||
-                        structure.structureType == 'storage' ||
-                        structure.structureType == 'extension') &&
+                        structure.structureType == 'storage') &&
+                    //structure.structureType == 'extension') &&
                     structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity();
             });
 
-            if (!p_creep.memory.harvesting && targets.length > 0) {
+            if (targets.length > 0) {
                 const dropSite = p_creep.pos.findClosestByPath(targets);
 
                 if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    p_creep.say('🔌 withdraw ');
+                    p_creep.say('🔌 withdraw');
                     return p_creep.moveTo(dropSite, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
                     });
+                }
+            }
+
+            const resourceEnergy = p_creep.room.droppedResources();
+            const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+
+            if (droppedResources) {
+                const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+
+                if (!_.isEmpty(energyTarget)) {
+                    let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+
+                    let source = Game.getObjectById(energyTarget.id);
+
+                    if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
+                        p_creep.say('⛏ pickup');
+                        p_creep.moveTo(source, {
+                            visualizePathStyle: {
+                                stroke: '#ffaa00'
+                            }
+                        });
+                        p_creep.say('⚡ ' + creepFillPercentage + '%')
+                    }
+
+                    return;
                 }
             }
 
@@ -79,6 +102,6 @@ var roleBuilder = {
             }
         }
     }
-};
+}
 
 module.exports = roleBuilder;
