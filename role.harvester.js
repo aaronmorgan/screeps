@@ -5,6 +5,7 @@ var roleHarvester = {
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
         p_creep.checkTicksToDie();
+        p_creep.checkTicksToLive();
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 

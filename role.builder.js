@@ -5,6 +5,7 @@ var roleBuilder = {
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
         p_creep.checkTicksToDie();
+        p_creep.checkTicksToLive();
 
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;

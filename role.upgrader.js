@@ -1,14 +1,10 @@
+require('prototype.creep')();
+
 var roleUpgrader = {
 
   /** @param {Creep} p_creep **/
   run: function (p_creep) {
-    // Drop all carried resources before we die.
-    if (p_creep.ticksToLive < 2) {
-      console.log('💡 INFO: ticksToLive=' + p_creep.ticksToLive + ', dropping resources...')
-      for (const resourceType in p_creep.carry) {
-        p_creep.drop(resourceType);
-      }
-    }
+    p_creep.checkTicksToLive();
 
     if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
       p_creep.memory.upgrading = false;
