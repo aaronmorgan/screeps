@@ -6,6 +6,7 @@ BUGS:
 4. Once we have one dropminer all harvesters are immediately removed.
 5. Building roads and extensions on terrain 'wall'.
 6. Harvesters are dropping off resouces then going to pick up more if they're left with less than 32%.
+7. Harvesters are not correctly using their sourceId value.
 
 IMPROVEMENTS:
 1. Don't despawn a hauler as soon as the DropMiner count changes. Wait 10 ticks or so to ensure it's still necessary to remove it.
@@ -367,7 +368,7 @@ module.exports.loop = function () {
 
     room.myCreeps().forEach(c => {
         const creep = Game.creeps[c.name];
-        
+
         if (creep.memory.role == role.HARVESTER) {
             roleHarvester.run(creep);
         }

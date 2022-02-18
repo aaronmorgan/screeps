@@ -27,7 +27,7 @@ var infrastructureTasks = {
 
     for (let i = index; i < constructionJobsTemplate.length; i++) {
       const job = constructionJobsTemplate[i];
-      console.log("Processing job: ", JSON.stringify(job));
+      // console.log("Processing job: ", JSON.stringify(job));
 
       if (job.rclLevel > currentRCLLevel) {
         break;
@@ -47,7 +47,8 @@ var infrastructureTasks = {
       if (tileObjects.length < 3 && 
           (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
 
-        console.log('terrain', JSON.stringify(tileObjects));
+        //console.log('terrain', JSON.stringify(tileObjects));
+
         // switch (job.type) {
         //   // Build a container near the RCL
         //   case 'rcl.container': {
