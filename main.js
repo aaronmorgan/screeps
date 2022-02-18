@@ -149,6 +149,8 @@ module.exports.loop = function () {
 
             if (energyCapacityAvailable >= 500) {
                 bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+            } else if (energyCapacityAvailable >= 350) {
+                bodyType = [WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
             } else {
                 bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
             }
@@ -170,6 +172,12 @@ module.exports.loop = function () {
             } else if (energyCapacityAvailable >= 600) {
                 bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
                 room.memory.minersPerSource = 1;
+            } else if (energyCapacityAvailable >= 400) {
+                bodyType = [WORK, WORK, WORK, MOVE, MOVE];
+                room.memory.minersPerSource = 2;
+            } else if (energyCapacityAvailable >= 350) {
+                bodyType = [WORK, WORK, WORK, MOVE];
+                room.memory.minersPerSource = 2;
             } else {
                 bodyType = [WORK, WORK, MOVE, MOVE];
                 room.memory.minersPerSource = 2;
@@ -250,6 +258,8 @@ module.exports.loop = function () {
                 ];
             } else if (energyCapacityAvailable >= 400) {
                 bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            } else if (energyCapacityAvailable >= 350) {
+                bodyType = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
             } else {
                 bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
             }
