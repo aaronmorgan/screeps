@@ -41,7 +41,7 @@ module.exports.loop = function () {
     let spawn = Game.spawns['Spawn1'];
     let room = spawn.room;
 
-   // room.determineRCLAccessPoints();
+    // room.determineRCLAccessPoints();
     room.determineSourceAccessPoints();
     room.structures();
     room.droppedResources();
@@ -79,7 +79,7 @@ module.exports.loop = function () {
     }
 
     //const energyAvailable = room.energyAvailable;
-    const energyCapacityAvailable = room.energyCapacityAvailable;
+    let energyCapacityAvailable = room.energyCapacityAvailable;
 
     // TODO Should be room creeps, not game....
     const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
@@ -136,11 +136,11 @@ module.exports.loop = function () {
     const sufficientUpgraders = upgraders.length >= room.memory.maxUpgraderCreeps;
 
     // Summary of actual vs target numbers.
-    console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '➖'));
-    console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '➖'));
-    console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '➖'));
-    console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '➖'));
-    console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '➖'));
+    console.log('  Harvesters: ' + harvesters.length + '/' + room.memory.maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));
+    console.log('  Drop Miners: ' + dropminers.length + '/' + room.memory.maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '❌'));
+    console.log('  Haulers: ' + haulers.length + '/' + room.memory.maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '❌'));
+    console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
+    console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
 
     if (room.memory._creepBuildQueue && (room.memory._creepBuildQueue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
         // HARVESTER creep

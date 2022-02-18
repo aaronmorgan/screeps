@@ -1,4 +1,4 @@
-// ICONS ⛔ 🛠️ 
+// ICONS ⛔ ⚠️ 🛠️ ➖ ❌
 
 module.exports.EXIT_CODE = {
         '0': 'OK',
