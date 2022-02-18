@@ -89,12 +89,11 @@ module.exports.loop = function () {
     //const energyAvailable = room.energyAvailable;
     let energyCapacityAvailable = room.energyCapacityAvailable;
 
-    // TODO Should be room creeps, not game....
-    const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == role.HARVESTER);
-    const dropminers = _.filter(Game.creeps, (creep) => creep.memory.role == role.DROPMINER);
-    const haulers = _.filter(Game.creeps, (creep) => creep.memory.role == role.HAULER);
-    const builders = _.filter(Game.creeps, (creep) => creep.memory.role == role.BUILDER);
-    const upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == role.UPGRADER);
+    const harvesters = room.creeps().harvesters;
+    const dropminers = room.creeps().dropminers;
+    const haulers = room.creeps().haulers;
+    const builders = room.creeps().builders;
+    const upgraders = room.creeps().upgraders;
 
     room.memory.creeps = {
         dropminers: dropminers.length
@@ -365,9 +364,9 @@ module.exports.loop = function () {
     creepFactory.evaluateBuildQueue(room);
     creepFactory.showSpawningCreepInfo(room, spawn)
 
-    for (let name in Game.creeps) {
-        const creep = Game.creeps[name];
-
+    room.myCreeps().forEach(c => {
+        const creep = Game.creeps[c.name];
+        
         if (creep.memory.role == role.HARVESTER) {
             roleHarvester.run(creep);
         }
@@ -383,7 +382,7 @@ module.exports.loop = function () {
         if (creep.memory.role == role.UPGRADER) {
             roleUpgrader.run(creep);
         }
-    }
+    });
 
     // TODO Only do this mod n times, e.g. % 10.
     infrastructureTasks.buildLinks(room);

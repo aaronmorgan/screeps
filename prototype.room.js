@@ -18,6 +18,20 @@ module.exports = function () {
         return this._structures;
     };
 
+    Room.prototype.creeps = function () {
+        if (!this._creeps || _.isEmpty(this._creeps)) {
+            this._creeps = {
+                harvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HARVESTER),
+                dropminers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.DROPMINER),
+                haulers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HAULER),
+                builders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.BUILDER),
+                upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER)
+            }
+        }
+
+        return this._creeps;
+    };
+
     Room.prototype.myCreeps = function () {
         if (!this._myCreeps || _.isEmpty(this._myCreeps)) {
             this._myCreeps = this.find(FIND_MY_CREEPS, {
@@ -128,6 +142,7 @@ module.exports = function () {
          */
         Room.prototype.gc =
         function () {
+            this._creeps = undefined;
             this._myCreeps = undefined;
             this._sources = undefined;
             this._structures = undefined;

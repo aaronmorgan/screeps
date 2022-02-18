@@ -12,11 +12,11 @@ var creepTasks = {
             return;
         }
 
-        const harvesters = _.filter(creeps, (creep) => creep.memory.role == role.HARVESTER);
-        const dropMiners = _.filter(creeps, (creep) => creep.memory.role == role.DROPMINER);
-        const haulers = _.filter(creeps, (creep) => creep.memory.role == role.HAULER);
-        const builders = _.filter(creeps, (creep) => creep.memory.role == role.BUILDER);
-        const upgraders = _.filter(creeps, (creep) => creep.memory.role == role.UPGRADER);
+        const harvesters = p_room.creeps().harvesters;
+        const dropminers = p_room.creeps().dropminers;
+        const haulers = p_room.creeps().haulers;
+        const builders = p_room.creeps().builders;
+        const upgraders = p_room.creeps().upgraders;
 
         let creepsToRemove = [];
 
@@ -29,7 +29,7 @@ var creepTasks = {
                 for (let i = 0; i <= creepsToDelete; i++) {
                     let creep = harvesters[i];
 
-                    if (creep.memory.ticksToDie) {
+                    if (!creep || creep.memory.ticksToDie) {
                         continue;
                     }
 
@@ -40,19 +40,19 @@ var creepTasks = {
             }
         } else {
             harvesters.forEach(creep => {
-                creep.ticksToDie = undefined;
+                creep.memory.ticksToDie = undefined;
             });
         }
 
 
-        if (dropMiners.length > p_room.memory.maxDropMinerCreeps) {
-            let creepsToDelete = dropMiners.length - p_room.memory.maxDropMinerCreeps;
+        if (dropminers.length > p_room.memory.maxDropMinerCreeps) {
+            let creepsToDelete = dropminers.length - p_room.memory.maxDropMinerCreeps;
 
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' DROPMINER creeps to remove...');
 
                 for (let i = 0; i <= creepsToDelete; i++) {
-                    creepsToRemove.push(dropMiners[i]);
+                    creepsToRemove.push(dropminers[i]);
                 }
             }
         }
@@ -66,7 +66,7 @@ var creepTasks = {
                 for (let i = 0; i <= creepsToDelete; i++) {
                     let creep = haulers[i];
 
-                    if (creep.memory.ticksToDie) {
+                    if (!creep || creep.memory.ticksToDie) {
                         continue;
                     }
 
@@ -77,7 +77,7 @@ var creepTasks = {
             }
         } else {
             haulers.forEach(creep => {
-                creep.ticksToDie = undefined;
+                creep.memory.ticksToDie = undefined;
             });
         }
 
@@ -90,7 +90,7 @@ var creepTasks = {
                 for (let i = 0; i <= creepsToDelete; i++) {
                     let creep = builders[i];
 
-                    if (creep.memory.ticksToDie) {
+                    if (!creep || creep.memory.ticksToDie) {
                         continue;
                     }
 
@@ -101,7 +101,7 @@ var creepTasks = {
             }
         } else {
             builders.forEach(creep => {
-                creep.ticksToDie = undefined;
+                creep.memory.ticksToDie = undefined;
             });
         }
 
