@@ -33,14 +33,14 @@ var roleHauler = {
 
     let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-    if (creepFillPercentage < 60 && p_creep.memory.harvesting == true) {
+    //if (creepFillPercentage < 60 && p_creep.memory.harvesting == true) {
+    if (p_creep.memory.harvesting == true) {
       p_creep.say('⚡ ' + creepFillPercentage + '%');
 
-      let largestDroppedEnergy = _.last(p_creep.room.droppedResources());
+      let largestDroppedEnergy = _.last(p_creep.room.droppedResources()); // TODO Should target closest?
 
       if (p_creep.memory.targetedDroppedEnergy.id == 0) {
         console.log('ℹ️ INFO: Hauler aquiring new dropped energy target...');
-
 
         p_creep.memory.targetedDroppedEnergy.id = largestDroppedEnergy.id;
         p_creep.memory.targetedDroppedEnergy.pos = largestDroppedEnergy.pos;
@@ -52,8 +52,7 @@ var roleHauler = {
         const newTarget = p_creep.room.droppedResources()[0];
 
         if (!newTarget) {
-          console.log('⚠️ Warning: NO NEW TARGET');
-
+          //console.log('⚠️ Warning: NO NEW TARGET');
           return;
         }
 
@@ -62,6 +61,11 @@ var roleHauler = {
       }
 
       if (p_creep.pickup(targetedDroppedEnergy) == ERR_NOT_IN_RANGE) {
+        if (creepFillPercentage > 25) {
+          p_creep.memory.harvesting = false;
+          return;
+        }
+
         p_creep.say('⚡' + creepFillPercentage + '%');
 
         if (p_creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) {
