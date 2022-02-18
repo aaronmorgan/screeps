@@ -93,8 +93,11 @@ module.exports.loop = function () {
     };
 
     // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
-    if (harvesters.length == 0 && dropminers.length == 0){
+    if (harvesters.length == 0 && dropminers.length == 0) {
         creepFactory.clearBuildQueue(room);
+
+        // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
+        energyCapacityAvailable = room.energyAvailable;
     }
 
     // Harvesters
