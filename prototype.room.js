@@ -1,5 +1,7 @@
 //let statsConsole = require("statsConsole");
 
+const { role } = require("./game.constants");
+
 // https://github.com/quonic/screeps-prototypes/blob/master/prototype.room.js
 
 module.exports = function () {
@@ -18,7 +20,9 @@ module.exports = function () {
 
     Room.prototype.myCreeps = function () {
         if (!this._myCreeps || _.isEmpty(this._myCreeps)) {
-            this._myCreeps = this.find(FIND_MY_CREEPS);
+            this._myCreeps = this.find(FIND_MY_CREEPS, {
+                filter: (o) => o.room.name == this.name
+            });
         }
 
         return this._myCreeps;
