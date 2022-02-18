@@ -48,7 +48,32 @@ var roleUpgrader = {
         }
       } else {
         if (p_creep.room.controller >= 3) {
-            return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
+          return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
+        }
+
+        const resourceEnergy = p_creep.room.droppedResources();
+        const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+
+        if (droppedResources) {
+          const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+
+          if (!_.isEmpty(energyTarget)) {
+            let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+
+            source = Game.getObjectById(energyTarget.id);
+
+            if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
+              p_creep.say('⛏ pickup');
+              p_creep.moveTo(source, {
+                visualizePathStyle: {
+                  stroke: '#ffaa00'
+                }
+              });
+
+              p_creep.say('⚡ ' + creepFillPercentage + '%')
+              return;
+            }
+          }
         }
 
         let sources = p_creep.room.sources();
