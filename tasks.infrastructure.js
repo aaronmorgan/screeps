@@ -44,7 +44,10 @@ var infrastructureTasks = {
           x.type != 'creep');
       });
 
-      if (tileObjects.length < 3 && tileObjects[0].type == 'terrain') {
+      if (tileObjects.length < 3 && 
+          (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
+
+        console.log('terrain', JSON.stringify(tileObjects));
         // switch (job.type) {
         //   // Build a container near the RCL
         //   case 'rcl.container': {
