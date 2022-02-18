@@ -1,6 +1,9 @@
 /*
 BUGS: 
 1. If there are no Harvesters or Haulers/Dropminers then Builders etc should not get energy from the spawn. It blocks creeps from spawning.
+2. Add a 'harvestingSatisfied' flag that would fix #1 above and mean that other creeps like builders cannot be done if not true.
+3. Harvestrs are quitting after 32%.
+4. Once we have one dropminer all harvesters are immediately removed.
 
 IMPROVEMENTS:
 1. Don't despawn a hauler as soon as the DropMiner count changes. Wait 10 ticks or so to ensure it's still necessary to remove it.
@@ -105,10 +108,6 @@ module.exports.loop = function () {
         room.getMaxSourceAccessPoints() :
         0;
 
-    if (haulers.length == 0 && dropminers.length > 0) {
-        room.memory.maxHarvesterCreeps = dropminers.length;
-    } // TODO could be refined?
-
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
     //room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
@@ -121,11 +120,15 @@ module.exports.loop = function () {
     const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
     const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
 
+    // if (haulers.length == 0 && dropminers.length > 0) {
+    //     room.memory.maxHarvesterCreeps = dropminers.length;
+    // } // TODO could be refined?
+
     // Builders
     const constructionSites = room.constructionSites().length;
 
     room.memory.maxBuilderCreeps = constructionSites > 0 ?
-        room.controller.level :
+        3 :
         0;
 
     // Upgraders
@@ -163,7 +166,8 @@ module.exports.loop = function () {
         }
 
         // DROPMINER creep
-        if (room.controller.level >= 2 && !sufficientDropMiners) {
+        //if (room.controller.level >= 2 && !sufficientDropMiners) {
+        if (!sufficientDropMiners) {
             let bodyType = [];
 
             if (energyCapacityAvailable >= 700) {
@@ -191,23 +195,34 @@ module.exports.loop = function () {
                     targetSourceId = room.memory.sources[0].id;
                 }
 
-                room.memory.sources.every(source => {
-                    let creepsForThisSource = Math.min(source.accessPoints, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
+                for (let i = 0; i < room.memory.sources.length; i++) {
+                    const source = room.memory.sources[i];
 
-                    if (creepsForThisSource == source.accessPoints) {
-                        return true;
+                    // TODO should be using room.memory.minersPerSource and take the min access points vs minersPerSource.
+                    // Then check how many miners already use this source.
+                    const a = Math.min(source.accessPoints, room.memory.minersPerSource);
+                    let creepsForThisSource = Math.min(a, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
+
+                    console.log('a', a);
+                    console.log('creepsForThisSource', creepsForThisSource);
+
+                    let b = dropminers.filter(x => x.memory.sourceId == source.id).length;
+                    console.log('b', b);
+
+                    if (b == room.memory.minersPerSource) {
+                        continue;
                     }
 
                     if (creepsForThisSource > source.accessPoints) {
-                        console.log('WARNING: Too many DROPMINER creeps for source ' + source.id);
+                        console.log('⚠️ WARNING: Too many DROPMINER creeps for source ' + source.id);
 
                         // TODO Remove excess creeps. Remove the creep with the lowest TTL?
-                        return true;
+                        continue;
                     }
 
                     targetSourceId = source.id;
-                    return false;
-                });
+                    break;
+                };
 
                 if (!targetSourceId) {
                     console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
@@ -221,7 +236,8 @@ module.exports.loop = function () {
         }
 
         // HAULER creep
-        if (room.controller.level >= 2 && !sufficientHaulers) {
+        //if (room.controller.level >= 2 && !sufficientHaulers) {
+        if (!sufficientHaulers) {
             let bodyType = [];
 
             if (energyCapacityAvailable >= 450) {
