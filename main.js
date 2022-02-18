@@ -167,17 +167,15 @@ module.exports.loop = function () {
                 let targetSourceId = undefined;
 
                 if (harvesters.length == 0) {
-                    // TODO select the closet one.
-                    targetSourceId = room.memory.sources[0].id;
+                    targetSourceId = spawn.pos.findClosestByPath(room.sources().map(x => x.pos))
                 }
 
                 for (let i = 0; i < room.memory.sources.length; i++) {
                     const source = room.memory.sources[i];
 
-                    const a = Math.min(source.accessPoints, room.memory.harvestersPerSource);
-                    const creepsForThisSource = Math.min(a, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
+                    const creepsForThisSource = Math.min(source.accessPoints, _.countBy(harvesters, x => x.memory.sourceId == source.id).true);
 
-                    const b = dropminers.filter(x => x.memory.sourceId == source.id).length;
+                    const b = harvesters.filter(x => x.memory.sourceId == source.id).length;
 
                     if (b == room.memory.minersPerSource) {
                         continue;
@@ -232,8 +230,7 @@ module.exports.loop = function () {
                 let targetSourceId = undefined;
 
                 if (dropminers.length == 0) {
-                    // TODO select the closet one.
-                    targetSourceId = room.memory.sources[0].id;
+                    targetSourceId = spawn.pos.findClosestByPath(room.sources().map(x => x.pos))
                 }
 
                 for (let i = 0; i < room.memory.sources.length; i++) {
