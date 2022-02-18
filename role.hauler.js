@@ -20,7 +20,7 @@ var roleHauler = {
 
       let largestDroppedEnergy = _.last(p_creep.room.droppedResources()); // TODO Should target closest?
 
-      if (p_creep.memory.targetedDroppedEnergy.id == 0) {
+      if (largestDroppedEnergy && !p_creep.memory.targetedDroppedEnergy.id == 0) {
         console.log('ℹ️ INFO: Hauler aquiring new dropped energy target...');
 
         p_creep.memory.targetedDroppedEnergy.id = largestDroppedEnergy.id;
@@ -70,10 +70,12 @@ var roleHauler = {
 
           let energyTarget = targets.find(x => x.pos.x == inRangeTargets.x && x.pos.y == inRangeTargets.y)
 
-          p_creep.memory.targetedDroppedEnergy = {
-            id: energyTarget.id,
-            pos: energyTarget.pos
-          };
+          if (energyTarget) {
+            p_creep.memory.targetedDroppedEnergy = {
+              id: energyTarget.id,
+              pos: energyTarget.pos
+            };
+          }
         }
 
         const source = Game.getObjectById(p_creep.memory.targetedDroppedEnergy.id);
