@@ -77,16 +77,17 @@ module.exports.loop = function () {
         console.log('⚠️ WARNING: No towers!');
     }
 
-    //   console.log('Memory.creeps size', JSON.stringify(Memory.creeps));
-
-    for (let name in Memory.creeps) {
-        if (!Game.creeps[name]) {
-            delete Memory.creeps[name];
-            console.log('INFO: Clearing creep memory:', name);
-        }
+    if (Game.tick % 50 == 0) {
+        console.log('INFO: Checking for deleted creeps...');
+        room.myCreeps().forEach(c => {
+            const creep = Game.creeps[c.name];
+            if (!Game.creeps[creep]) {
+                delete Memory.creeps[creep];
+                console.log('INFO: Clearing creep memory:', creep);
+            }
+        });
     }
 
-    //const energyAvailable = room.energyAvailable;
     let energyCapacityAvailable = room.energyCapacityAvailable;
 
     const harvesters = room.creeps().harvesters;
