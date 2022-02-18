@@ -1,23 +1,25 @@
 require('prototype.room')();
+require('prototype.creep')();
 
 var roleHauler = {
 
   /** @param {Creep} p_creep **/
   run: function (p_creep) {
-    if (p_creep.memory.ticksToDie) {
-      //     p_creep.memory.ticksToDie -= 1;
+    p_creep.checkTicksToDie();
+    // if (p_creep.memory.ticksToDie) {
+    //   p_creep.memory.ticksToDie -= 1;
 
-      if (p_creep.memory.ticksToDie <= 0) {
-        console.log('💀 Removing HAULER creep ' + p_creep.id)
+    //   if (p_creep.memory.ticksToDie <= 0) {
+    //     console.log('💀 Removing ' + p_creep.memory.role + ' creep ' + p_creep.id)
 
-        // Drop all resources.
-        for (const resourceType in p_creep.carry) {
-          p_creep.drop(resourceType);
-        }
+    //     // Drop all resources.
+    //     for (const resourceType in p_creep.carry) {
+    //       p_creep.drop(resourceType);
+    //     }
 
-        p_creep.suicide();
-      }
-    }
+    //     p_creep.suicide();
+    //   }
+    // }
 
     // Drop all carried resources before we die.
     if (p_creep.ticksToLive < 2) {

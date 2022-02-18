@@ -1,25 +1,14 @@
+require('prototype.creep')();
+
 var roleHarvester = {
 
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
-        if (p_creep.memory.ticksToDie) {
-            p_creep.memory.ticksToDie -= 1;
-
-            if (p_creep.memory.ticksToDie <= 0) {
-                console.log('💀 Removing HAULER creep ' + p_creep.id)
-
-                // Drop all resources.
-                for (const resourceType in p_creep.carry) {
-                    p_creep.drop(resourceType);
-                }
-
-                p_creep.suicide();
-            }
-        }
+        p_creep.checkTicksToDie();
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-        if (creepFillPercentage < 30) {
+        if (p_creep.memory.isMining || creepFillPercentage < 30) {
 
             // Cater for the siuation where the creep wanders into another room.
             if (_.isEmpty(p_creep.room.memory.sources)) {
@@ -41,6 +30,8 @@ var roleHarvester = {
             if (!_.isEmpty(energyTarget)) {
                 source = Game.getObjectById(energyTarget.id);
 
+                p_creep.memory.isMining = false;
+
                 if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(source, {
                         visualizePathStyle: {
@@ -53,16 +44,16 @@ var roleHarvester = {
             } else {
                 source = Game.getObjectById(p_creep.memory.sourceId);
 
-                //source = Game.getObjectById(p_creep.room.memory.sources[0].id);
+                p_creep.memory.isMining = true;
 
-                //console.log('mine');
                 if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(source, {
                         visualizePathStyle: {
                             stroke: '#ffaa00'
                         }
                     });
-                    p_creep.say('⚡ ' + creepFillPercentage + '%')
+                } else {
+                    p_creep.say('⛏ ' + creepFillPercentage + '%')
                 }
             }
         } else {
@@ -75,6 +66,8 @@ var roleHarvester = {
             });
 
             if (targets.length > 0) {
+                p_creep.memory.isMining = false;
+
                 if (p_creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(targets[0], {
                         visualizePathStyle: {

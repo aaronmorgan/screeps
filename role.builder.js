@@ -1,21 +1,10 @@
+require('prototype.creep')();
+
 var roleBuilder = {
 
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
-        if (p_creep.memory.ticksToDie) {
-            //        p_creep.memory.ticksToDie -= 1;
-
-            if (p_creep.memory.ticksToDie <= 0) {
-                console.log('💀 Removing BUILDER creep ' + p_creep.id)
-
-                // Drop all resources.
-                for (const resourceType in p_creep.carry) {
-                    p_creep.drop(resourceType);
-                }
-
-                p_creep.suicide();
-            }
-        }
+        p_creep.checkTicksToDie();
 
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
