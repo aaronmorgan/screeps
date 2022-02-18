@@ -19,12 +19,16 @@ var roleHarvester = {
                 return;
             }
 
+            // Favor dropped energy first so havesters can act as haulers to the dropminers.
             const resourceEnergy = p_creep.room.droppedResources();
             const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
-            const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
 
-            //console.log('droppedResources', JSON.stringify(energyTarget));
-            //let droppedResources = _.sortBy(resourceEnergy, x => x.energy);
+            let energyTarget = undefined;
+
+            if (droppedResources) {
+                energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+            }
+
             let source = undefined;
 
             if (!_.isEmpty(energyTarget)) {
