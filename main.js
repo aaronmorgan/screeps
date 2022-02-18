@@ -96,7 +96,8 @@ module.exports.loop = function () {
     };
 
     // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
-    if (harvesters.length == 0 && dropminers.length == 0) {
+    if ((harvesters.length == 0 && dropminers.length == 0) ||
+        (harvesters.length == 0 && haulers.length == 0)) {
         creepFactory.clearBuildQueue(room);
 
         // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
@@ -104,14 +105,16 @@ module.exports.loop = function () {
     }
 
     // Harvesters
-    room.memory.maxHarvesterCreeps = (dropminers.length == 0 || haulers.length == 0) ?
+    room.memory.maxHarvesterCreeps = (dropminers.length == 0) ? // || haulers.length == 0) ?
         room.getMaxSourceAccessPoints() :
         0;
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
     //room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
-    room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
+    if (!room.memory.maxDropMinerCreeps) {
+        room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
+    }
 
     // Haulers
     room.memory.maxHaulerCreeps = dropminers.length; // == 0 ? 0 : Math.floor(dropminers.length * 1.5);
@@ -263,7 +266,9 @@ module.exports.loop = function () {
         }
 
         // BUILDER creep
-        if (!sufficientBuilders) {
+        if (!sufficientBuilders &&
+            (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0))) {
+
             let bodyType = [];
 
             if (energyCapacityAvailable >= 900) {
