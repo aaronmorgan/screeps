@@ -2,11 +2,18 @@ var roleHarvester = {
 
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
-        // Drop all carried resources before we die.
-        if (p_creep.ticksToLive < 2) {
-            console.log('💡 INFO: ticksToLive=' + p_creep.ticksToLive + ', dropping resources...')
-            for (const resourceType in p_creep.carry) {
-                p_creep.drop(resourceType);
+        if (p_creep.memory.ticksToDie) {
+            p_creep.memory.ticksToDie -= 1;
+
+            if (p_creep.memory.ticksToDie <= 0) {
+                console.log('💀 Removing HAULER creep ' + p_creep.id)
+
+                // Drop all resources.
+                for (const resourceType in p_creep.carry) {
+                    p_creep.drop(resourceType);
+                }
+
+                p_creep.suicide();
             }
         }
 
@@ -44,7 +51,9 @@ var roleHarvester = {
                 }
 
             } else {
-                source = Game.getObjectById(p_creep.room.memory.sources[0].id);
+                source = Game.getObjectById(p_creep.memory.sourceId);
+
+                //source = Game.getObjectById(p_creep.room.memory.sources[0].id);
 
                 //console.log('mine');
                 if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {

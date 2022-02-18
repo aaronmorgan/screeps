@@ -2,7 +2,7 @@ var roleDropMiner = {
 
     /** @param {Creep} creep **/
     run: function (p_creep) {
-        let source = Game.getObjectById(p_creep.memory.sourceId);
+        const source = Game.getObjectById(p_creep.memory.sourceId);
 
         if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
             p_creep.say('⛏ harvest');
@@ -11,6 +11,7 @@ var roleDropMiner = {
                     stroke: '#ffaa00'
                 }
             });
+
             return p_creep.harvest(source);
         }
     }
