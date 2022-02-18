@@ -1,5 +1,6 @@
 const {
-    role
+    role,
+    global
 } = require('game.constants');
 
 var creepTasks = {
@@ -26,10 +27,23 @@ var creepTasks = {
                 console.log('DEBUG: Found ' + creepsToDelete + ' HARVESTER creeps to remove...');
 
                 for (let i = 0; i <= creepsToDelete; i++) {
-                    creepsToRemove.push(harvesters[i]);
+                    let creep = harvesters[i];
+
+                    if (creep.memory.ticksToDie) {
+                        continue;
+                    }
+
+                    if (!creep.memory.ticksToDie) {
+                        creep.memory.ticksToDie = global.TICKS_TO_DELETE;
+                    }
                 }
             }
+        } else {
+            harvesters.forEach(creep => {
+                creep.ticksToDie = undefined;
+            });
         }
+
 
         if (dropMiners.length > p_room.memory.maxDropMinerCreeps) {
             let creepsToDelete = dropMiners.length - p_room.memory.maxDropMinerCreeps;
@@ -50,10 +64,14 @@ var creepTasks = {
                 console.log('DEBUG: Found ' + creepsToDelete + ' HAULER creeps to remove...');
 
                 for (let i = 0; i <= creepsToDelete; i++) {
-                    const creep = haulers[i];
+                    let creep = haulers[i];
+
+                    if (creep.memory.ticksToDie) {
+                        continue;
+                    }
 
                     if (!creep.memory.ticksToDie) {
-                        creep.memory.ticksToDie = 50;
+                        creep.memory.ticksToDie = global.TICKS_TO_DELETE;
                     }
                 }
             }
@@ -72,8 +90,12 @@ var creepTasks = {
                 for (let i = 0; i <= creepsToDelete; i++) {
                     let creep = builders[i];
 
+                    if (creep.memory.ticksToDie) {
+                        continue;
+                    }
+
                     if (creep && !creep.memory.ticksToDie) {
-                        creep.memory.ticksToDie = 50;
+                        creep.memory.ticksToDie = global.TICKS_TO_DELETE;
                     }
                 }
             }
@@ -108,7 +130,8 @@ var creepTasks = {
                     continue;
                 }
 
-                if (creep.memory.role == role.HAULER ||
+                if (creep.memory.role == role.HARVESTER ||
+                    creep.memory.role == role.HAULER ||
                     creep.memory.role == role.BUILDER) {
 
                     console.log('⛔ Error: creep with role ' + creep.memory.role + ' should manage it\'s own cleanup');

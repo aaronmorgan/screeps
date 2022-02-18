@@ -87,13 +87,26 @@ var creepFactory = {
         // this.logBuildQueueDetails();
     },
 
-    logBuildQueueDetails: function (p_room) {
+    evaluateBuildQueue: function (p_room) {
         if (p_room.memory._creepBuildQueue.length == 0) {
             return;
         }
 
         const job = p_room.memory._creepBuildQueue[0];
-        console.log('INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining ' + '(' + job.name +')');
+
+        this.logBuildQueueDetails(p_room, job);
+
+        var buildCost = this.bodyCost(job.body);
+
+        if (buildCost > p_room.energyCapacityAvailable) {
+            p_room.memory._creepBuildQueue.shift();
+        }
+    },
+
+    logBuildQueueDetails: function (p_room, p_job) {
+        console.log(
+            'INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining ' +
+            '(' + p_job.name + '|' + this.bodyCost(p_job.body) + ')');
     },
 
     showSpawningCreepInfo: function (p_room, p_spawn) {

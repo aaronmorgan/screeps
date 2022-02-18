@@ -4,12 +4,15 @@ BUGS:
 2. Add a 'harvestingSatisfied' flag that would fix #1 above and mean that other creeps like builders cannot be done if not true.
 3. Harvestrs are quitting after 32%.
 4. Once we have one dropminer all harvesters are immediately removed.
+5. Building roads and extensions on terrain 'wall'.
+6. Harvesters are dropping off resouces then going to pick up more if they're left with less than 32%.
 
 IMPROVEMENTS:
 1. Don't despawn a hauler as soon as the DropMiner count changes. Wait 10 ticks or so to ensure it's still necessary to remove it.
 2. Set the 'max dropminers per source' when producing the top DropMiner.
 3. All creeps with Carry feature should drop resources when ticks to live < 2.
 4. Structure build queue should only place one construction site at a time.
+5. Force a refresh of room.droppedResources whenever a creep picks some up.
 
 */
 
@@ -74,6 +77,8 @@ module.exports.loop = function () {
         console.log('⚠️ WARNING: No towers!');
     }
 
+    //   console.log('Memory.creeps size', JSON.stringify(Memory.creeps));
+
     for (let name in Memory.creeps) {
         if (!Game.creeps[name]) {
             delete Memory.creeps[name];
@@ -123,10 +128,6 @@ module.exports.loop = function () {
     const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
     const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
 
-    // if (haulers.length == 0 && dropminers.length > 0) {
-    //     room.memory.maxHarvesterCreeps = dropminers.length;
-    // } // TODO could be refined?
-
     // Builders
     const constructionSites = room.constructionSites().length;
 
@@ -162,15 +163,51 @@ module.exports.loop = function () {
             }
 
             if (!_.isEmpty(bodyType)) {
-                creepFactory.create(room, spawn, role.HARVESTER, bodyType, {
-                    role: role.HARVESTER
-                });
+                let targetSourceId = undefined;
+
+                if (harvesters.length == 0) {
+                    // TODO select the closet one.
+                    targetSourceId = room.memory.sources[0].id;
+                }
+
+                for (let i = 0; i < room.memory.sources.length; i++) {
+                    const source = room.memory.sources[i];
+
+                    const a = Math.min(source.accessPoints, room.memory.harvestersPerSource);
+                    const creepsForThisSource = Math.min(a, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
+
+                    const b = dropminers.filter(x => x.memory.sourceId == source.id).length;
+
+                    if (b == room.memory.minersPerSource) {
+                        continue;
+                    }
+
+                    if (creepsForThisSource > source.accessPoints) {
+                        console.log('⚠️ WARNING: Too many DROPMINER creeps for source ' + source.id);
+
+                        // TODO Remove excess creeps. Remove the creep with the lowest TTL?
+                        continue;
+                    }
+
+                    targetSourceId = source.id;
+                    break;
+                };
+
+                if (!targetSourceId) {
+                    console.log('ERROR: Attempting to create ' + role.HARVESTER + ' with an assigned source');
+                } else {
+                    creepFactory.create(room, spawn, role.HARVESTER, bodyType, {
+                        role: role.HARVESTER,
+                        sourceId: targetSourceId
+                    });
+                }
             }
         }
 
         // DROPMINER creep
-        //if (room.controller.level >= 2 && !sufficientDropMiners) {
-        if (!sufficientDropMiners) {
+        if (!sufficientDropMiners &&
+            (harvesters.length > 0 || haulers.length > 0)) {
+
             let bodyType = [];
 
             if (energyCapacityAvailable >= 700) {
@@ -201,16 +238,10 @@ module.exports.loop = function () {
                 for (let i = 0; i < room.memory.sources.length; i++) {
                     const source = room.memory.sources[i];
 
-                    // TODO should be using room.memory.minersPerSource and take the min access points vs minersPerSource.
-                    // Then check how many miners already use this source.
                     const a = Math.min(source.accessPoints, room.memory.minersPerSource);
-                    let creepsForThisSource = Math.min(a, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
+                    const creepsForThisSource = Math.min(a, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
 
-                    console.log('a', a);
-                    console.log('creepsForThisSource', creepsForThisSource);
-
-                    let b = dropminers.filter(x => x.memory.sourceId == source.id).length;
-                    console.log('b', b);
+                    const b = dropminers.filter(x => x.memory.sourceId == source.id).length;
 
                     if (b == room.memory.minersPerSource) {
                         continue;
@@ -227,6 +258,8 @@ module.exports.loop = function () {
                     break;
                 };
 
+                room.memory.maxDropMinerCreeps = room.memory.minersPerSource * room.memory.sources.length;
+
                 if (!targetSourceId) {
                     console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
                 } else {
@@ -239,7 +272,6 @@ module.exports.loop = function () {
         }
 
         // HAULER creep
-        //if (room.controller.level >= 2 && !sufficientHaulers) {
         if (!sufficientHaulers) {
             let bodyType = [];
 
@@ -330,7 +362,7 @@ module.exports.loop = function () {
     }
 
     creepFactory.processBuildQueue(room, spawn);
-    creepFactory.logBuildQueueDetails(room);
+    creepFactory.evaluateBuildQueue(room);
     creepFactory.showSpawningCreepInfo(room, spawn)
 
     for (let name in Game.creeps) {
