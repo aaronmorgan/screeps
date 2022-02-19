@@ -31,6 +31,8 @@ var creepFactory = {
                 name: p_role,
                 memory: p_memory
             });
+
+        return OK;
     },
 
     validateCache: function (p_room) {

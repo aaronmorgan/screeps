@@ -1,6 +1,65 @@
+const {
+    EXIT_CODE,
+    role,
+    global
+} = require('game.constants');
+
 require('prototype.creep')();
+let creepFactory = require('tasks.build.creeps');
 
 var roleHarvester = {
+
+    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable, p_harvesters) {
+        let bodyType = [];
+
+        if (p_energyCapacityAvailable >= 500) {
+            bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        } else if (p_energyCapacityAvailable >= 350) {
+            bodyType = [WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+        } else {
+            bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
+        }
+
+        if (!_.isEmpty(bodyType)) {
+            let targetSourceId = undefined;
+
+            if (p_harvesters.length == 0) {
+                targetSourceId = p_spawn.pos.findClosestByPath(p_room.sources().map(x => x.pos))
+            }
+
+            for (let i = 0; i < p_room.memory.sources.length; i++) {
+                const source = p_room.memory.sources[i];
+
+                const creepsForThisSource = Math.min(source.accessPoints, _.countBy(p_harvesters, x => x.memory.sourceId == source.id).true);
+
+                const b = p_harvesters.filter(x => x.memory.sourceId == source.id).length;
+
+                if (b == p_room.memory.minersPerSource) {
+                    continue;
+                }
+
+                if (creepsForThisSource > source.accessPoints) {
+                    console.log('⚠️ WARNING: Too many DROPMINER creeps for source ' + source.id);
+
+                    // TODO Remove excess creeps. Remove the creep with the lowest TTL?
+                    continue;
+                }
+
+                targetSourceId = source.id;
+                break;
+            };
+
+            if (!targetSourceId) {
+                console.log('ERROR: Attempting to create ' + role.HARVESTER + ' with an assigned source');
+                return EXIT_CODE.ERR_INVALID_TARGET;
+            } else {
+                return creepFactory.create(p_room, p_spawn, role.HARVESTER, bodyType, {
+                    role: role.HARVESTER,
+                    sourceId: targetSourceId
+                });
+            }
+        }
+    },
 
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
@@ -42,7 +101,7 @@ var roleHarvester = {
                         }
                     });
                     p_creep.say('⚡ ' + creepFillPercentage + '%')
-                } else if (pickupResult == OK){
+                } else if (pickupResult == OK) {
                     p_creep.room.refreshDroppedResources();
                 }
 

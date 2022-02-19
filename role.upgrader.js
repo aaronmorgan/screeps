@@ -1,6 +1,46 @@
+const {
+  role,
+  global
+} = require('game.constants');
+
 require('prototype.creep')();
+let creepFactory = require('tasks.build.creeps');
 
 var roleUpgrader = {
+
+  tryBuild: function(p_room, p_spawn, p_energyCapacityAvailable) {
+    let bodyType = [];
+
+    if (p_room.storage && p_energyCapacityAvailable >= 1750) {
+        bodyType = [
+            WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
+            CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+            MOVE, MOVE, MOVE, MOVE, MOVE
+        ];
+    } else if (p_room.storage && p_energyCapacityAvailable >= 1000) {
+        bodyType = [
+            WORK, WORK, WORK, WORK, WORK, WORK,
+            CARRY, CARRY, CARRY, CARRY,
+            MOVE, MOVE, MOVE, MOVE
+        ];
+        // Prioritise movement overy carry capaciity. If the container is repeatedly low
+        // on energy we don't want to be waiting.
+    } else if (p_energyCapacityAvailable >= 550) {
+        bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+    } else if (p_energyCapacityAvailable >= 400) {
+        bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+    } else if (p_energyCapacityAvailable >= 350) {
+        bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
+    } else {
+        bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
+    }
+
+    if (!_.isEmpty(bodyType)) {
+        return creepFactory.create(p_room, p_spawn, role.UPGRADER, bodyType, {
+            role: role.UPGRADER
+        });
+    }
+  },
 
   /** @param {Creep} p_creep **/
   run: function (p_creep) {
