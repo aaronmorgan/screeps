@@ -58,7 +58,9 @@ var roleUpgrader = {
 
             source = Game.getObjectById(energyTarget.id);
 
-            if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
+            const pickupResult = p_creep.pickup(source);
+
+            if (pickupResult == ERR_NOT_IN_RANGE) {
               p_creep.say('⛏ pickup');
               p_creep.moveTo(source, {
                 visualizePathStyle: {
@@ -68,6 +70,8 @@ var roleUpgrader = {
 
               p_creep.say('⚡ ' + creepFillPercentage + '%')
               return;
+            } else if (pickupResult == OK) {
+              p_creep.room.refreshDroppedResources();
             }
           }
         }

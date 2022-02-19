@@ -51,7 +51,7 @@ module.exports = function () {
     };
 
     Room.prototype.droppedResources = function () {
-        if (!this._droppedResources) { //} || _.isEmpty(this._droppedResources)) {
+        if (!this._droppedResources) {
             let resourceEnergy = this.find(FIND_DROPPED_RESOURCES, {
                 filter: (o) => o.resourceType === RESOURCE_ENERGY
             });
@@ -60,6 +60,12 @@ module.exports = function () {
         }
 
         return this._droppedResources;
+    };
+
+    Room.prototype.refreshDroppedResources = function () {
+        this._droppedResources = [];
+        console.log('refreshing dropped resources');
+        return this.droppedResources();
     };
 
     Room.prototype.sources = function () {

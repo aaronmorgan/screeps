@@ -33,13 +33,17 @@ var roleHarvester = {
 
                 p_creep.memory.isMining = false;
 
-                if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
+                const pickupResult = p_creep.pickup(source);
+
+                if (pickupResult == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(source, {
                         visualizePathStyle: {
                             stroke: '#ffaa00'
                         }
                     });
                     p_creep.say('⚡ ' + creepFillPercentage + '%')
+                } else if (pickupResult == OK){
+                    p_creep.room.refreshDroppedResources();
                 }
 
             } else {
