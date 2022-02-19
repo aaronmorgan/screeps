@@ -140,8 +140,6 @@ module.exports.loop = function () {
     const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
     const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
 
-    console.log('d', additionalHaulersModifier);
-
     room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier; // == 0 ? 0 : Math.floor(dropminers.length * 1.5);
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
@@ -149,11 +147,7 @@ module.exports.loop = function () {
     const sufficientHaulers = dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
 
     // Builders
-    const constructionSites = room.constructionSites().length;
-
-    room.memory.maxBuilderCreeps = constructionSites > 0 ?
-        3 :
-        0;
+    room.memory.maxBuilderCreeps = room.constructionSites().length > 0 ? 3 : 0;
 
     // Upgraders
     // Should be a set value + number of containers * 2?

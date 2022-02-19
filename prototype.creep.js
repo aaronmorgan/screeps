@@ -1,7 +1,3 @@
-const {
-    RESOURCES
-} = require('game.constants');
-
 module.exports = function () {
 
     Creep.prototype.checkTicksToLive = function () {

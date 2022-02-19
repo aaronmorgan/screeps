@@ -1,8 +1,4 @@
-//let statsConsole = require("statsConsole");
-
 const { role } = require("./game.constants");
-
-// https://github.com/quonic/screeps-prototypes/blob/master/prototype.room.js
 
 module.exports = function () {
 
@@ -14,7 +10,6 @@ module.exports = function () {
             this._structures.all = allStructures;
         }
 
-        //console.log('_structures', JSON.stringify(this._structures))
         return this._structures;
     };
 
@@ -62,9 +57,9 @@ module.exports = function () {
         return this._droppedResources;
     };
 
+    // Used by creeps that might pickup energy; resetting the room for other creeps that tick.
     Room.prototype.refreshDroppedResources = function () {
         this._droppedResources = [];
-        console.log('refreshing dropped resources');
         return this.droppedResources();
     };
 
