@@ -85,7 +85,6 @@ var infrastructureTasks = {
         switch (result) {
           case OK: {
             // Only set down one construction site at a time.
-            console.log('OK');
             return;
           }
           default: {
@@ -164,34 +163,40 @@ const constructionJobsTemplate = [
     y: -2
   },
   {
-    rclLevel: 2,
+    rclLevel: 3,
     type: "extension",
     x: -1,
     y: -2
   },
   {
-    rclLevel: 2,
+    rclLevel: 3,
     type: "extension",
     x: -1,
     y: -1
   },
   {
-    rclLevel: 2,
+    rclLevel: 3,
     type: "extension",
     x: -2,
     y: -2
   },
   {
-    rclLevel: 2,
+    rclLevel: 3,
     type: "extension",
     x: -2,
     y: -1
   },
   {
-    rclLevel: 2,
+    rclLevel: 3,
     type: "extension",
     x: -3,
     y: -1
+  },
+  {
+    rclLevel: 3,
+    type: "container",
+    x: 0,
+    y: 3
   },
   // Roads, north, south, east, west
   {
