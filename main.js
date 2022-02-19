@@ -14,6 +14,7 @@ IMPROVEMENTS:
 3. All creeps with Carry feature should drop resources when ticks to live < 2.
 4. Structure build queue should only place one construction site at a time.
 5. Force a refresh of room.droppedResources whenever a creep picks some up.
+6. Build an upgrader before any builders, to get to RCL 2 ASAP.
 
 */
 
@@ -123,7 +124,25 @@ module.exports.loop = function () {
     }
 
     // Haulers
-    room.memory.maxHaulerCreeps = dropminers.length; // == 0 ? 0 : Math.floor(dropminers.length * 1.5);
+    let allDroppedEnergy = 0;
+    room.droppedResources().forEach(x => {
+        allDroppedEnergy += x.energy
+    });
+
+    let allContainersCapacity = 0;
+
+    structures.container.forEach(x => {
+        allContainersCapacity += x.storeCapacity - x.store.energy;
+    });
+
+    console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
+
+    const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
+    const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
+
+    console.log('d', additionalHaulersModifier);
+
+    room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier; // == 0 ? 0 : Math.floor(dropminers.length * 1.5);
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
     const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
