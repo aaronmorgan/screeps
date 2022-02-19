@@ -1,10 +1,10 @@
 const {
     EXIT_CODE,
-    role,
-    global
+    role
 } = require('game.constants');
 
 require('prototype.creep')();
+
 let creepFactory = require('tasks.build.creeps');
 
 var roleHarvester = {

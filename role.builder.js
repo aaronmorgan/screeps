@@ -1,6 +1,37 @@
+const {
+    role
+} = require('game.constants');
+
 require('prototype.creep')();
 
+let creepFactory = require('tasks.build.creeps');
+
 var roleBuilder = {
+
+    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable) {
+        let bodyType = [];
+
+        if (p_energyCapacityAvailable >= 900) {
+            bodyType = [
+                WORK, WORK, WORK, WORK, WORK,
+                CARRY, CARRY, CARRY, CARRY, CARRY,
+                MOVE, MOVE, MOVE
+            ];
+        } else if (p_energyCapacityAvailable >= 400) {
+            bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        } else if (p_energyCapacityAvailable >= 350) {
+            bodyType = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
+        } else {
+            bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
+        }
+
+        if (!_.isEmpty(bodyType)) {
+            return creepFactory.create(p_room, p_spawn, role.BUILDER, bodyType, {
+                role: role.BUILDER,
+                building: true
+            });
+        }
+    },
 
     /** @param {Creep} p_creep **/
     run: function (p_creep) {

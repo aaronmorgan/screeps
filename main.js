@@ -202,120 +202,19 @@ module.exports.loop = function () {
                 if (!sufficientDropMiners &&
                     (harvesters.length > 0 || haulers.length > 0)) {
 
-                    let bodyType = [];
-
-                    if (energyCapacityAvailable >= 700) {
-                        bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE];
-                        room.memory.minersPerSource = 1;
-                    } else if (energyCapacityAvailable >= 600) {
-                        bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
-                        room.memory.minersPerSource = 1;
-                    } else if (energyCapacityAvailable >= 400) {
-                        bodyType = [WORK, WORK, WORK, MOVE, MOVE];
-                        room.memory.minersPerSource = 2;
-                    } else if (energyCapacityAvailable >= 350) {
-                        bodyType = [WORK, WORK, WORK, MOVE];
-                        room.memory.minersPerSource = 2;
-                    } else {
-                        bodyType = [WORK, WORK, MOVE, MOVE];
-                        room.memory.minersPerSource = 2;
-                    }
-
-                    if (!_.isEmpty(bodyType)) {
-                        let targetSourceId = undefined;
-
-                        if (dropminers.length == 0) {
-                            targetSourceId = spawn.pos.findClosestByPath(room.sources().map(x => x.pos))
-                        }
-
-                        for (let i = 0; i < room.memory.sources.length; i++) {
-                            const source = room.memory.sources[i];
-
-                            const a = Math.min(source.accessPoints, room.memory.minersPerSource);
-                            const creepsForThisSource = Math.min(a, _.countBy(dropminers, x => x.memory.sourceId == source.id).true);
-
-                            const b = dropminers.filter(x => x.memory.sourceId == source.id).length;
-
-                            if (b == room.memory.minersPerSource) {
-                                continue;
-                            }
-
-                            if (creepsForThisSource > source.accessPoints) {
-                                console.log('⚠️ WARNING: Too many DROPMINER creeps for source ' + source.id);
-
-                                // TODO Remove excess creeps. Remove the creep with the lowest TTL?
-                                continue;
-                            }
-
-                            targetSourceId = source.id;
-                            break;
-                        };
-
-                        room.memory.maxDropMinerCreeps = room.memory.minersPerSource * room.memory.sources.length;
-
-                        if (!targetSourceId) {
-                            console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
-                        } else {
-                            creepFactory.create(room, spawn, role.DROPMINER, bodyType, {
-                                role: role.DROPMINER,
-                                sourceId: targetSourceId
-                            });
-                        }
-                    }
+                    roleDropMiner.tryBuild(room, spawn, energyCapacityAvailable, dropminers);
                 }
 
                 // HAULER creep
                 if (!sufficientHaulers) {
-                    let bodyType = [];
-
-                    if (energyCapacityAvailable >= 450) {
-                        bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-                    } else if (energyCapacityAvailable >= 400) {
-                        bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-                    } else if (energyCapacityAvailable >= 350) {
-                        bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
-                    } else {
-                        bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-                    }
-
-                    if (!_.isEmpty(bodyType)) {
-                        creepFactory.create(room, spawn, role.HAULER, bodyType, {
-                            role: role.HAULER,
-                            harvesting: true,
-                            targetedDroppedEnergy: {
-                                id: 0,
-                                pos: new RoomPosition(1, 1, room.name)
-                            }
-                        });
-                    }
+                    roleHauler.tryBuild(room, spawn, energyCapacityAvailable);
                 }
 
                 // BUILDER creep
                 if (!sufficientBuilders &&
                     (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0))) {
 
-                    let bodyType = [];
-
-                    if (energyCapacityAvailable >= 900) {
-                        bodyType = [
-                            WORK, WORK, WORK, WORK, WORK,
-                            CARRY, CARRY, CARRY, CARRY, CARRY,
-                            MOVE, MOVE, MOVE
-                        ];
-                    } else if (energyCapacityAvailable >= 400) {
-                        bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-                    } else if (energyCapacityAvailable >= 350) {
-                        bodyType = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
-                    } else {
-                        bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
-                    }
-
-                    if (!_.isEmpty(bodyType)) {
-                        creepFactory.create(room, spawn, role.BUILDER, bodyType, {
-                            role: role.BUILDER,
-                            building: true
-                        });
-                    }
+                    roleBuilder.tryBuild(room, spawn, energyCapacityAvailable);
                 }
 
                 // UPGRADER creeps
