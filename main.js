@@ -131,12 +131,16 @@ module.exports.loop = function () {
         allContainersCapacity += x.storeCapacity - x.store.energy;
     });
 
-    console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
+    if (allContainersCapacity > 0) {
+        console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
 
-    const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
-    const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
+        const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
+        const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
 
-    room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier; // == 0 ? 0 : Math.floor(dropminers.length * 1.5);
+        room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+    } else {
+        room.memory.maxHaulerCreeps = dropminers.length
+    }
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
     const sufficientDropMiners = dropminers.length >= room.memory.maxDropMinerCreeps;
