@@ -175,9 +175,6 @@ module.exports.loop = function () {
     console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
 
     if (room.memory.creepBuildQueue && (room.memory.creepBuildQueue.queue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
-        // Kick off early game tasks.
-
-
         switch (room.memory.game.phase) {
             case 0: {
                 if (roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters) == OK) {

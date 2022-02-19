@@ -55,7 +55,8 @@ var roleHarvester = {
             } else {
                 return creepFactory.create(p_room, p_spawn, role.HARVESTER, bodyType, {
                     role: role.HARVESTER,
-                    sourceId: targetSourceId
+                    sourceId: targetSourceId,
+                    isHarvesting: true
                 });
             }
         }
@@ -68,13 +69,7 @@ var roleHarvester = {
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-        if (p_creep.memory.isMining || creepFillPercentage < 30) {
-
-            // Cater for the siuation where the creep wanders into another room.
-            if (_.isEmpty(p_creep.room.memory.sources)) {
-                return;
-            }
-
+        if (p_creep.memory.isHarvesting) {
             // Favor dropped energy first so havesters can act as haulers to the dropminers.
             const resourceEnergy = p_creep.room.droppedResources();
             const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
@@ -85,62 +80,77 @@ var roleHarvester = {
                 energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
             }
 
-            let source = undefined;
+            let droppedEnergy = undefined;
 
             if (!_.isEmpty(energyTarget)) {
-                source = Game.getObjectById(energyTarget.id);
+                droppedEnergy = Game.getObjectById(energyTarget.id);
 
-                p_creep.memory.isMining = false;
+                p_creep.memory.isHarvesting = true;
 
-                const pickupResult = p_creep.pickup(source);
+                const pickupResult = p_creep.pickup(droppedEnergy);
 
                 if (pickupResult == ERR_NOT_IN_RANGE) {
-                    p_creep.moveTo(source, {
+                    p_creep.moveTo(droppedEnergy, {
                         visualizePathStyle: {
                             stroke: '#ffaa00'
                         }
                     });
-                    p_creep.say('⚡ ' + creepFillPercentage + '%')
                 } else if (pickupResult == OK) {
                     p_creep.room.refreshDroppedResources();
+                    p_creep.memory.isHarvesting = true;
                 }
 
+                p_creep.say('⛏ ' + creepFillPercentage + '%')
             } else {
-                source = Game.getObjectById(p_creep.memory.sourceId);
+                // Cater for the siuation where the creep wanders into another room.
+                if (_.isEmpty(p_creep.room.memory.sources)) {
+                    return;
+                }
 
-                p_creep.memory.isMining = true;
+                const source = Game.getObjectById(p_creep.memory.sourceId);
 
-                if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                p_creep.memory.isHarvesting = true;
+
+                const harvestResult = p_creep.harvest(source);
+
+                if (harvestResult == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(source, {
                         visualizePathStyle: {
                             stroke: '#ffaa00'
                         }
                     });
-                } else {
-                    p_creep.say('⛏ ' + creepFillPercentage + '%')
+                } else if (harvestResult == OK) {
+                    p_creep.memory.isHarvesting = p_creep.store.getFreeCapacity() != 0;
                 }
+
+                p_creep.say('⛏ ' + creepFillPercentage + '%')
             }
         } else {
             const targets = _.filter(p_creep.room.structures().all, (structure) => {
-                return (
+                return (structure.structureType == 'spawn' ||
                         structure.structureType == 'extension' ||
-                        structure.structureType == 'spawn' ||
-                        structure.structureType == 'tower') &&
+                        structure.structureType == 'tower') && 
+                        // TODO Add container and storage.
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             });
 
             if (targets.length > 0) {
-                p_creep.memory.isMining = false;
+                p_creep.memory.isHarvesting = false;
 
-                if (p_creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                const transferResult = p_creep.transfer(targets[0], RESOURCE_ENERGY);
+                if (transferResult == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(targets[0], {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
                     });
-
-                    p_creep.say('⚡ ' + creepFillPercentage + '%')
+                } else if (transferResult == ERR_NOT_ENOUGH_ENERGY) {
+                    p_creep.memory.isHarvesting = true;
+                } else if (transferResult == OK && p_creep.store.getUsedCapacity() == 0) {
+                    p_creep.memory.isHarvesting = true;
                 }
+
+                p_creep.say('⚡ ' + creepFillPercentage + '%')
             }
         }
     }
