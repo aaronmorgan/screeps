@@ -44,8 +44,8 @@ var infrastructureTasks = {
           x.type != 'creep');
       });
 
-      if (tileObjects.length < 3 && 
-          (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
+      if (tileObjects.length < 3 &&
+        (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
 
         //console.log('terrain', JSON.stringify(tileObjects));
 
@@ -89,7 +89,6 @@ var infrastructureTasks = {
             return;
           }
           default: {
-            console.log('!OK');
             console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result] + ', job=', JSON.stringify(job) + ', x=' + job.x + ', y=' + job.y);
             continue;
           }
@@ -120,13 +119,6 @@ const constructionJobsTemplate = [
     x: 4,
     y: 0
   },
-  {
-    rclLevel: 0,
-    type: "container",
-    x: -4,
-    y: 0
-  },
-
   // Level 2
   {
     rclLevel: 2,
@@ -146,17 +138,11 @@ const constructionJobsTemplate = [
     x: 2,
     y: -2
   },
-  // {
-  //   rclLevel: 2,
-  //   type: "container",
-  //   x: 3,
-  //   y: 2
-  // },
   {
     rclLevel: 2,
     type: "extension",
-    x: 3,
-    y: -2
+    x: 2,
+    y: -1
   },
   {
     rclLevel: 2,
@@ -164,22 +150,47 @@ const constructionJobsTemplate = [
     x: 3,
     y: -1
   },
-  // {
-  //   rclLevel: 2,
-  //   type: "container",
-  //   x: 1,
-  //   y: -1
-  // },
   {
-    rclLevel: 3, // RCL caps us at 5 extensions until level 3.
-    type: "extension",
-    x: 3,
-    y: 1
+    rclLevel: 2,
+    type: "container",
+    x: -4,
+    y: 0
   },
+  // Level 3
   {
     rclLevel: 3,
     type: "tower",
-    x: 2,
+    x: 3,
+    y: -2
+  },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: -1,
+    y: -2
+  },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: -1,
+    y: -1
+  },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: -2,
+    y: -2
+  },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: -2,
+    y: -1
+  },
+  {
+    rclLevel: 2,
+    type: "extension",
+    x: -3,
     y: -1
   },
   // Roads, north, south, east, west
@@ -216,12 +227,6 @@ const constructionJobsTemplate = [
   {
     rclLevel: 3,
     type: "road",
-    x: 0,
-    y: 3
-  },
-  {
-    rclLevel: 3,
-    type: "road",
     x: -1,
     y: 0
   },
@@ -247,42 +252,6 @@ const constructionJobsTemplate = [
     rclLevel: 3,
     type: "road",
     x: 0,
-    y: -2
-  },
-  {
-    rclLevel: 3,
-    type: "road",
-    x: 0,
-    y: -3
-  },
-  {
-    rclLevel: 3,
-    type: "extension",
-    x: -3,
-    y: 1
-  },
-  {
-    rclLevel: 3,
-    type: "extension",
-    x: -2,
-    y: 2
-  },
-  {
-    rclLevel: 3,
-    type: "extension",
-    x: -3,
-    y: 2
-  },
-  {
-    rclLevel: 3,
-    type: "container",
-    x: -1,
-    y: 1
-  },
-  {
-    rclLevel: 3,
-    type: "container",
-    x: -3,
     y: -2
   },
   {
@@ -417,12 +386,7 @@ const constructionJobsTemplate = [
     x: -1,
     y: -3
   },
-  {
-    rclLevel: 3,
-    type: "extension",
-    x: -1,
-    y: -2
-  },
+  // Level 4
   {
     rclLevel: 4,
     type: "extension",
@@ -432,45 +396,70 @@ const constructionJobsTemplate = [
   {
     rclLevel: 4,
     type: "extension",
+    x: 1,
+    y: 2
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: 2,
+    y: 1
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: 2,
+    y: 2
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: 3,
+    y: 1
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: -1,
+    y: 1
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: -1,
+    y: 2
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: -2,
+    y: 1
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
+    x: -2,
+    y: 2
+  },
+  {
+    rclLevel: 4,
+    type: "extension",
     x: -3,
-    y: -1
-  },
-  {
-    rclLevel: 4,
-    type: "extension",
-    x: -1,
-    y: 2
-  },
-  {
-    rclLevel: 4,
-    type: "extension",
-    x: -1,
-    y: -1
-  },
-  {
-    rclLevel: 4,
-    type: "extension",
-    x: 1,
-    y: 2
-  },
-  {
-    rclLevel: 4,
-    type: "extension",
-    x: 1,
-    y: -2
+    y: 1
   },
   {
     rclLevel: 4,
     type: "storage",
-    x: -2,
-    y: -1
+    x: 0,
+    y: -3
   },
+  // Level 5
   {
     rclLevel: 5,
     type: "tower",
-    x: -2,
-    y: 1
-  }
+    x: -3,
+    y: -2
+  },
 ];
 
 module.exports = infrastructureTasks;
