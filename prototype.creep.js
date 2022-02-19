@@ -2,9 +2,8 @@ module.exports = function () {
 
     Creep.prototype.checkTicksToLive = function () {
         if (this.ticksToLive == 1) {
-            console.log('💀 INFO: Creep: ' + this.name + ', ticksToLive=' + this.ticksToLive + ', dropping resources...')
-
             for (const resourceType in this.carry) {
+                console.log('💀 TTL Creep: ' + this.name + ', dropping resource: ' + resourceType)
                 this.drop(resourceType);
             }
         }
@@ -16,9 +15,8 @@ module.exports = function () {
             this.memory.ticksToDie -= 1;
 
             if (this.memory.ticksToDie < 1) {
-                console.log('💀 Removing ' + this.memory.role + ' creep ' + this.id)
-
                 for (const resourceType in this.store) {
+                    console.log('💀 TTD Creep: ' + this.name + ', dropping resource: ' + resourceType)
                     this.drop(resourceType);
                 }
 
