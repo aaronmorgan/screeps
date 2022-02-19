@@ -131,6 +131,11 @@ module.exports.loop = function () {
         allContainersCapacity += x.storeCapacity - x.store.energy;
     });
 
+    // Cap the dropped energy count so we don't try to pickup/store more than we have capacity for.
+    if (allDroppedEnergy > allContainersCapacity) {
+        allDroppedEnergy = allContainersCapacity;
+    }
+
     if (allContainersCapacity > 0) {
         console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
 
