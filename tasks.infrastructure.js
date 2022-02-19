@@ -1,5 +1,6 @@
 const {
-  EXIT_CODE
+  EXIT_CODE,
+  structure
 } = require('game.constants');
 
 var infrastructureTasks = {
@@ -7,10 +8,9 @@ var infrastructureTasks = {
   // Doesn't use a traditional queue or any cache but instead looks at current construction site objects
   // to determine whether to continue or not.
   buildLinks: function (p_room) {
+    // Only enqueue one construction site at a time.
     const constructionSites = p_room.constructionSites();
-
     if (constructionSites.length > 0) {
-      //console.log('⚠️ Information: Room already has construction sites present');
       return;
     }
 
@@ -30,6 +30,20 @@ var infrastructureTasks = {
       // console.log("Processing job: ", JSON.stringify(job));
 
       if (job.rclLevel > currentRCLLevel) {
+        if (currentRCLLevel == 3) {
+          p_room.sources().forEach(pos => {
+            let path = spawn.pos.findPathTo(pos, {
+              maxOps: 200
+            });
+            if (path.length) {
+              //console.log('path', JSON.stringify(path));
+              path.forEach(x => {
+                p_room.createConstructionSite(pos.x, pos.y, structure.STRUCTURE_ROAD);
+              });
+            }
+          });
+
+        }
         break;
       }
 
