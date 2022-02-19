@@ -19,7 +19,7 @@ var creepTasks = {
 
         this.findCreepsToDelete(p_room.creeps().harvesters, p_room.memory.maxHarvesterCreeps);
 
-        if (dropminers.length > p_room.memory.maxDropMinerCreeps) {
+        if (dropminers.length > p_room.memory.maxDropMinerCreeps + 1) {
             let creepsToDelete = dropminers.length - p_room.memory.maxDropMinerCreeps;
 
             if (creepsToDelete > 0) {
@@ -34,7 +34,7 @@ var creepTasks = {
         this.findCreepsToDelete(p_room.creeps().haulers, p_room.memory.maxHaulerCreeps);
         this.findCreepsToDelete(p_room.creeps().builders, p_room.memory.maxBuilderCreeps);
 
-        if (upgraders.length > p_room.memory.maxUpgraderCreeps) {
+        if (upgraders.length > p_room.memory.maxUpgraderCreeps + 1) {
             let creepsToDelete = upgraders.length - p_room.memory.maxUpgraderCreeps;
 
             if (creepsToDelete > 0) {
@@ -50,10 +50,6 @@ var creepTasks = {
         if (creepsToRemove.length > 0) {
             creepsToRemove.forEach(creep => {
                 if (!creep) {
-                    return;
-                }
-
-                if (creep.memory.role == role.UPGRADER && creep.store.getUsedCapacity() > 0) {
                     return;
                 }
 
@@ -79,7 +75,7 @@ var creepTasks = {
     },
 
     findCreepsToDelete: function (p_creeps, p_maxCreeps) {
-        if (p_creeps.length > p_maxCreeps) {
+        if (p_creeps.length > p_maxCreeps + 1) {
             let creepsToDelete = p_creeps.length - p_maxCreeps;
 
             if (creepsToDelete > 0) {
@@ -95,6 +91,7 @@ var creepTasks = {
                     if (!creep.memory.ticksToDie) {
                         creepsToRemove += 1;
                         creep.memory.ticksToDie = global.TICKS_TO_DELETE;
+                        console.log('creep.memory.ticksToDie', creep.memory.ticksToDie);
                     }
                 }
 
