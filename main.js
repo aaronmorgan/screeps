@@ -4,14 +4,15 @@ BUGS:
 1. If there are no Harvesters or Haulers/Dropminers then Builders etc should not get energy from the spawn. It blocks creeps from spawning.
 2. Add a 'harvestingSatisfied' flag that would fix #1 above and mean that other creeps like builders cannot be done if not true.
 3. Harvestrs are quitting after 32%.
-4. Once we have one dropminer all harvesters are immediately removed.
-5. Building roads and extensions on terrain 'wall'.
 6. Harvesters are dropping off resouces then going to pick up more if they're left with less than 32%.
 7. Harvesters are not correctly using their sourceId value.
 
 IMPROVEMENTS:
 6. Build an upgrader before any builders, to get to RCL 2 ASAP.
 7. The auto scaling for Haulers is working well but if it scales back up a creep already marked for death won't be unmarked.
+8. Haulers should target nearest dropped energy.
+9. Should check build queue before enquing a second creep of the same type just built.
+10. Upgraders should auto scale like Haulers, so we only work of available container/storage availability/capacity.
 
 */
 
@@ -65,7 +66,6 @@ module.exports.loop = function () {
                     filter: (structure) => structure.hits < structure.hitsMax
                 });
                 if (closestDamagedStructure) {
-                    //console.log('DEFENCE: Repairing damaged structure');
                     tower.repair(closestDamagedStructure);
                 }
             }
@@ -115,7 +115,6 @@ module.exports.loop = function () {
 
     // Drop miners
     // Not sure if the file ternary condition is correct or not.
-    //room.memory.maxDropMinerCreeps = room.getSources().length * (room.memory.minersPerSource ? room.memory.minersPerSource : 0);
     if (!room.memory.maxDropMinerCreeps) {
         room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
     }
@@ -151,7 +150,6 @@ module.exports.loop = function () {
     room.memory.maxBuilderCreeps = room.constructionSites().length > 0 ? 3 : 0;
 
     // Upgraders
-    // Should be a set value + number of containers * 2?
     room.memory.maxUpgraderCreeps = MAX_UPGRADER_CREEPS;
 
     const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
