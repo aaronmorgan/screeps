@@ -26,7 +26,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' HARVESTER creeps to remove...');
 
-                for (let i = 0; i <= creepsToDelete; i++) {
+                for (let i = 1; i <= creepsToDelete; i++) {
                     let creep = harvesters[i];
 
                     if (!creep || creep.memory.ticksToDie) {
@@ -51,7 +51,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' DROPMINER creeps to remove...');
 
-                for (let i = 0; i <= creepsToDelete; i++) {
+                for (let i = 1; i <= creepsToDelete; i++) {
                     creepsToRemove.push(dropminers[i]);
                 }
             }
@@ -63,7 +63,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' HAULER creeps to remove...');
 
-                for (let i = 0; i <= creepsToDelete; i++) {
+                for (let i = 1; i <= creepsToDelete; i++) {
                     let creep = haulers[i];
 
                     if (!creep || creep.memory.ticksToDie) {
@@ -87,7 +87,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' BUILDER creeps to remove...');
 
-                for (let i = 0; i <= creepsToDelete; i++) {
+                for (let i = 1; i <= creepsToDelete; i++) {
                     let creep = builders[i];
 
                     if (!creep || creep.memory.ticksToDie) {
@@ -111,7 +111,7 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' UPGRADER creeps to remove...');
 
-                for (let i = 0; i <= creepsToDelete; i++) {
+                for (let i = 1; i <= creepsToDelete; i++) {
                     creepsToRemove.push(upgraders[i]);
                 }
             }
@@ -119,15 +119,13 @@ var creepTasks = {
 
         // Batch remove all unused creeps.
         if (creepsToRemove.length > 0) {
-            for (let i = 0; i < creepsToRemove.length; i++) {
-                const creep = creepsToRemove[i];
-
+            creepsToRemove.forEach(creep => {
                 if (!creep) {
-                    continue;
+                    return;
                 }
 
                 if (creep.memory.role == role.UPGRADER && creep.store.getUsedCapacity() > 0) {
-                    continue;
+                    return;
                 }
 
                 if (creep.memory.role == role.HARVESTER ||
@@ -135,13 +133,17 @@ var creepTasks = {
                     creep.memory.role == role.BUILDER) {
 
                     console.log('⛔ Error: creep with role ' + creep.memory.role + ' should manage it\'s own cleanup');
-                    continue;
+                    return;
                 }
 
 
-                console.log('Removing creep ' + creep.id)
+                for (const resourceType in creep.store) {
+                    creep.drop(resourceType);
+                }
+
+                console.log('💀 Force removing creep ' + creep.name + ', ' + creep.id)
                 creep.suicide();
-            }
+            });
         } else {
             //console.log('DEBUG: None found for room ' + p_room.name);
         }
