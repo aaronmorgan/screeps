@@ -276,12 +276,6 @@ const constructionJobsTemplate = [
     rclLevel: 3,
     type: "road",
     x: 4,
-    y: 0
-  },
-  {
-    rclLevel: 3,
-    type: "road",
-    x: 4,
     y: -1
   },
   {
@@ -343,12 +337,6 @@ const constructionJobsTemplate = [
     type: "road",
     x: -4,
     y: 2
-  },
-  {
-    rclLevel: 3,
-    type: "road",
-    x: -4,
-    y: 0
   },
   {
     rclLevel: 3,

@@ -34,9 +34,9 @@ var creepFactory = {
     },
 
     validateCache: function (p_room) {
-        if (!p_room.memory._creepBuildQueue) {
+        if (!p_room.memory.creepBuildQueue) {
             console.log('INFO: Creating creep build queue...');
-            p_room.memory._creepBuildQueue = [];
+            p_room.memory.creepBuildQueue = [];
         }
     },
 
@@ -44,12 +44,12 @@ var creepFactory = {
         this.validateCache(p_room);
 
         // Temporarily only allow one queued creep job.
-        if (p_room.memory._creepBuildQueue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
+        if (p_room.memory.creepBuildQueue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
             return;
         }
 
         p_room.memory._creepBuildQueue.push(p_buildJob);
-        console.log('INFO: New creep build job added, ' + p_room.memory._creepBuildQueue.length + ' jobs queued');
+        console.log('INFO: New creep build job added, ' + p_room.memory.creepBuildQueue.length + ' jobs queued');
     },
 
     processBuildQueue: function (p_room, p_spawn) {
@@ -59,11 +59,11 @@ var creepFactory = {
 
         this.validateCache(p_room);
 
-        if (p_room.memory._creepBuildQueue.length == 0) {
+        if (p_room.memory.creepBuildQueue.length == 0) {
             return;
         }
 
-        const job = p_room.memory._creepBuildQueue[0];
+        const job = p_room.memory.creepBuildQueue[0];
         const name = job.name + Game.time;
 
         const bodyCost = this.bodyCost(job.body);
@@ -83,29 +83,29 @@ var creepFactory = {
             return;
         }
 
-        p_room.memory._creepBuildQueue.shift();
+        p_room.memory.creepBuildQueue.shift();
         // this.logBuildQueueDetails();
     },
 
     evaluateBuildQueue: function (p_room) {
-        if (p_room.memory._creepBuildQueue.length == 0) {
+        if (p_room.memory.creepBuildQueue.length == 0) {
             return;
         }
 
-        const job = p_room.memory._creepBuildQueue[0];
+        const job = p_room.memory.creepBuildQueue[0];
 
         this.logBuildQueueDetails(p_room, job);
 
         var buildCost = this.bodyCost(job.body);
 
         if (buildCost > p_room.energyCapacityAvailable) {
-            p_room.memory._creepBuildQueue.shift();
+            p_room.memory.creepBuildQueue.shift();
         }
     },
 
     logBuildQueueDetails: function (p_room, p_job) {
         console.log(
-            'INFO: Build queue has ' + p_room.memory._creepBuildQueue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining ' +
+            'INFO: Build queue has ' + p_room.memory.creepBuildQueue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH + ' jobs remaining ' +
             '(' + p_job.name + '|' + this.bodyCost(p_job.body) + ')');
     },
 
@@ -140,7 +140,7 @@ var creepFactory = {
 
     clearBuildQueue: function (p_room) {
         console.log('⚠️ Warning: Clearing creep build queue');
-        p_room.memory._creepBuildQueue = [];
+        p_room.memory.creepBuildQueue = [];
     },
 };
 

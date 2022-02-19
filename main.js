@@ -9,12 +9,8 @@ BUGS:
 7. Harvesters are not correctly using their sourceId value.
 
 IMPROVEMENTS:
-1. Don't despawn a hauler as soon as the DropMiner count changes. Wait 10 ticks or so to ensure it's still necessary to remove it.
-2. Set the 'max dropminers per source' when producing the top DropMiner.
-3. All creeps with Carry feature should drop resources when ticks to live < 2.
-4. Structure build queue should only place one construction site at a time.
-5. Force a refresh of room.droppedResources whenever a creep picks some up.
 6. Build an upgrader before any builders, to get to RCL 2 ASAP.
+7. The auto scaling for Haulers is working well but if it scales back up a creep already marked for death won't be unmarked.
 
 */
 
