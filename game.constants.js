@@ -49,5 +49,5 @@ module.exports.EXIT_CODE = {
 
     module.exports.global = {
         MAX_CREEP_BUILD_QUEUE_LENGTH: 1,
-        TICKS_TO_DELETE: 50
+        TICKS_TO_DELETE: 200
     };
