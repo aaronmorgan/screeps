@@ -6,6 +6,7 @@ BUGS:
 3. Harvestrs are quitting after 32%.
 6. Harvesters are dropping off resouces then going to pick up more if they're left with less than 32%.
 7. Harvesters are not correctly using their sourceId value.
+8. Race condition if a creep type is spawning the logic may queue another of that type because it's not 
 
 IMPROVEMENTS:
 6. Build an upgrader before any builders, to get to RCL 2 ASAP.
@@ -120,31 +121,35 @@ module.exports.loop = function () {
     }
 
     // Haulers
-    let allDroppedEnergy = 0;
-    room.droppedResources().forEach(x => {
-        allDroppedEnergy += x.energy
-    });
+    if (structures.container) {
+        let allDroppedEnergy = 0;
+        room.droppedResources().forEach(x => {
+            allDroppedEnergy += x.energy
+        });
 
-    let allContainersCapacity = 0;
+        let allContainersCapacity = 0;
 
-    structures.container.forEach(x => {
-        allContainersCapacity += x.storeCapacity - x.store.energy;
-    });
+        structures.container.forEach(x => {
+            allContainersCapacity += x.storeCapacity - x.store.energy;
+        });
 
-    // Cap the dropped energy count so we don't try to pickup/store more than we have capacity for.
-    if (allDroppedEnergy > allContainersCapacity) {
-        allDroppedEnergy = allContainersCapacity;
-    }
+        // Cap the dropped energy count so we don't try to pickup/store more than we have capacity for.
+        if (allDroppedEnergy > allContainersCapacity) {
+            allDroppedEnergy = allContainersCapacity;
+        }
 
-    if (allContainersCapacity > 0) {
-        console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
+        if (allContainersCapacity > 0) {
+            console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
 
-        const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
-        const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
+            const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
+            const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
 
-        room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+            room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+        } else {
+            room.memory.maxHaulerCreeps = dropminers.length;
+        }
     } else {
-        room.memory.maxHaulerCreeps = dropminers.length
+        room.memory.maxHaulerCreeps = dropminers.length;
     }
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
@@ -167,7 +172,7 @@ module.exports.loop = function () {
     console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
     console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
 
-    if (room.memory.creepBuildQueue && (room.memory.creepBuildQueue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
+    if (room.memory.creepBuildQueue && (room.memory.creepBuildQueue.queue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
         // HARVESTER creep
         if (!sufficientHarvesters) {
             let bodyType = [];
@@ -312,7 +317,6 @@ module.exports.loop = function () {
             }
         }
 
-        console.log('eh? ', (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0)));
         // BUILDER creep
         if (!sufficientBuilders &&
             (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0))) {
