@@ -1,4 +1,5 @@
 /*
+
 BUGS: 
 1. If there are no Harvesters or Haulers/Dropminers then Builders etc should not get energy from the spawn. It blocks creeps from spawning.
 2. Add a 'harvestingSatisfied' flag that would fix #1 above and mean that other creeps like builders cannot be done if not true.
@@ -163,7 +164,7 @@ module.exports.loop = function () {
     console.log('  Builders: ' + builders.length + '/' + room.memory.maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
     console.log('  Upgraders: ' + upgraders.length + '/' + room.memory.maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
 
-    if (room.memory._creepBuildQueue && (room.memory._creepBuildQueue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
+    if (room.memory.creepBuildQueue && (room.memory.creepBuildQueue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
         // HARVESTER creep
         if (!sufficientHarvesters) {
             let bodyType = [];
@@ -308,6 +309,7 @@ module.exports.loop = function () {
             }
         }
 
+        console.log('eh? ', (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0)));
         // BUILDER creep
         if (!sufficientBuilders &&
             (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0))) {

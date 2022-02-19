@@ -48,7 +48,7 @@ var creepFactory = {
             return;
         }
 
-        p_room.memory._creepBuildQueue.push(p_buildJob);
+        p_room.memory.creepBuildQueue.push(p_buildJob);
         console.log('INFO: New creep build job added, ' + p_room.memory.creepBuildQueue.length + ' jobs queued');
     },
 
