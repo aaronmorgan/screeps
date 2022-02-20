@@ -7,9 +7,9 @@ BUGS:
 6. Harvesters are dropping off resouces then going to pick up more if they're left with less than 32%.
 7. Harvesters are not correctly using their sourceId value.
 8. Race condition if a creep type is spawning the logic may queue another of that type because it's not 
+9. Builder will not build until it's at 100% capacity.
 
 IMPROVEMENTS:
-6. Build an upgrader before any builders, to get to RCL 2 ASAP.
 7. The auto scaling for Haulers is working well but if it scales back up a creep already marked for death won't be unmarked.
 8. Haulers should target nearest dropped energy.
 9. Should check build queue before enquing a second creep of the same type just built.
