@@ -8,37 +8,37 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleUpgrader = {
 
-  tryBuild: function(p_room, p_spawn, p_energyCapacityAvailable) {
+  tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable) {
     let bodyType = [];
 
     if (p_room.storage && p_energyCapacityAvailable >= 1750) {
-        bodyType = [
-            WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
-            CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-            MOVE, MOVE, MOVE, MOVE, MOVE
-        ];
+      bodyType = [
+        WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
+        CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+        MOVE, MOVE, MOVE, MOVE, MOVE
+      ];
     } else if (p_room.storage && p_energyCapacityAvailable >= 1000) {
-        bodyType = [
-            WORK, WORK, WORK, WORK, WORK, WORK,
-            CARRY, CARRY, CARRY, CARRY,
-            MOVE, MOVE, MOVE, MOVE
-        ];
-        // Prioritise movement overy carry capaciity. If the container is repeatedly low
-        // on energy we don't want to be waiting.
+      bodyType = [
+        WORK, WORK, WORK, WORK, WORK, WORK,
+        CARRY, CARRY, CARRY, CARRY,
+        MOVE, MOVE, MOVE, MOVE
+      ];
+      // Prioritise movement overy carry capaciity. If the container is repeatedly low
+      // on energy we don't want to be waiting.
     } else if (p_energyCapacityAvailable >= 550) {
-        bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+      bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
     } else if (p_energyCapacityAvailable >= 400) {
-        bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+      bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
     } else if (p_energyCapacityAvailable >= 350) {
-        bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
+      bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
     } else {
-        bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
+      bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
     }
 
     if (!_.isEmpty(bodyType)) {
-        return creepFactory.create(p_room, p_spawn, role.UPGRADER, bodyType, {
-            role: role.UPGRADER
-        });
+      return creepFactory.create(p_room, p_spawn, role.UPGRADER, bodyType, {
+        role: role.UPGRADER
+      });
     }
   },
 
@@ -46,14 +46,15 @@ var roleUpgrader = {
   run: function (p_creep) {
     p_creep.checkTicksToLive();
 
+    let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+
     if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
       p_creep.memory.upgrading = false;
-      p_creep.say('🔌 withdraw');
+      //    p_creep.say('🔌 withdraw');
     }
 
     if (!p_creep.memory.upgrading && p_creep.store.getFreeCapacity() == 0) {
       p_creep.memory.upgrading = true;
-      p_creep.say('⚒️ upgrade');
     }
 
     if (p_creep.memory.upgrading) {
@@ -83,9 +84,9 @@ var roleUpgrader = {
           });
         }
       } else {
-        if (p_creep.room.controller >= 3) {
-          return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
-        }
+        // if (p_creep.room.controller >= 3) {
+        //   return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
+        // }
 
         const resourceEnergy = p_creep.room.droppedResources();
         const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
@@ -101,33 +102,35 @@ var roleUpgrader = {
             const pickupResult = p_creep.pickup(source);
 
             if (pickupResult == ERR_NOT_IN_RANGE) {
-              p_creep.say('⛏ pickup');
+              p_creep.say('⚒️ pickup');
               p_creep.moveTo(source, {
                 visualizePathStyle: {
                   stroke: '#ffaa00'
                 }
               });
 
-              p_creep.say('⚡ ' + creepFillPercentage + '%')
               return;
             } else if (pickupResult == OK) {
               p_creep.room.refreshDroppedResources();
             }
           }
-        }
+        } else {
 
-        let sources = p_creep.room.sources();
-        let nearestSource = p_creep.pos.findClosestByPath(sources);
+          let sources = p_creep.room.sources();
+          let nearestSource = p_creep.pos.findClosestByPath(sources);
 
-        if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-          p_creep.moveTo(nearestSource, {
-            visualizePathStyle: {
-              stroke: '#3370ac'
-            }
-          });
+          if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+            p_creep.moveTo(nearestSource, {
+              visualizePathStyle: {
+                stroke: '#3370ac'
+              }
+            });
+          }
         }
       }
     }
+
+    p_creep.say('⚒️ ' + creepFillPercentage + '%');
   }
 };
 
