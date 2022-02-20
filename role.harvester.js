@@ -68,6 +68,7 @@ var roleHarvester = {
         p_creep.checkTicksToLive();
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+        p_creep.say('⛏ ' + creepFillPercentage + '%')
 
         if (p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0) {
             // Favor dropped energy first so havesters can act as haulers to the dropminers.
@@ -121,7 +122,6 @@ var roleHarvester = {
             }
         } else {
             if (p_creep.room.creeps().haulers.length > 0) {
-                console.log('dropping')
                 p_creep.drop(RESOURCE_ENERGY)
                 return;
             }
@@ -154,8 +154,6 @@ var roleHarvester = {
                 }
             }
         }
-
-        p_creep.say('⛏ ' + creepFillPercentage + '%')
     }
 };
 

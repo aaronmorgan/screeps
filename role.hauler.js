@@ -60,7 +60,6 @@ var roleHauler = {
         const newTarget = p_creep.room.droppedResources()[0];
 
         if (!newTarget) {
-          //console.log('⚠️ Warning: NO NEW TARGET');
           return;
         }
 
@@ -73,7 +72,7 @@ var roleHauler = {
       if (pickupResult == ERR_NOT_IN_RANGE) {
         if (creepFillPercentage > 25) {
           p_creep.memory.harvesting = false;
-          
+
           return;
         }
 
@@ -124,21 +123,26 @@ var roleHauler = {
         p_creep.room.refreshDroppedResources();
       }
     } else {
-      // They're not always returned in this order, is that a problem?
-      const targets = _.filter(p_creep.room.structures().all, (structure) => {
+      let targets = _.filter(p_creep.room.structures().all, (structure) => {
         return (
-            structure.structureType == STRUCTURE_TOWER ||
             structure.structureType == STRUCTURE_SPAWN ||
-            structure.structureType == STRUCTURE_EXTENSION ||
-            structure.structureType == STRUCTURE_CONTAINER ||
-            structure.structureType == STRUCTURE_STORAGE) &&
+            structure.structureType == STRUCTURE_EXTENSION) &&
           structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
       });
+
+      if (!targets || targets.length == 0) {
+        targets = _.filter(p_creep.room.structures().all, (structure) => {
+          return (
+              structure.structureType == STRUCTURE_TOWER ||
+              structure.structureType == STRUCTURE_CONTAINER ||
+              structure.structureType == STRUCTURE_STORAGE) &&
+            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+        });
+      }
 
       const dropSite = p_creep.pos.findClosestByPath(targets);
 
       if (p_creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        //creep.say('⚡  transfer ');
         p_creep.moveTo(dropSite, {
           visualizePathStyle: {
             stroke: '#ffffff'

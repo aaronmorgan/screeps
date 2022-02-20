@@ -47,10 +47,10 @@ var roleUpgrader = {
     p_creep.checkTicksToLive();
 
     let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+    p_creep.say('⚒️ ' + creepFillPercentage + '%');
 
     if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
       p_creep.memory.upgrading = false;
-      //    p_creep.say('🔌 withdraw');
     }
 
     if (!p_creep.memory.upgrading && p_creep.store.getFreeCapacity() == 0) {
@@ -68,8 +68,8 @@ var roleUpgrader = {
     } else {
       const targets = _.filter(p_creep.room.structures().all, (structure) => {
         return (
-            structure.structureType == 'container' ||
-            structure.structureType == 'storage') &&
+            structure.structureType == STRUCTURE_CONTAINER ||
+            structure.structureType == STRUCTURE_STORAGE) &&
           structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity(); // TODO: Should this getFreeCapacity check be here?
       });
 
@@ -95,14 +95,11 @@ var roleUpgrader = {
           const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
 
           if (!_.isEmpty(energyTarget)) {
-            let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-
             source = Game.getObjectById(energyTarget.id);
 
             const pickupResult = p_creep.pickup(source);
 
             if (pickupResult == ERR_NOT_IN_RANGE) {
-              p_creep.say('⚒️ pickup');
               p_creep.moveTo(source, {
                 visualizePathStyle: {
                   stroke: '#ffaa00'
@@ -129,8 +126,6 @@ var roleUpgrader = {
         }
       }
     }
-
-    p_creep.say('⚒️ ' + creepFillPercentage + '%');
   }
 };
 
