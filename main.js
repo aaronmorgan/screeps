@@ -14,7 +14,7 @@ IMPROVEMENTS:
 8. Haulers should target nearest dropped energy.
 9. Should check build queue before enquing a second creep of the same type just built.
 10. Upgraders should auto scale like Haulers, so we only work of available container/storage availability/capacity.
-
+11. If Harvester cannot access energy source it should pickup dropped energy.
 */
 
 require('prototype.room')();
@@ -34,11 +34,6 @@ let infrastructureTasks = require('tasks.infrastructure');
 let creepTasks = require('tasks.creeps');
 let creepFactory = require('tasks.build.creeps');
 
-const MAX_UPGRADER_CREEPS = 4;
-
-// TODO:
-// 1. Hauler should drop at spawn if no storage and builders should pickup dropped energy.
-
 module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
     let spawn = Game.spawns['Spawn1'];
@@ -51,7 +46,7 @@ module.exports.loop = function () {
 
     if (!room.memory.game) {
         room.memory.game = {
-            phase: 0
+            phase: 1
         }
     }
 
@@ -122,36 +117,44 @@ module.exports.loop = function () {
         room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
     }
 
+
     // Haulers
-    if (structures.container) {
+    if (!room.memory.maxHaulerCreeps) {
+        room.memory.maxHaulerCreeps = 1 + dropminers.length;
+    }
+
+    if (Game.tick % 10 != 0) {
         let allDroppedEnergy = 0;
         room.droppedResources().forEach(x => {
             allDroppedEnergy += x.energy
         });
 
-        let allContainersCapacity = 0;
+        if (structures.container) {
 
-        structures.container.forEach(x => {
-            allContainersCapacity += x.storeCapacity - x.store.energy;
-        });
 
-        // Cap the dropped energy count so we don't try to pickup/store more than we have capacity for.
-        if (allDroppedEnergy > allContainersCapacity) {
-            allDroppedEnergy = allContainersCapacity;
-        }
+            let allContainersCapacity = 0;
+            structures.container.forEach(x => {
+                allContainersCapacity += x.storeCapacity - x.store.energy;
+            });
 
-        if (allContainersCapacity > 0) {
-            console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
+            // Cap the dropped energy count so we don't try to pickup/store more than we have capacity for.
+            if (allDroppedEnergy > allContainersCapacity) {
+                allDroppedEnergy = allContainersCapacity;
+            }
 
-            const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
-            const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
+            if (allContainersCapacity > 0) {
+                console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
 
-            room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+                const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
+                const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
+                room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+            } else {
+                const additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
+                room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;s            }
         } else {
-            room.memory.maxHaulerCreeps = dropminers.length;
+            const additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
+            room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
         }
-    } else {
-        room.memory.maxHaulerCreeps = dropminers.length;
     }
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
@@ -176,20 +179,32 @@ module.exports.loop = function () {
 
     if (room.memory.creepBuildQueue && (room.memory.creepBuildQueue.queue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
         switch (room.memory.game.phase) {
-            case 0: {
+            case 1: {
+                // First turn; get a Harvester out immediately.
                 if (roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters) == OK) {
                     room.memory.game.phase += 1
                 }
 
                 break;
             }
-            case 1: {
+            case 2: {
+                // With the Harvester from phase 1 get an Upgrader out immediately to get the RCL to level 2.
                 if (roleUpgrader.tryBuild(room, spawn, energyCapacityAvailable) == OK) {
                     room.memory.game.phase += 1
                 }
                 break;
             }
             default: {
+                // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
+                // TODO Fix this, it flushes the build queue in the early game.
+                // if ((harvesters.length == 0 && dropminers.length == 0) ||
+                //     (harvesters.length == 0 && haulers.length == 0)) {
+                //     creepFactory.clearBuildQueue(room);
+
+                //     // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
+                //     energyCapacityAvailable = room.energyAvailable;
+                // }
+
                 // HARVESTER creep
                 if (!sufficientHarvesters) {
                     roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters);

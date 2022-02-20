@@ -17,13 +17,6 @@ const {
 var creepFactory = {
 
     create: function (p_room, p_spawn, p_role, p_body, p_memory) {
-        if (p_spawn.spawning) {
-            if (p_role == p_spawn.spawning.name) {
-                console.log('INFO: Creep of type \'' + p_role + '\' already being built');
-                return;
-            }
-        }
-
         this.enqueueBuildJob(
             p_room,
             p_spawn, {
@@ -37,24 +30,22 @@ var creepFactory = {
 
     validateCache: function (p_room) {
         if (!p_room.memory.creepBuildQueue) {
-            this.clearBuildQueue();
+            this.clearBuildQueue(p_room);
         }
     },
 
     enqueueBuildJob: function (p_room, p_spawn, p_buildJob) {
         this.validateCache(p_room);
 
-        if (p_room.memory.creepBuildQueue.queue.length == 0 && p_room.memory.creepBuildQueue.spawning ||
-            p_room.memory.creepBuildQueue.queue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
+        if (p_room.memory.creepBuildQueue.queue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
             return;
         }
 
         // This may not actually be catching the edge case it was meant to.
-        if (p_room.memory.creepBuildQueue.spawning &&
-            p_room.memory.creepBuildQueue.queue[0].body.name == p_buildJob.name) {
-            console.log('⚠️ WARNING: Discarding build job because creep type ' + p_buildJob.name + ' is already queued');
-            return;
-        }
+        // if (p_spawn.spawning && p_room.memory.creepBuildQueue.queue[0].body.name == p_buildJob.name) {
+        //     console.log('⚠️ WARNING: Discarding build job because creep type ' + p_buildJob.name + ' is already queued');
+        //     return;
+        // }
 
         p_room.memory.creepBuildQueue.queue.push(p_buildJob);
         //console.log('INFO: New creep build job added, ' + p_room.memory.creepBuildQueue.queue.length + ' jobs queued');
@@ -91,7 +82,6 @@ var creepFactory = {
             return;
         }
 
-        p_room.memory.creepBuildQueue.spawning = true;
         p_room.memory.creepBuildQueue.queue.shift();
     },
 
@@ -133,8 +123,6 @@ var creepFactory = {
                     align: 'left',
                     opacity: 0.8
                 });
-        } else {
-            p_room.memory.creepBuildQueue.spawning = false;
         }
     },
 
@@ -151,8 +139,7 @@ var creepFactory = {
     clearBuildQueue: function (p_room) {
         console.log('⚠️ Warning: Clearing creep build queue');
         p_room.memory.creepBuildQueue = {
-            queue: [],
-            spawning: false
+            queue: []
         }
     },
 };
