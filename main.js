@@ -130,9 +130,8 @@ module.exports.loop = function () {
         });
 
         if (structures.container) {
-
-
             let allContainersCapacity = 0;
+
             structures.container.forEach(x => {
                 allContainersCapacity += x.storeCapacity - x.store.energy;
             });
@@ -150,7 +149,8 @@ module.exports.loop = function () {
                 room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
             } else {
                 const additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
-                room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;s            }
+                room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+            }
         } else {
             const additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
             room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;

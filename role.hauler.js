@@ -7,7 +7,6 @@ require('prototype.creep')();
 
 let creepFactory = require('tasks.build.creeps');
 
-
 var roleHauler = {
 
   tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable) {
@@ -44,9 +43,9 @@ var roleHauler = {
       p_creep.memory.harvesting = false;
     }
 
-    let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+    const creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+    p_creep.say('🚚 ' + creepFillPercentage + '%');
 
-    //if (creepFillPercentage < 60 && p_creep.memory.harvesting == true) {
     if (p_creep.memory.harvesting == true) {
       let largestDroppedEnergy = _.last(p_creep.room.droppedResources()); // TODO Should target closest?
 
@@ -74,6 +73,7 @@ var roleHauler = {
       if (pickupResult == ERR_NOT_IN_RANGE) {
         if (creepFillPercentage > 25) {
           p_creep.memory.harvesting = false;
+          
           return;
         }
 
@@ -124,25 +124,16 @@ var roleHauler = {
         p_creep.room.refreshDroppedResources();
       }
     } else {
-      let structures = p_creep.room.structures();
-      let targets = structures.spawn.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-
-      if (!targets || targets.length == 0 && structures.tower) {
-        targets = structures.tower.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-      }
-
-      if (!targets || targets.length == 0 && structures.extension) {
-        targets = structures.extension.filter(structure => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-      }
-
-      if (!targets || targets.length == 0) {
-        targets = _.filter(structures.all, (structure) => {
-          return (
-              structure.structureType == 'container' ||
-              structure.structureType == 'storage') &&
-            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-        });
-      };
+      // They're not always returned in this order, is that a problem?
+      const targets = _.filter(p_creep.room.structures().all, (structure) => {
+        return (
+            structure.structureType == STRUCTURE_TOWER ||
+            structure.structureType == STRUCTURE_SPAWN ||
+            structure.structureType == STRUCTURE_EXTENSION ||
+            structure.structureType == STRUCTURE_CONTAINER ||
+            structure.structureType == STRUCTURE_STORAGE) &&
+          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+      });
 
       const dropSite = p_creep.pos.findClosestByPath(targets);
 
@@ -159,8 +150,6 @@ var roleHauler = {
         p_creep.memory.harvesting = true;
       }
     }
-
-    p_creep.say('🚚 ' + creepFillPercentage + '%');
   }
 };
 

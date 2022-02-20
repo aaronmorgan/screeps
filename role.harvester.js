@@ -97,8 +97,6 @@ var roleHarvester = {
                 } else if (pickupResult == OK) {
                     p_creep.room.refreshDroppedResources();
                 }
-
-                p_creep.say('⛏ ' + creepFillPercentage + '%')
             } else {
                 // Cater for the siuation where the creep wanders into another room.
                 if (_.isEmpty(p_creep.room.memory.sources)) {
@@ -120,15 +118,22 @@ var roleHarvester = {
                 } else if (harvestResult == OK) {
                     p_creep.memory.isHarvesting = p_creep.store.getFreeCapacity() != 0;
                 }
-
-                p_creep.say('⛏ ' + creepFillPercentage + '%')
             }
         } else {
+            if (p_creep.room.creeps().haulers.length > 0) {
+                console.log('dropping')
+                p_creep.drop(RESOURCE_ENERGY)
+                return;
+            }
+
+            // They're not always returned in this order, is that a problem?
             const targets = _.filter(p_creep.room.structures().all, (structure) => {
-                return (structure.structureType == 'spawn' ||
-                        structure.structureType == 'extension' ||
-                        structure.structureType == 'tower') &&
-                    // TODO Add container and storage.
+                return (
+                        structure.structureType == STRUCTURE_TOWER ||
+                        structure.structureType == STRUCTURE_SPAWN ||
+                        structure.structureType == STRUCTURE_EXTENSION ||
+                        structure.structureType == STRUCTURE_CONTAINER ||
+                        structure.structureType == STRUCTURE_STORAGE) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             });
 
@@ -150,7 +155,7 @@ var roleHarvester = {
             }
         }
 
-        p_creep.say('⚡ ' + creepFillPercentage + '%')
+        p_creep.say('⛏ ' + creepFillPercentage + '%')
     }
 };
 

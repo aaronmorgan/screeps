@@ -1,5 +1,27 @@
 // ICONS ⛔ ⚠️ 🛠️ ➖ ❌ 💀
 
+//     STRUCTURE_CONTAINER: 'container',
+//     STRUCTURE_CONTROLLER: 'controller',
+//     STRUCTURE_EXTENSION: 'extension',
+//     STRUCTURE_EXTRACTOR: 'extractor',
+//     STRUCTURE_FACTORY: 'factory',
+//     STRUCTURE_INVADER_CORE: 'invaderCore',
+//     STRUCTURE_KEEPER_LAIR: 'keeperLair',
+//     STRUCTURE_LAB: 'lab',
+//     STRUCTURE_LINK: 'link',
+//     STRUCTURE_NUKER: 'nuker',
+//     STRUCTURE_OBSERVER: 'observer',
+//     STRUCTURE_PORTAL: 'portal',
+//     STRUCTURE_POWER_BANK: 'powerBank',
+//     STRUCTURE_POWER_SPAWN: 'powerSpawn',
+//     STRUCTURE_RAMPART: 'rampart',
+//     STRUCTURE_ROAD: 'road',
+//     STRUCTURE_SPAWN: 'spawn',
+//     STRUCTURE_STORAGE: 'storage',
+//     STRUCTURE_TERMINAL: 'terminal',
+//     STRUCTURE_TOWER: 'tower',
+//     STRUCTURE_WALL: 'constructedWall'
+
 module.exports.EXIT_CODE = {
         '0': 'OK',
         '-1': 'ERR_NOT_OWNER',
@@ -13,30 +35,6 @@ module.exports.EXIT_CODE = {
         '-11': 'ERR_TIRED',
         '-12': 'ERR_NO_BODYPART',
         '-14': 'ERR_RCL_NOT_ENOUGH'
-    },
-
-    module.exports.structure = {
-        STRUCTURE_SPAWN: 'spawn',
-        STRUCTURE_EXTENSION: 'extension',
-        STRUCTURE_ROAD: 'road',
-        STRUCTURE_WALL: 'constructedWall',
-        STRUCTURE_RAMPART: 'rampart',
-        STRUCTURE_KEEPER_LAIR: 'keeperLair',
-        STRUCTURE_PORTAL: 'portal',
-        STRUCTURE_CONTROLLER: 'controller',
-        STRUCTURE_LINK: 'link',
-        STRUCTURE_STORAGE: 'storage',
-        STRUCTURE_TOWER: 'tower',
-        STRUCTURE_OBSERVER: 'observer',
-        STRUCTURE_POWER_BANK: 'powerBank',
-        STRUCTURE_POWER_SPAWN: 'powerSpawn',
-        STRUCTURE_EXTRACTOR: 'extractor',
-        STRUCTURE_LAB: 'lab',
-        STRUCTURE_TERMINAL: 'terminal',
-        STRUCTURE_CONTAINER: 'container',
-        STRUCTURE_NUKER: 'nuker',
-        STRUCTURE_FACTORY: 'factory',
-        STRUCTURE_INVADER_CORE: 'invaderCore',
     },
 
     module.exports.role = {

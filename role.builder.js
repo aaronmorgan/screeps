@@ -40,11 +40,9 @@ var roleBuilder = {
 
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
-            p_creep.say('🔌 withdraw');
         }
         if (!p_creep.memory.building && p_creep.carry.energy == p_creep.carryCapacity) {
             p_creep.memory.building = true;
-            p_creep.say('🔨 build');
         }
 
         if (p_creep.memory.building) {
@@ -90,8 +88,6 @@ var roleBuilder = {
                 const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
 
                 if (!_.isEmpty(energyTarget)) {
-                    let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-
                     let source = Game.getObjectById(energyTarget.id);
 
                     if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
@@ -101,7 +97,6 @@ var roleBuilder = {
                                 stroke: '#ffaa00'
                             }
                         });
-                        p_creep.say('⚡ ' + creepFillPercentage + '%')
                     }
 
                     return;
@@ -122,6 +117,9 @@ var roleBuilder = {
                 });
             }
         }
+
+        let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+        p_creep.say('🔨 ' + creepFillPercentage + '%')
     }
 }
 

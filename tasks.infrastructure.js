@@ -1,6 +1,5 @@
 const {
-  EXIT_CODE,
-  structure
+  EXIT_CODE
 } = require('game.constants');
 
 const {
