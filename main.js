@@ -142,7 +142,7 @@ module.exports.loop = function () {
             }
 
             if (allContainersCapacity > 0) {
-                console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
+                //console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
 
                 const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
                 const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);

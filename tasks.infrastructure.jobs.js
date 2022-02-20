@@ -40,11 +40,11 @@ module.exports.jobs = {
                 x: -4,
                 y: 0
             },
-            // {
-            //     type: "rcl.container",
-            //     x: 0,
-            //     y: 0
-            // }
+            {
+                type: "rcl.container",
+                x: 0,
+                y: 0
+            }
         ]
     },
     RCL_3: {

@@ -38,6 +38,9 @@ var roleBuilder = {
         p_creep.checkTicksToDie();
         p_creep.checkTicksToLive();
 
+        let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+        p_creep.say('🔨 ' + creepFillPercentage + '%')
+
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
         }
@@ -62,8 +65,8 @@ var roleBuilder = {
             }
         } else {
             let targets = _.filter(p_creep.room.structures().all, (structure) => {
-                return (structure.structureType == 'container' ||
-                        structure.structureType == 'storage') &&
+                return (structure.structureType == STRUCTURE_CONTAINER ||
+                        structure.structureType == STRUCTURE_STORAGE) &&
                     //structure.structureType == 'extension') &&
                     structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity();
             });
@@ -72,7 +75,6 @@ var roleBuilder = {
                 const dropSite = p_creep.pos.findClosestByPath(targets);
 
                 if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    p_creep.say('🔌 withdraw');
                     return p_creep.moveTo(dropSite, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
@@ -91,7 +93,6 @@ var roleBuilder = {
                     let source = Game.getObjectById(energyTarget.id);
 
                     if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
-                        p_creep.say('⛏ pickup');
                         p_creep.moveTo(source, {
                             visualizePathStyle: {
                                 stroke: '#ffaa00'
@@ -109,7 +110,6 @@ var roleBuilder = {
 
             if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
                 p_creep.memory.harvesting = true;
-                p_creep.say('⛏ harvest ');
                 return p_creep.moveTo(nearestSource, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
@@ -117,9 +117,6 @@ var roleBuilder = {
                 });
             }
         }
-
-        let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-        p_creep.say('🔨 ' + creepFillPercentage + '%')
     }
 }
 
