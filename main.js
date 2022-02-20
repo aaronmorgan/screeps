@@ -74,16 +74,16 @@ module.exports.loop = function () {
         console.log('⚠️ WARNING: No towers!');
     }
 
-    if (Game.tick % 50 == 0) {
-        console.log('INFO: Checking for deleted creeps...');
-        room.myCreeps().forEach(c => {
-            const creep = Game.creeps[c.name];
-            if (!Game.creeps[creep]) {
-                delete Memory.creeps[creep];
-                console.log('INFO: Clearing creep memory:', creep);
-            }
-        });
-    }
+    // if (Game.tick % 50 == 0) {
+    //     console.log('INFO: Checking for deleted creeps...');
+    //     room.myCreeps().forEach(c => {
+    //         const creep = Game.creeps[c.name];
+    //         if (!Game.creeps[creep]) {
+    //             delete Memory.creeps[creep];
+    //             console.log('INFO: Clearing creep memory:', creep);
+    //         }
+    //     });
+    // }
 
     let energyCapacityAvailable = room.energyCapacityAvailable;
 
@@ -97,14 +97,14 @@ module.exports.loop = function () {
         dropminers: dropminers.length
     };
 
-    // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
-    if ((harvesters.length == 0 && dropminers.length == 0) ||
-        (harvesters.length == 0 && haulers.length == 0)) {
-        creepFactory.clearBuildQueue(room);
+    // // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
+    // if ((harvesters.length == 0 && dropminers.length == 0) ||
+    //     (harvesters.length == 0 && haulers.length == 0)) {
+    //     creepFactory.clearBuildQueue(room);
 
-        // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
-        energyCapacityAvailable = room.energyAvailable;
-    }
+    //     // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
+    //     energyCapacityAvailable = room.energyAvailable;
+    // }
 
     // Harvesters
     room.memory.maxHarvesterCreeps = (dropminers.length == 0) ? // || haulers.length == 0) ?
@@ -123,7 +123,7 @@ module.exports.loop = function () {
         room.memory.maxHaulerCreeps = 1 + dropminers.length;
     }
 
-    if (Game.tick % 10 != 0) {
+    if (Game.tick % 10 == 0) {
         let allDroppedEnergy = 0;
         room.droppedResources().forEach(x => {
             allDroppedEnergy += x.energy
@@ -155,6 +155,32 @@ module.exports.loop = function () {
             const additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
             room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
         }
+
+        if (structures.container) {
+            let allContainersCapacity = 0;
+            let allContainersEnergy = 0;
+
+            structures.container.forEach(x => {
+                allContainersCapacity += x.storeCapacity;
+                allContainersEnergy += x.store.energy;
+            });
+
+            if (allContainersCapacity > 0) {
+                console.log('Stored stored energy vs container capacity: ' + allContainersEnergy + '/' + allContainersCapacity);
+
+                const droppedEnergyAsPercentageOfContainerCapacity = (allContainersEnergy / allContainersCapacity * 100);
+                const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
+
+                console.log('droppedEnergyAsPercentageOfContainerCapacity', droppedEnergyAsPercentageOfContainerCapacity);
+                console.log('additionalHaulersModifier', additionalHaulersModifier);
+
+                room.memory.maxUpgraderCreeps = upgraders.length + additionalHaulersModifier;
+            } else {
+                room.memory.maxUpgraderCreeps = upgraders.length;
+            }
+        } else {
+            room.memory.maxUpgraderCreeps = 1 + 4;
+        }
     }
 
     const sufficientHarvesters = harvesters.length >= room.memory.maxHarvesterCreeps;
@@ -165,7 +191,9 @@ module.exports.loop = function () {
     room.memory.maxBuilderCreeps = room.constructionSites().length > 0 ? 3 : 0;
 
     // Upgraders
-    room.memory.maxUpgraderCreeps = 1 + MAX_UPGRADER_CREEPS;
+    if (!room.memory.maxUpgraderCreeps) {
+        room.memory.maxUpgraderCreeps = 1 + upgraders.length;
+    }
 
     const sufficientBuilders = builders.length >= room.memory.maxBuilderCreeps;
     const sufficientUpgraders = upgraders.length >= room.memory.maxUpgraderCreeps;
@@ -239,10 +267,14 @@ module.exports.loop = function () {
 
     creepFactory.processBuildQueue(room, spawn);
     creepFactory.evaluateBuildQueue(room);
-    creepFactory.showSpawningCreepInfo(room, spawn)
+    //creepFactory.showSpawningCreepInfo(room, spawn)
 
     room.myCreeps().forEach(c => {
         const creep = Game.creeps[c.name];
+
+        if (!Game.creeps[creep]) {
+            delete Memory.creeps[creep];
+        }
 
         if (creep.memory.role == role.HARVESTER) {
             roleHarvester.run(creep);

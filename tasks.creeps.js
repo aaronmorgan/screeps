@@ -91,7 +91,6 @@ var creepTasks = {
                     if (!creep.memory.ticksToDie) {
                         creepsToRemove += 1;
                         creep.memory.ticksToDie = global.TICKS_TO_DELETE;
-                        console.log('creep.memory.ticksToDie', creep.memory.ticksToDie);
                     }
                 }
 

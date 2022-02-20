@@ -78,7 +78,6 @@ var roleDropMiner = {
         const source = Game.getObjectById(p_creep.memory.sourceId);
 
         if (p_creep.harvest(source) == ERR_NOT_IN_RANGE) {
-            p_creep.say('⛏ harvest');
             p_creep.moveTo(source, {
                 visualizePathStyle: {
                     stroke: '#ffaa00'
@@ -87,6 +86,8 @@ var roleDropMiner = {
 
             return p_creep.harvest(source);
         }
+
+        p_creep.say('⛏ harvest');
     }
 };
 
