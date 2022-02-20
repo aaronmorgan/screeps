@@ -17,7 +17,7 @@ var roleHarvester = {
         } else if (p_energyCapacityAvailable >= 350) {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else {
-            bodyType = [WORK, CARRY, MOVE, MOVE, MOVE];
+            bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
@@ -69,7 +69,7 @@ var roleHarvester = {
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-        if (p_creep.memory.isHarvesting) {
+        if (p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0) {
             // Favor dropped energy first so havesters can act as haulers to the dropminers.
             const resourceEnergy = p_creep.room.droppedResources();
             const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
@@ -85,10 +85,9 @@ var roleHarvester = {
             if (!_.isEmpty(energyTarget)) {
                 droppedEnergy = Game.getObjectById(energyTarget.id);
 
-                p_creep.memory.isHarvesting = true;
-
                 const pickupResult = p_creep.pickup(droppedEnergy);
 
+                console.log(pickupResult);
                 if (pickupResult == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(droppedEnergy, {
                         visualizePathStyle: {
@@ -97,7 +96,6 @@ var roleHarvester = {
                     });
                 } else if (pickupResult == OK) {
                     p_creep.room.refreshDroppedResources();
-                    p_creep.memory.isHarvesting = true;
                 }
 
                 p_creep.say('⛏ ' + creepFillPercentage + '%')
@@ -129,8 +127,8 @@ var roleHarvester = {
             const targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (structure.structureType == 'spawn' ||
                         structure.structureType == 'extension' ||
-                        structure.structureType == 'tower') && 
-                        // TODO Add container and storage.
+                        structure.structureType == 'tower') &&
+                    // TODO Add container and storage.
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
             });
 
@@ -149,10 +147,10 @@ var roleHarvester = {
                 } else if (transferResult == OK && p_creep.store.getUsedCapacity() == 0) {
                     p_creep.memory.isHarvesting = true;
                 }
-
-                p_creep.say('⚡ ' + creepFillPercentage + '%')
             }
         }
+
+        p_creep.say('⚡ ' + creepFillPercentage + '%')
     }
 };
 
