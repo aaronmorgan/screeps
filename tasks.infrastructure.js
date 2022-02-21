@@ -30,35 +30,23 @@ var infrastructureTasks = {
         // Far enough away for Upgraders to have it at their backs while working
         // but not so close that it gets in the way or too far that they have to 
         // travel unnecessarily.
-
-        let pos = undefined;
-
         if (path) {
-          switch (true) {
-            case (path.length > 30): {
-              pos = path[path.length - 17];
-              break;
-            }
-            case (path.length > 20): {
-              pos = path[path.length - 12];
-              break;
-            }
-            case (path.length > 15): {
-              pos = path[path.length - 7];
-              break;
-            }
-            default:
-              pos = path[path.length - 4];
+          let pos = undefined;
+
+          if (path.length > 10) {
+            pos = path[Math.ceil(path.length * 0.6)];
+          } else {
+            pos = path[path.length - 2];
           }
+
+          job = {
+            type: STRUCTURE_CONTAINER,
+            x: pos.x,
+            y: pos.y
+          };
+
+          specialSite = true;
         }
-
-        job = {
-          type: STRUCTURE_CONTAINER,
-          x: pos.x,
-          y: pos.y
-        };
-
-        specialSite = true;
       }
       // if (currentRCLLevel >= 3) {
       //   p_room.sources().forEach(pos => {

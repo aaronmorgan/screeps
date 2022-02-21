@@ -3,8 +3,8 @@ module.exports.jobs = {
         jobs: []
     },
     RCL_1: [{
-        type: "rcl.container",
-        x: 0,
+        type: "container",
+        x: 4,
         y: 0
     }],
     RCL_2: {
@@ -17,6 +17,11 @@ module.exports.jobs = {
                 type: "extension",
                 x: 1,
                 y: -1
+            },
+            {
+                type: "rcl.container",
+                x: 0,
+                y: 0
             },
             {
                 type: "extension",
@@ -36,11 +41,6 @@ module.exports.jobs = {
             {
                 type: "container",
                 x: -4,
-                y: 0
-            },
-            {
-                type: "container",
-                x: 4,
                 y: 0
             }
         ]
