@@ -24,24 +24,41 @@ var infrastructureTasks = {
           ignoreCreeps: true
         });
 
-        if (path && path.length > 15) { // TODO This location positioning may need tweaking over time.
-          // Far enough away for Upgraders to have it at their backs while working
-          // but not so close that it gets in the way or too far that they have to 
-          // travel unnecessarily.
+        // TODO check that all surrounding tiles are empty and if not move 
+        // further away from the RCL until condition satisfied/
 
-          // TODO check that all surrounding tiles are empty and if not move 
-          // further away from the RCL until condition satisfied/
-          let pos = path[path.length - 7];
+        // Far enough away for Upgraders to have it at their backs while working
+        // but not so close that it gets in the way or too far that they have to 
+        // travel unnecessarily.
 
-          //p_room.createConstructionSite(pos.x, pos.y, structure.STRUCTURE_CONTAINER);
-          job = {
-            type: STRUCTURE_CONTAINER,
-            x: pos.x,
-            y: pos.y
-          };
+        let pos = undefined;
 
-          specialSite = true;
+        if (path) {
+          switch (true) {
+            case (path.length > 30): {
+              pos = path[path.length - 17];
+              break;
+            }
+            case (path.length > 20): {
+              pos = path[path.length - 12];
+              break;
+            }
+            case (path.length > 15): {
+              pos = path[path.length - 7];
+              break;
+            }
+            default:
+              pos = path[path.length - 4];
+          }
         }
+
+        job = {
+          type: STRUCTURE_CONTAINER,
+          x: pos.x,
+          y: pos.y
+        };
+
+        specialSite = true;
       }
       // if (currentRCLLevel >= 3) {
       //   p_room.sources().forEach(pos => {
