@@ -121,7 +121,7 @@ module.exports.loop = function () {
         room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
     }
 
-    if (Game.time % 50 == 0) {
+    if (Game.time % 200 == 0) {
         console.log('⚠️ Info: Re-evaluating creep requirements.')
 
         let allDroppedEnergy = 0;

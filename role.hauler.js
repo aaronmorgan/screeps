@@ -47,16 +47,22 @@ var roleHauler = {
     p_creep.say('🚚 ' + creepFillPercentage + '%');
 
     if (p_creep.memory.harvesting == true) {
-      let largestDroppedEnergy = _.last(p_creep.room.droppedResources()); // TODO Should target closest?
+      //let largestDroppedEnergy = _.last(p_creep.room.droppedResources()); // TODO Should target closest?
+      let droppedEnergyTarget = p_creep.pos.findClosestByPath(p_creep.room.droppedResources());
 
-      if (largestDroppedEnergy && !p_creep.memory.targetedDroppedEnergy.id == 0) {
-        p_creep.memory.targetedDroppedEnergy.id = largestDroppedEnergy.id;
-        p_creep.memory.targetedDroppedEnergy.pos = largestDroppedEnergy.pos;
+      if (!droppedEnergyTarget) {
+        return;
+      }
+
+      // TODO needs to then evaluate if the closest is the largest...
+      if (p_creep.memory.targetedDroppedEnergy.id == 0) {
+        p_creep.memory.targetedDroppedEnergy.id = droppedEnergyTarget.id;
+        p_creep.memory.targetedDroppedEnergy.pos = droppedEnergyTarget.pos;
       }
 
       const targetedDroppedEnergy = Game.getObjectById(p_creep.memory.targetedDroppedEnergy.id);
 
-      if (!targetedDroppedEnergy || !largestDroppedEnergy) {
+      if (!targetedDroppedEnergy || !droppedEnergyTarget) {
         const newTarget = p_creep.room.droppedResources()[0];
 
         if (!newTarget) {
@@ -73,14 +79,19 @@ var roleHauler = {
         if (creepFillPercentage > 25) {
           p_creep.memory.harvesting = false;
 
+          p_creep.memory.targetedDroppedEnergy = {
+            id: 0,
+            pos: undefined
+          };
+
           return;
         }
 
-        if (p_creep.memory.targetedDroppedEnergy.id != largestDroppedEnergy.id) {
+        if (p_creep.memory.targetedDroppedEnergy.id != droppedEnergyTarget.id) {
           // ...instead check the new target against the old and determine the closest.
           const targets = [{
-              id: largestDroppedEnergy.id,
-              pos: p_creep.room.getPositionAt(largestDroppedEnergy.pos.x, largestDroppedEnergy.pos.y)
+              id: droppedEnergyTarget.id,
+              pos: p_creep.room.getPositionAt(droppedEnergyTarget.pos.x, droppedEnergyTarget.pos.y)
             },
             {
               id: p_creep.memory.targetedDroppedEnergy.id,
@@ -109,8 +120,8 @@ var roleHauler = {
 
         if (source.energy < p_creep.store.getFreeCapacity()) {
           p_creep.memory.targetedDroppedEnergy = {
-            id: largestDroppedEnergy.id,
-            pos: largestDroppedEnergy.pos
+            id: droppedEnergyTarget.id,
+            pos: droppedEnergyTarget.pos
           };
         }
 
@@ -126,38 +137,33 @@ var roleHauler = {
       let targets = [];
 
       if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-          targets.push(Game.spawns['Spawn1']);
-      } else {
-          targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-      } 
-
-      if (targets.count == 0) {
-          // They're not always returned in this order, is that a problem?
-          targets = _.filter(p_creep.room.structures().all, (structure) => {
-              return (
-                      structure.structureType == STRUCTURE_TOWER ||
-                      structure.structureType == STRUCTURE_CONTAINER ||
-                      structure.structureType == STRUCTURE_STORAGE) &&
-                  structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-          });
+        targets.push(Game.spawns['Spawn1']);
+      } else if (targets.length == 0) {
+        targets = _.filter(p_creep.room.structures().tower, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+      } else if (targets.length == 0) {
+        targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+      } else if (targets.length == 0) {
+        targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+      } else if (targets.length == 0) {
+        targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
       }
 
       if (targets.length > 0) {
-          const target = p_creep.pos.findClosestByPath(targets)
-          p_creep.memory.isHarvesting = false;
+        const target = p_creep.pos.findClosestByPath(targets)
+        p_creep.memory.harvesting = false;
 
-          const transferResult = p_creep.transfer(target, RESOURCE_ENERGY);
-          if (transferResult == ERR_NOT_IN_RANGE) {
-              p_creep.moveTo(target, {
-                  visualizePathStyle: {
-                      stroke: '#ffffff'
-                  }
-              });
-          } else if (transferResult == ERR_NOT_ENOUGH_ENERGY) {
-              p_creep.memory.isHarvesting = true;
-          } else if (transferResult == OK && p_creep.store.getUsedCapacity() == 0) {
-              p_creep.memory.isHarvesting = true;
-          }
+        const transferResult = p_creep.transfer(target, RESOURCE_ENERGY);
+        if (transferResult == ERR_NOT_IN_RANGE) {
+          p_creep.moveTo(target, {
+            visualizePathStyle: {
+              stroke: '#ffffff'
+            }
+          });
+        } else if (transferResult == ERR_NOT_ENOUGH_ENERGY) {
+          p_creep.memory.harvesting = true;
+        } else if (transferResult == OK && p_creep.store.getUsedCapacity() == 0) {
+          p_creep.memory.harvesting = true;
+        }
       }
       if (p_creep.store.getUsedCapacity() == 0) {
         p_creep.memory.harvesting = true;

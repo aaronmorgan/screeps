@@ -131,20 +131,15 @@ var roleHarvester = {
 
             if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 targets.push(Game.spawns['Spawn1']);
-            } else {
+              } else if (targets.length == 0) {
+                targets = _.filter(p_creep.room.structures().tower, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+              } else if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-            } 
-
-            if (targets.count == 0) {
-                // They're not always returned in this order, is that a problem?
-                targets = _.filter(p_creep.room.structures().all, (structure) => {
-                    return (
-                            structure.structureType == STRUCTURE_TOWER ||
-                            structure.structureType == STRUCTURE_CONTAINER ||
-                            structure.structureType == STRUCTURE_STORAGE) &&
-                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-                });
-            }
+              } else if (targets.length == 0) {
+                targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+              } else if (targets.length == 0) {
+                targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+              }
 
             if (targets.length > 0) {
                 const target = p_creep.pos.findClosestByPath(targets)
