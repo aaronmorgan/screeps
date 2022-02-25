@@ -101,6 +101,9 @@ module.exports.loop = function () {
 
         // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
         energyCapacityAvailable = room.energyAvailable;
+    } else if (dropminers.length > 0 && haulers.length == 0) {
+        creepFactory.clearBuildQueue(room);
+        roleHauler.tryBuild(room, spawn, room.energyAvailable);
     } else if (upgraders.length == 0) {
         creepFactory.clearBuildQueue(room);
 
