@@ -121,16 +121,15 @@ module.exports.loop = function () {
         room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
     }
 
-    // Haulers
-    if (!room.memory.maxHaulerCreeps) {
-        room.memory.maxHaulerCreeps = 1 + dropminers.length;
-    }
+    if (Game.time % 50 == 0) {
+        console.log('⚠️ Info: Re-evaluating creep requirements.')
 
-    if (Game.tick % 10 == 0) {
         let allDroppedEnergy = 0;
         room.droppedResources().forEach(x => {
             allDroppedEnergy += x.energy
         });
+
+        let additionalHaulersModifier = room.memory.sources.length;
 
         if (structures.container) {
             let allContainersCapacity = 0;
@@ -146,19 +145,18 @@ module.exports.loop = function () {
 
             if (allContainersCapacity > 0) {
                 //console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
-
                 const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
-                const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
-                room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+                additionalHaulersModifier += Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
             } else {
-                const additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
-                room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+                additionalHaulersModifier += Math.floor(allDroppedEnergy / 100);
             }
         } else {
-            const additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
-            room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+            additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
         }
 
+        room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+
+        // Upgraders
         if (structures.container) {
             let allContainersCapacity = 0;
             let allContainersEnergy = 0;
@@ -169,13 +167,8 @@ module.exports.loop = function () {
             });
 
             if (allContainersCapacity > 0) {
-                console.log('Stored stored energy vs container capacity: ' + allContainersEnergy + '/' + allContainersCapacity);
-
                 const droppedEnergyAsPercentageOfContainerCapacity = (allContainersEnergy / allContainersCapacity * 100);
                 const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
-
-                console.log('droppedEnergyAsPercentageOfContainerCapacity', droppedEnergyAsPercentageOfContainerCapacity);
-                console.log('additionalHaulersModifier', additionalHaulersModifier);
 
                 room.memory.maxUpgraderCreeps = upgraders.length + additionalHaulersModifier;
             } else {
