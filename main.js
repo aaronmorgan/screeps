@@ -15,6 +15,11 @@ IMPROVEMENTS:
 9. Should check build queue before enquing a second creep of the same type just built.
 10. Upgraders should auto scale like Haulers, so we only work of available container/storage availability/capacity.
 11. If Harvester cannot access energy source it should pickup dropped energy.
+12. Should the rcl.container simply be placed -30% away from the rcl, back towards the spawn?
+13. Harvester/Hauler should target Spawn first when returning energy.
+14. Set the number creeps for each tick so we don't have to check array length repeatedly.
+15. Spawn name should be stored in room memory.
+
 */
 
 require('prototype.room')();
@@ -74,17 +79,6 @@ module.exports.loop = function () {
         console.log('⚠️ WARNING: No towers!');
     }
 
-    // if (Game.tick % 50 == 0) {
-    //     console.log('INFO: Checking for deleted creeps...');
-    //     room.myCreeps().forEach(c => {
-    //         const creep = Game.creeps[c.name];
-    //         if (!Game.creeps[creep]) {
-    //             delete Memory.creeps[creep];
-    //             console.log('INFO: Clearing creep memory:', creep);
-    //         }
-    //     });
-    // }
-
     let energyCapacityAvailable = room.energyCapacityAvailable;
 
     const harvesters = room.creeps().harvesters;
@@ -94,17 +88,24 @@ module.exports.loop = function () {
     const upgraders = room.creeps().upgraders;
 
     room.memory.creeps = {
-        dropminers: dropminers.length
+        harvesters: harvesters.length,
+        dropminers: dropminers.length,
+        haulers: haulers.length,
+        builders: builders.length,
+        upgraders: upgraders.length
     };
 
-    // // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
-    // if ((harvesters.length == 0 && dropminers.length == 0) ||
-    //     (harvesters.length == 0 && haulers.length == 0)) {
-    //     creepFactory.clearBuildQueue(room);
+    // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
+    if ((harvesters.length == 0 && dropminers.length == 0)) {
+        creepFactory.clearBuildQueue(room);
 
-    //     // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
-    //     energyCapacityAvailable = room.energyAvailable;
-    // }
+        // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
+        energyCapacityAvailable = room.energyAvailable;
+    } else if (upgraders.length == 0) {
+        creepFactory.clearBuildQueue(room);
+
+        roleUpgrader.tryBuild(room, spawn, room.energyAvailable);
+    }
 
     // Harvesters
     room.memory.maxHarvesterCreeps = (dropminers.length == 0) ? // || haulers.length == 0) ?
@@ -116,7 +117,6 @@ module.exports.loop = function () {
     if (!room.memory.maxDropMinerCreeps) {
         room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.getMaxSourceAccessPoints();
     }
-
 
     // Haulers
     if (!room.memory.maxHaulerCreeps) {
@@ -233,24 +233,24 @@ module.exports.loop = function () {
                 //     energyCapacityAvailable = room.energyAvailable;
                 // }
 
-                // HARVESTER creep
+                // HARVESTER creeps
                 if (!sufficientHarvesters) {
                     roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters);
                 }
 
-                // DROPMINER creep
+                // DROPMINER creeps
                 if (!sufficientDropMiners &&
                     (harvesters.length > 0 || haulers.length > 0)) {
 
                     roleDropMiner.tryBuild(room, spawn, energyCapacityAvailable, dropminers);
                 }
 
-                // HAULER creep
+                // HAULER creeps
                 if (!sufficientHaulers) {
                     roleHauler.tryBuild(room, spawn, energyCapacityAvailable);
                 }
 
-                // BUILDER creep
+                // BUILDER creeps
                 if (!sufficientBuilders &&
                     (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0))) {
 
