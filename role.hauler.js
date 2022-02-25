@@ -123,33 +123,42 @@ var roleHauler = {
         p_creep.room.refreshDroppedResources();
       }
     } else {
-      let targets = _.filter(p_creep.room.structures().all, (structure) => {
-        return (
-            structure.structureType == STRUCTURE_SPAWN ||
-            structure.structureType == STRUCTURE_EXTENSION) &&
-          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-      });
+      let targets = [];
 
-      if (!targets || targets.length == 0) {
-        targets = _.filter(p_creep.room.structures().all, (structure) => {
-          return (
-              structure.structureType == STRUCTURE_TOWER ||
-              structure.structureType == STRUCTURE_CONTAINER ||
-              structure.structureType == STRUCTURE_STORAGE) &&
-            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-        });
+      if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+          targets.push(Game.spawns['Spawn1']);
+      } else {
+          targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+      } 
+
+      if (targets.count == 0) {
+          // They're not always returned in this order, is that a problem?
+          targets = _.filter(p_creep.room.structures().all, (structure) => {
+              return (
+                      structure.structureType == STRUCTURE_TOWER ||
+                      structure.structureType == STRUCTURE_CONTAINER ||
+                      structure.structureType == STRUCTURE_STORAGE) &&
+                  structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+          });
       }
 
-      const dropSite = p_creep.pos.findClosestByPath(targets);
+      if (targets.length > 0) {
+          const target = p_creep.pos.findClosestByPath(targets)
+          p_creep.memory.isHarvesting = false;
 
-      if (p_creep.transfer(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        p_creep.moveTo(dropSite, {
-          visualizePathStyle: {
-            stroke: '#ffffff'
+          const transferResult = p_creep.transfer(target, RESOURCE_ENERGY);
+          if (transferResult == ERR_NOT_IN_RANGE) {
+              p_creep.moveTo(target, {
+                  visualizePathStyle: {
+                      stroke: '#ffffff'
+                  }
+              });
+          } else if (transferResult == ERR_NOT_ENOUGH_ENERGY) {
+              p_creep.memory.isHarvesting = true;
+          } else if (transferResult == OK && p_creep.store.getUsedCapacity() == 0) {
+              p_creep.memory.isHarvesting = true;
           }
-        });
       }
-
       if (p_creep.store.getUsedCapacity() == 0) {
         p_creep.memory.harvesting = true;
       }

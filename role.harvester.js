@@ -31,7 +31,6 @@ var roleHarvester = {
                 for (let i = 0; i < p_room.memory.sources.length; i++) {
                     const source = p_room.memory.sources[i];
 
-                    // TODO Should sort source by number of creeps and select the lowest/last.
                     console.log('source', source);
                     const creepsForThisSource = Math.min(source.accessPoints, _.countBy(p_harvesters, x => x.memory.sourceId == source.id).true);
                     console.log('creepsForThisSource', creepsForThisSource);
@@ -39,9 +38,6 @@ var roleHarvester = {
                     const b = p_harvesters.filter(x => x.memory.sourceId == source.id).length;
                     console.log('b', b);
                     console.log('bb', JSON.stringify(b))
-                    if (b == p_room.memory.minersPerSource) {
-                        continue;
-                    }
 
                     if (creepsForThisSource > source.accessPoints) {
                         console.log('⚠️ WARNING: Too many HARVESTER creeps for source ' + source.id);
@@ -76,7 +72,8 @@ var roleHarvester = {
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
         p_creep.say('⛏ ' + creepFillPercentage + '%')
 
-        if (p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0) {
+        if ((p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0) ||
+            p_creep.room.memory.creeps.dropminers > 0) { // Simply act as a hauler if there are Dropminer creeps present.
             // Favor dropped energy first so havesters can act as haulers to the dropminers.
             const resourceEnergy = p_creep.room.droppedResources();
             const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
@@ -130,23 +127,32 @@ var roleHarvester = {
                 return;
             }
 
-            // They're not always returned in this order, is that a problem?
-            const targets = _.filter(p_creep.room.structures().all, (structure) => {
-                return (
-                        structure.structureType == STRUCTURE_TOWER ||
-                        structure.structureType == STRUCTURE_SPAWN ||
-                        structure.structureType == STRUCTURE_EXTENSION ||
-                        structure.structureType == STRUCTURE_CONTAINER ||
-                        structure.structureType == STRUCTURE_STORAGE) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            });
+            let targets = [];
+
+            if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                targets.push(Game.spawns['Spawn1']);
+            } else {
+                targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+            } 
+
+            if (targets.count == 0) {
+                // They're not always returned in this order, is that a problem?
+                targets = _.filter(p_creep.room.structures().all, (structure) => {
+                    return (
+                            structure.structureType == STRUCTURE_TOWER ||
+                            structure.structureType == STRUCTURE_CONTAINER ||
+                            structure.structureType == STRUCTURE_STORAGE) &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+                });
+            }
 
             if (targets.length > 0) {
+                const target = p_creep.pos.findClosestByPath(targets)
                 p_creep.memory.isHarvesting = false;
 
-                const transferResult = p_creep.transfer(targets[0], RESOURCE_ENERGY);
+                const transferResult = p_creep.transfer(target, RESOURCE_ENERGY);
                 if (transferResult == ERR_NOT_IN_RANGE) {
-                    p_creep.moveTo(targets[0], {
+                    p_creep.moveTo(target, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
