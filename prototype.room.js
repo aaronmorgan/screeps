@@ -1,4 +1,6 @@
-const { role } = require("./game.constants");
+const {
+    role
+} = require("./game.constants");
 
 module.exports = function () {
 
@@ -47,6 +49,14 @@ module.exports = function () {
 
     Room.prototype.droppedResources = function () {
         if (!this._droppedResources) {
+            let resourceEnergy = _.filter(p_creep.room.structures().all, (structure) => {
+                return (
+                        structure.structureType == STRUCTURE_TOWER ||
+                        structure.structureType == STRUCTURE_CONTAINER ||
+                        structure.structureType == STRUCTURE_STORAGE) &&
+                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+            });
+
             let resourceEnergy = this.find(FIND_DROPPED_RESOURCES, {
                 filter: (o) => o.resourceType === RESOURCE_ENERGY
             });
