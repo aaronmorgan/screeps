@@ -77,12 +77,7 @@ var roleHauler = {
 
       if (pickupResult == ERR_NOT_IN_RANGE) {
         if (creepFillPercentage > 25) {
-          p_creep.memory.harvesting = false;
-
-          p_creep.memory.targetedDroppedEnergy = {
-            id: 0,
-            pos: undefined
-          };
+          this.resetHarvesting(p_creep);
 
           return;
         }
@@ -138,19 +133,23 @@ var roleHauler = {
 
       if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
         targets.push(Game.spawns['Spawn1']);
-      } else if (targets.length == 0) {
+      }
+      if (targets.length == 0) {
         targets = _.filter(p_creep.room.structures().tower, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-      } else if (targets.length == 0) {
+      }
+      if (targets.length == 0) {
         targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-      } else if (targets.length == 0) {
+      }
+      if (targets.length == 0) {
         targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-      } else if (targets.length == 0) {
+      }
+      if (targets.length == 0) {
         targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
       }
 
       if (targets.length > 0) {
         const target = p_creep.pos.findClosestByPath(targets)
-        p_creep.memory.harvesting = false;
+        this.resetHarvesting(p_creep);
 
         const transferResult = p_creep.transfer(target, RESOURCE_ENERGY);
         if (transferResult == ERR_NOT_IN_RANGE) {
@@ -169,6 +168,15 @@ var roleHauler = {
         p_creep.memory.harvesting = true;
       }
     }
+  },
+
+  resetHarvesting: function (p_creep) {
+    p_creep.memory.harvesting = false;
+
+    p_creep.memory.targetedDroppedEnergy = {
+      id: 0,
+      pos: undefined
+    };
   }
 };
 

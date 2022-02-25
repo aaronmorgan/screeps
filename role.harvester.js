@@ -131,15 +131,19 @@ var roleHarvester = {
 
             if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 targets.push(Game.spawns['Spawn1']);
-              } else if (targets.length == 0) {
+            }
+            if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().tower, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-              } else if (targets.length == 0) {
+            }
+            if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-              } else if (targets.length == 0) {
+            }
+            if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-              } else if (targets.length == 0) {
+            }
+            if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-              }
+            }
 
             if (targets.length > 0) {
                 const target = p_creep.pos.findClosestByPath(targets)
