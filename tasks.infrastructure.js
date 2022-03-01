@@ -8,13 +8,11 @@ const {
 
 var infrastructureTasks = {
 
-
     processJobs: function (p_room, p_jobs) {
         const spawn = p_room.structures().spawn[0];
 
         for (let i = 0; i < p_jobs.length; i++) {
             let job = p_jobs[i];
-
             let specialSite = false;
 
             if (job.type == 'rcl.container') {
@@ -139,10 +137,12 @@ var infrastructureTasks = {
         // This could be further improved to increase the frequency to per tick during times of war.
         // if (Game.time % (400 / p_room.controller.level) == 0) {
         //   console.log('⚠️ Information: Resetting construction queue index to 0');
-        //   index = 0;
-        // }
+        //   this.processJobs(p_room, jobs['RCL_' + p_room.controller.level].jobs);
+        // } else {
 
-        this.processJobs(p_room, jobs['RCL_' + p_room.controller.level].jobs);
+        for (let j = 0; j <= p_room.controller.level; j++) {
+            this.processJobs(p_room, jobs['RCL_' + p_room.controller.level].jobs);
+        }
     }
 }
 
