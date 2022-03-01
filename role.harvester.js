@@ -14,8 +14,10 @@ var roleHarvester = {
 
         if (p_energyCapacityAvailable >= 500) {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 400) {
+        } else if (p_energyCapacityAvailable >= 450) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
+        } else if (p_energyCapacityAvailable >= 400) {
+            bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 350) {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else {
