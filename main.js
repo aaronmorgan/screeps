@@ -82,6 +82,15 @@ module.exports.loop = function () {
         console.log('⚠️ WARNING: No towers!');
     }
 
+    if (Game.tick % 50 == 0) {
+        console.log('⚠️ INFO: Checking for deleted creeps...');
+        for (var i in Memory.creeps) {
+            if (!Game.creeps[i]) {
+                delete Memory.creeps[i];
+            }
+        }
+    }
+
     let energyAvailable = room.energyAvailable;
 
     const MAX_HAULERS = 6;
@@ -91,7 +100,7 @@ module.exports.loop = function () {
     const haulers = room.creeps().haulers;
     const builders = room.creeps().builders;
     const upgraders = room.creeps().upgraders;
-
+    
     room.memory.creeps = {
         harvesters: harvesters.length,
         dropminers: dropminers.length,
@@ -154,7 +163,7 @@ module.exports.loop = function () {
                 additionalHaulersModifier += Math.floor(allDroppedEnergy / 100);
             }
         } else {
-            console.log('additionalHaulersModifier', additionalHaulersModifier);
+            additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
         }
 
         room.memory.maxHaulerCreeps = Math.floor(MAX_HAULERS, dropminers.length + additionalHaulersModifier);
@@ -171,7 +180,6 @@ module.exports.loop = function () {
 
             if (allContainersCapacity > 0) {
                 const droppedEnergyAsPercentageOfContainerCapacity = (allContainersEnergy / allContainersCapacity * 100);
-                console.log('droppedEnergyAsPercentageOfContainerCapacity', droppedEnergyAsPercentageOfContainerCapacity)
                 const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
 
                 room.memory.maxUpgraderCreeps = upgraders.length + additionalHaulersModifier;
@@ -272,9 +280,9 @@ module.exports.loop = function () {
     room.myCreeps().forEach(c => {
         const creep = Game.creeps[c.name];
 
-        if (!Game.creeps[creep]) {
-            delete Memory.creeps[creep];
-        }
+        // if (!Game.creeps[creep]) {
+        //     delete Memory.creeps[creep];
+        // }
 
         if (creep.memory.role == role.HARVESTER) {
             roleHarvester.run(creep);
