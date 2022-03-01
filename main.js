@@ -19,6 +19,9 @@ IMPROVEMENTS:
 13. Harvester/Hauler should target Spawn first when returning energy.
 14. Set the number creeps for each tick so we don't have to check array length repeatedly.
 15. Spawn name should be stored in room memory.
+16. Don't clear the build queue in the first few turns; check game phase?s
+17. Don't build the RCL container if there's already a base container withing range. 10? 15? tiles.
+18. Determine the size of the Upgraders based on the distance of the RCL from the base. 
 
 */
 
@@ -79,7 +82,9 @@ module.exports.loop = function () {
         console.log('⚠️ WARNING: No towers!');
     }
 
-    let energyCapacityAvailable = room.energyCapacityAvailable;
+    let energyAvailable = room.energyAvailable;
+
+    const MAX_HAULERS = 6;
 
     const harvesters = room.creeps().harvesters;
     const dropminers = room.creeps().dropminers;
@@ -98,9 +103,7 @@ module.exports.loop = function () {
     // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
     if ((harvesters.length == 0 && dropminers.length == 0)) {
         creepFactory.clearBuildQueue(room);
-
         // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
-        energyCapacityAvailable = room.energyAvailable;
     } else if (dropminers.length > 0 && haulers.length == 0) {
         creepFactory.clearBuildQueue(room);
         roleHauler.tryBuild(room, spawn, room.energyAvailable);
@@ -151,10 +154,10 @@ module.exports.loop = function () {
                 additionalHaulersModifier += Math.floor(allDroppedEnergy / 100);
             }
         } else {
-            additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
+            console.log('additionalHaulersModifier', additionalHaulersModifier);
         }
 
-        room.memory.maxHaulerCreeps = dropminers.length + additionalHaulersModifier;
+        room.memory.maxHaulerCreeps = Math.floor(MAX_HAULERS, dropminers.length + additionalHaulersModifier);
 
         // Upgraders
         if (structures.container) {
@@ -168,6 +171,7 @@ module.exports.loop = function () {
 
             if (allContainersCapacity > 0) {
                 const droppedEnergyAsPercentageOfContainerCapacity = (allContainersEnergy / allContainersCapacity * 100);
+                console.log('droppedEnergyAsPercentageOfContainerCapacity', droppedEnergyAsPercentageOfContainerCapacity)
                 const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
 
                 room.memory.maxUpgraderCreeps = upgraders.length + additionalHaulersModifier;
@@ -205,7 +209,7 @@ module.exports.loop = function () {
         switch (room.memory.game.phase) {
             case 1: {
                 // First turn; get a Harvester out immediately.
-                if (roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters) == OK) {
+                if (roleHarvester.tryBuild(room, spawn, energyAvailable, harvesters) == OK) {
                     room.memory.game.phase += 1
                 }
 
@@ -213,7 +217,7 @@ module.exports.loop = function () {
             }
             case 2: {
                 // With the Harvester from phase 1 get an Upgrader out immediately to get the RCL to level 2.
-                if (roleUpgrader.tryBuild(room, spawn, energyCapacityAvailable) == OK) {
+                if (roleUpgrader.tryBuild(room, spawn, energyAvailable) == OK) {
                     room.memory.game.phase += 1
                 }
                 break;
@@ -231,31 +235,31 @@ module.exports.loop = function () {
 
                 // HARVESTER creeps
                 if (!sufficientHarvesters) {
-                    roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters);
+                    roleHarvester.tryBuild(room, spawn, energyAvailable, harvesters);
                 }
 
                 // DROPMINER creeps
                 if (!sufficientDropMiners &&
                     (harvesters.length > 0 || haulers.length > 0)) {
 
-                    roleDropMiner.tryBuild(room, spawn, energyCapacityAvailable, dropminers);
+                    roleDropMiner.tryBuild(room, spawn, energyAvailable, dropminers);
                 }
 
                 // HAULER creeps
                 if (!sufficientHaulers) {
-                    roleHauler.tryBuild(room, spawn, energyCapacityAvailable);
+                    roleHauler.tryBuild(room, spawn, energyAvailable);
                 }
 
                 // BUILDER creeps
                 if (!sufficientBuilders &&
                     (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0))) {
 
-                    roleBuilder.tryBuild(room, spawn, energyCapacityAvailable);
+                    roleBuilder.tryBuild(room, spawn, energyAvailable);
                 }
 
                 // UPGRADER creeps
                 if (!sufficientUpgraders) {
-                    roleUpgrader.tryBuild(room, spawn, energyCapacityAvailable);
+                    roleUpgrader.tryBuild(room, spawn, energyAvailable);
                 }
             }
         }
