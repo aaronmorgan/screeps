@@ -1,4 +1,4 @@
-// ICONS ⛔ ⚠️ 🛠️ ➖ ❌ 💀
+// ICONS ⛔ ⚠️ 🔨 ⛏️ ⚒️ 🛠️ 🔧 ⚙️ ➖ ❌ 💀 🛡️
 
 //     STRUCTURE_CONTAINER: 'container',
 //     STRUCTURE_CONTROLLER: 'controller',

@@ -87,7 +87,7 @@ var roleDropMiner = {
             return p_creep.harvest(source);
         }
 
-        p_creep.say('⛏');
+        p_creep.say('⚙️');
     }
 };
 
