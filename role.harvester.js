@@ -30,9 +30,7 @@ var roleHarvester = {
             if (p_harvesters.length == 0) {
                 targetSourceId = p_spawn.pos.findClosestByPath(p_room.sources()).id;
             } else {
-                for (let i = 0; i < p_room.memory.sources.length; i++) {
-                    const source = p_room.memory.sources[i];
-
+                for (let source of p_room.memory.sources) {
                     console.log('source', source);
                     const creepsForThisSource = Math.min(source.accessPoints, _.countBy(p_harvesters, x => x.memory.sourceId == source.id).true);
                     console.log('creepsForThisSource', creepsForThisSource);
@@ -45,7 +43,7 @@ var roleHarvester = {
                         console.log('⚠️ WARNING: Too many HARVESTER creeps for source ' + source.id);
 
                         // TODO Remove excess creeps. Remove the creep with the lowest TTL?
-                        continue;
+                        return;
                     }
 
                     targetSourceId = source.id;
@@ -124,7 +122,7 @@ var roleHarvester = {
             }
         } else {
             // This is designed to allow the Harvester to act as a sort of Dropminer.
-            if (p_creep.room.creeps().haulers.length > 0) {
+            if (p_creep.room.creeps().haulers.length > 0 && p_creep.room.creeps().dropminers.length == 0) {
                 p_creep.drop(RESOURCE_ENERGY)
                 return;
             }
