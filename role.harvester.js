@@ -75,7 +75,7 @@ var roleHarvester = {
         p_creep.say('⛏ ' + creepFillPercentage + '%')
 
         if ((p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0) ||
-            p_creep.room.memory.creeps.dropminers > 0) { // Simply act as a hauler if there are Dropminer creeps present.
+            (p_creep.room.memory.creeps.dropminers > 0 && p_creep.store.getFreeCapacity() != 0)) { // Simply act as a hauler if there are Dropminer creeps present.
             // Favor dropped energy first so havesters can act as haulers to the dropminers.
             const resourceEnergy = p_creep.room.droppedResources();
             const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
