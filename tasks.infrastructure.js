@@ -8,16 +8,14 @@ const {
 
 var infrastructureTasks = {
 
-    processJobs: function (p_room, p_jobs) {
-        const spawn = p_room.structures().spawn[0];
-
+    processJobs: function (p_room, p_spawn, p_jobs) {
         for (let i = 0; i < p_jobs.length; i++) {
             let job = p_jobs[i];
             let specialSite = false;
 
             if (job.type == 'rcl.container') {
                 // RCL adjacent container.
-                const path = spawn.pos.findPathTo(p_room.controller.pos, {
+                const path = p_spawn.pos.findPathTo(p_room.controller.pos, {
                     ignoreDestructibleStructures: true,
                     ignoreCreeps: true
                 });
@@ -72,8 +70,8 @@ var infrastructureTasks = {
             //   break;
             //     }
 
-            let x = spawn.pos.x + job.x;
-            let y = spawn.pos.y + job.y;
+            let x = p_spawn.pos.x + job.x;
+            let y = p_spawn.pos.y + job.y;
 
             if (specialSite) {
                 x = job.x;
@@ -128,20 +126,14 @@ var infrastructureTasks = {
     // to determine whether to continue or not.
     buildLinks: function (p_room) {
         // Only enqueue one construction site at a time.
-        const constructionSites = p_room.constructionSites();
-        if (constructionSites.length > 0) {
+        if (p_room.constructionSites().length > 0) {
             return;
         }
 
-        // Periodically check whether we need to rebuild anything by resetting the construction job level.
-        // This could be further improved to increase the frequency to per tick during times of war.
-        // if (Game.time % (400 / p_room.controller.level) == 0) {
-        //   console.log('⚠️ Information: Resetting construction queue index to 0');
-        //   this.processJobs(p_room, jobs['RCL_' + p_room.controller.level].jobs);
-        // } else {
+        const spawn = p_room.structures().spawn[0];
 
         for (let j = 0; j <= p_room.controller.level; j++) {
-            this.processJobs(p_room, jobs['RCL_' + p_room.controller.level].jobs);
+            this.processJobs(p_room, spawn, jobs['RCL_' + j].jobs);
         }
     }
 }

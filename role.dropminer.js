@@ -36,9 +36,7 @@ var roleDropMiner = {
                 targetSourceId = p_spawn.pos.findClosestByPath(p_room.sources().map(x => x.pos))
             }
 
-            for (let i = 0; i < p_room.memory.sources.length; i++) {
-                const source = p_room.memory.sources[i];
-
+            p_room.memory.sources.forEach(source => {
                 const a = Math.min(source.accessPoints, p_room.memory.minersPerSource);
                 const creepsForThisSource = Math.min(a, _.countBy(p_dropminers, x => x.memory.sourceId == source.id).true);
 
@@ -57,7 +55,7 @@ var roleDropMiner = {
 
                 targetSourceId = source.id;
                 break;
-            };
+            });
 
             p_room.memory.maxDropMinerCreeps = p_room.memory.minersPerSource * p_room.memory.sources.length;
 

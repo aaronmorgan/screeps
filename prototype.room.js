@@ -99,12 +99,7 @@ module.exports = function () {
 
             this.memory.sources = [];
 
-            const sources = this.sources();
-
-            for (let i = 0; i < sources.length; i++) {
-
-                const source = sources[i];
-
+            this.sources().forEach(source => {
                 const fields = this.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
                 const accessibleFields = 9 - _.countBy(fields, "terrain").wall;
 
@@ -112,7 +107,7 @@ module.exports = function () {
                     id: source.id,
                     accessPoints: accessibleFields
                 });
-            }
+            })
         },
 
         Room.prototype.determineRCLAccessPoints = function () {
