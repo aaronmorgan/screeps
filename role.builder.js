@@ -62,6 +62,9 @@ var roleBuilder = {
                         }
                     });
                 }
+            } else {
+                // Creep is idle, we should put the energy back and die.
+                p_creep.dropResourcesAndDie();
             }
         } else {
             let targets = _.filter(p_creep.room.structures().all, (structure) => {
@@ -105,8 +108,7 @@ var roleBuilder = {
             }
 
             // Local energy sources
-            let sources = p_creep.room.sources();
-            let nearestSource = p_creep.pos.findClosestByPath(sources);
+            let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
 
             if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
                 p_creep.memory.harvesting = true;

@@ -137,9 +137,12 @@ var creepFactory = {
     },
 
     clearBuildQueue: function (p_room) {
-        console.log('⚠️ Warning: Clearing creep build queue');
-        p_room.memory.creepBuildQueue = {
-            queue: []
+        if (p_room.memory.creepBuildQueue.length > 0) {
+            console.log('⚠️ Warning: Clearing creep build queue');
+
+            p_room.memory.creepBuildQueue = {
+                queue: []
+            }
         }
     },
 };
