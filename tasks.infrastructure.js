@@ -13,37 +13,71 @@ var infrastructureTasks = {
             let job = p_jobs[i];
             let specialSite = false;
 
-            if (job.type == 'rcl.container') {
-                // RCL adjacent container.
-                const path = p_spawn.pos.findPathTo(p_room.controller.pos, {
-                    ignoreDestructibleStructures: true,
-                    ignoreCreeps: true
-                });
+            switch (job.type) {
+                case 'rcl.container': {
+                    // RCL adjacent container.
+                    const path = p_spawn.pos.findPathTo(p_room.controller.pos, {
+                        ignoreDestructibleStructures: true,
+                        ignoreCreeps: true
+                    });
 
-                // TODO check that all surrounding tiles are empty and if not move 
-                // further away from the RCL until condition satisfied/
+                    // TODO check that all surrounding tiles are empty and if not move 
+                    // further away from the RCL until condition satisfied/
 
-                // Far enough away for Upgraders to have it at their backs while working
-                // but not so close that it gets in the way or too far that they have to 
-                // travel unnecessarily.
-                if (path) {
-                    let pos = undefined;
+                    // Far enough away for Upgraders to have it at their backs while working
+                    // but not so close that it gets in the way or too far that they have to 
+                    // travel unnecessarily.
+                    if (path) {
+                        let pos = undefined;
 
-                    if (path.length > 10) {
-                        pos = path[Math.ceil(path.length * 0.6)];
-                    } else {
-                        pos = path[path.length - 2];
+                        if (path.length > 10) {
+                            pos = path[Math.ceil(path.length * 0.6)];
+                        } else {
+                            pos = path[path.length - 2];
+                        }
+
+                        job = {
+                            type: STRUCTURE_CONTAINER,
+                            x: pos.x,
+                            y: pos.y
+                        };
+
+                        specialSite = true;
                     }
 
-                    job = {
-                        type: STRUCTURE_CONTAINER,
-                        x: pos.x,
-                        y: pos.y
-                    };
-
-                    specialSite = true;
+                    break;
                 }
+                case 'furthest.source.link': {
+                    let longestPath = undefined;
+
+                    p_room.memory.sources.forEach(source => {
+                        const path = p_spawn.pos.findPathTo(Game.getObjectById(source.id).pos, {
+                            ignoreDestructibleStructures: true,
+                            ignoreCreeps: true
+                        });
+
+                        if (!longestPath || path.length > longestPath.length) {
+                            longestPath = path;
+                        }
+                    });
+
+                    if (longestPath) {
+                        const pos = longestPath[longestPath.length - 3]; // TODO is this correct?
+
+                        job = {
+                            type: STRUCTURE_LINK,
+                            x: pos.x,
+                            y: pos.y
+                        };
+
+                        specialSite = true;
+                    }
+
+                    break;
+                }
+
             }
+
             // if (currentRCLLevel >= 3) {
             //   p_room.sources().forEach(pos => {
             //     let path = spawn.pos.findPathTo(pos, {

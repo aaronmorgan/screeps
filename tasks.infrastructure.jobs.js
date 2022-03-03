@@ -295,7 +295,61 @@ module.exports.jobs = {
         ]
     },
     RCL_5: {
-        jobs: []
+        jobs: [{
+            type: "tower",
+            x: -3,
+            y: 2
+        },
+        {
+            type: "link",
+            x: 0,
+            y: -4
+        },
+        {
+            type: "furthest.source.link",
+            x: 0,
+            y: 0
+        },
+        {
+            type: "road",
+            x: 5,
+            y: 0
+        },
+        {
+            type: "road",
+            x: 0,
+            y: 4
+        },
+        {
+            type: "road",
+            x: -5,
+            y: 0
+        },
+        {
+            type: "road",
+            x: 0,
+            y: -5
+        },
+        {
+            type: "road",
+            x: 1,
+            y: -4
+        },
+        {
+            type: "road",
+            x: -1,
+            y: -4
+        },
+        {
+            type: "extension",
+            x: 3,
+            y: 2
+        },
+        {
+            type: "extension",
+            x: -3,
+            y: -2
+        }]
     },
     RCL_6: {
         jobs: []
