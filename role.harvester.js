@@ -58,34 +58,7 @@ var roleHarvester = {
         p_creep.say('⛏️ ' + creepFillPercentage + '%')
 
         if ((p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0)) { // ||
-            //      (p_creep.room.memory.creeps.dropminers > 0 && p_creep.store.getFreeCapacity() != 0)) { // Simply act as a hauler if there are Dropminer creeps present.
-            // Favor dropped energy first so havesters can act as haulers to the dropminers.
-            // const resourceEnergy = p_creep.room.droppedResources();
-            // const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
 
-            // let energyTarget = undefined;
-
-            // if (droppedResources) {
-            //     energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
-            // }
-
-            // let droppedEnergy = undefined;
-
-            // if (!_.isEmpty(energyTarget)) {
-            //     droppedEnergy = Game.getObjectById(energyTarget.id);
-
-            //     const pickupResult = p_creep.pickup(droppedEnergy);
-
-            //     if (pickupResult == ERR_NOT_IN_RANGE) {
-            //         p_creep.moveTo(droppedEnergy, {
-            //             visualizePathStyle: {
-            //                 stroke: '#ffaa00'
-            //             }
-            //         });
-            //     } else if (pickupResult == OK) {
-            //         p_creep.room.refreshDroppedResources();
-            //     }
-            // } else {
             // Cater for the siuation where the creep wanders into another room.
             if (_.isEmpty(p_creep.room.memory.sources)) {
                 return;

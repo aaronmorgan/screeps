@@ -35,8 +35,6 @@ var roleCourier = {
 
     /** @param {Creep} creep **/
     run: function (p_creep) {
-        //   const source = Game.getObjectById(p_creep.memory.sourceId);
-
         p_creep.checkTicksToDie();
         p_creep.checkTicksToLive();
 
