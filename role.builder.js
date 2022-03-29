@@ -67,6 +67,8 @@ var roleBuilder = {
                 p_creep.dropResourcesAndDie();
             }
         } else {
+            p_creep.memory.building = false;
+
             let targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
@@ -86,38 +88,41 @@ var roleBuilder = {
                 }
             }
 
-            const resourceEnergy = p_creep.room.droppedResources();
-            const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+            if (p_creep.room.memory.creeps.couriers == 0) {
+                const resourceEnergy = p_creep.room.droppedResources();
+                const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
 
-            if (droppedResources) {
-                const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+                if (droppedResources) {
+                    const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
 
-                if (!_.isEmpty(energyTarget)) {
-                    let source = Game.getObjectById(energyTarget.id);
+                    if (!_.isEmpty(energyTarget)) {
+                        let source = Game.getObjectById(energyTarget.id);
 
-                    if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
-                        p_creep.moveTo(source, {
-                            visualizePathStyle: {
-                                stroke: '#ffaa00'
-                            }
-                        });
+                        if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
+                            p_creep.moveTo(source, {
+                                visualizePathStyle: {
+                                    stroke: '#ffaa00'
+                                }
+                            });
+                        }
+
+                        return;
                     }
-
-                    return;
                 }
             }
 
+            // Don't attempt to mine resources; target droppped preferrably.
             // Local energy sources
-            let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
+            // let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
 
-            if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                p_creep.memory.harvesting = true;
-                return p_creep.moveTo(nearestSource, {
-                    visualizePathStyle: {
-                        stroke: '#ffaa00'
-                    }
-                });
-            }
+            // if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+            //     p_creep.memory.harvesting = true;
+            //     return p_creep.moveTo(nearestSource, {
+            //         visualizePathStyle: {
+            //             stroke: '#ffaa00'
+            //         }
+            //     });
+            // }
         }
     }
 }

@@ -32,32 +32,15 @@ var roleDropMiner = {
         if (!_.isEmpty(bodyType)) {
             let targetSourceId = undefined;
 
-            if (p_dropminers.length == 0) {
-                targetSourceId = p_spawn.pos.findClosestByPath(p_room.sources().map(x => x.pos))
+            for (let source of p_room.memory.sources) {
+                let creepsForThisSource = _.countBy(p_dropminers, x => x.memory.sourceId == source.id).true;
+                creepsForThisSource = Math.min(source.accessPoints, creepsForThisSource);
+
+                if (!creepsForThisSource) {
+                    targetSourceId = source.id;
+                    break;
+                }
             }
-
-            p_room.memory.sources.forEach(source => {
-                const a = Math.min(source.accessPoints, p_room.memory.minersPerSource);
-                const creepsForThisSource = Math.min(a, _.countBy(p_dropminers, x => x.memory.sourceId == source.id).true);
-
-                const b = p_dropminers.filter(x => x.memory.sourceId == source.id).length;
-
-                if (b == p_room.memory.minersPerSource) {
-                    continue;
-                }
-
-                if (creepsForThisSource > source.accessPoints) {
-                    console.log('⚠️ WARNING: Too many DROPMINER creeps for source ' + source.id);
-
-                    // TODO Remove excess creeps. Remove the creep with the lowest TTL?
-                    continue;
-                }
-
-                targetSourceId = source.id;
-                break;
-            });
-
-            p_room.memory.maxDropMinerCreeps = p_room.memory.minersPerSource * p_room.memory.sources.length;
 
             if (!targetSourceId) {
                 console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');

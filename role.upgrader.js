@@ -84,44 +84,42 @@ var roleUpgrader = {
                     });
                 }
             } else {
-                // if (p_creep.room.controller >= 3) {
-                //   return; // Test upgraders not using energy sources and getting in the way of harvesters and haulers.
-                // }
+                if (p_creep.room.memory.creeps.couriers == 0) {
+                    const resourceEnergy = p_creep.room.droppedResources();
+                    const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
 
-                const resourceEnergy = p_creep.room.droppedResources();
-                const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+                    if (droppedResources) {
+                        const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
 
-                if (droppedResources) {
-                    const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+                        if (!_.isEmpty(energyTarget)) {
+                            source = Game.getObjectById(energyTarget.id);
 
-                    if (!_.isEmpty(energyTarget)) {
-                        source = Game.getObjectById(energyTarget.id);
+                            const pickupResult = p_creep.pickup(source);
 
-                        const pickupResult = p_creep.pickup(source);
+                            if (pickupResult == ERR_NOT_IN_RANGE) {
+                                p_creep.moveTo(source, {
+                                    visualizePathStyle: {
+                                        stroke: '#ffaa00'
+                                    }
+                                });
 
-                        if (pickupResult == ERR_NOT_IN_RANGE) {
-                            p_creep.moveTo(source, {
+                                return;
+                            } else if (pickupResult == OK) {
+                                p_creep.room.refreshDroppedResources();
+                            }
+                        }
+                    } else {
+
+                        let sources = p_creep.room.sources();
+                        let nearestSource = p_creep.pos.findClosestByPath(sources);
+
+                        if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+                            p_creep.moveTo(nearestSource, {
                                 visualizePathStyle: {
-                                    stroke: '#ffaa00'
+                                    stroke: '#3370ac'
                                 }
                             });
-
-                            return;
-                        } else if (pickupResult == OK) {
-                            p_creep.room.refreshDroppedResources();
                         }
-                    }
-                } else {
-
-                    let sources = p_creep.room.sources();
-                    let nearestSource = p_creep.pos.findClosestByPath(sources);
-
-                    if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                        p_creep.moveTo(nearestSource, {
-                            visualizePathStyle: {
-                                stroke: '#3370ac'
-                            }
-                        });
                     }
                 }
             }

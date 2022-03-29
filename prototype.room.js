@@ -19,6 +19,7 @@ module.exports = function () {
         if (!this._creeps || _.isEmpty(this._creeps)) {
             this._creeps = {
                 harvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HARVESTER),
+                couriers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.COURIER),
                 dropminers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.DROPMINER),
                 haulers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HAULER),
                 builders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.BUILDER),
@@ -97,17 +98,23 @@ module.exports = function () {
                 return;
             }
 
-            this.memory.sources = [];
+            let sources = [];
+            let accessPoints = 0;
 
             this.sources().forEach(source => {
                 const fields = this.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
                 const accessibleFields = 9 - _.countBy(fields, "terrain").wall;
 
-                this.memory.sources.push({
+                sources.push({
                     id: source.id,
                     accessPoints: accessibleFields
                 });
+
+                accessPoints += accessibleFields;
             })
+
+            this.memory.sources = _.sortBy(sources, s => this.structures().spawn[0].pos.getRangeTo(s))
+            this.memory.maxSouceAccessPoints = accessPoints;
         },
 
         Room.prototype.determineRCLAccessPoints = function () {

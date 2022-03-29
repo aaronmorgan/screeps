@@ -2,10 +2,7 @@ module.exports = function () {
 
     Creep.prototype.checkTicksToLive = function () {
         if (this.ticksToLive == 1) {
-            for (const resourceType in this.carry) {
-                console.log('💀 TTL Creep: ' + this.name + ', dropping resource: ' + resourceType)
-                this.drop(resourceType);
-            }
+            this.dropResourcesAndDie();
         }
     };
 
@@ -15,13 +12,17 @@ module.exports = function () {
             this.memory.ticksToDie -= 1;
 
             if (this.memory.ticksToDie < 1) {
-                for (const resourceType in this.store) {
-                    console.log('💀 TTD Creep: ' + this.name + ', dropping resource: ' + resourceType)
-                    this.drop(resourceType);
-                }
-
-                this.suicide();
+                this.dropResourcesAndDie();
             }
         }
+    };
+
+    Creep.prototype.dropResourcesAndDie = function () {
+        for (const resourceType in this.carry) {
+            console.log('💀 TTD Creep: ' + this.name + ', dropping resource: ' + resourceType)
+            this.drop(resourceType);
+        }
+
+        this.suicide();
     };
 };

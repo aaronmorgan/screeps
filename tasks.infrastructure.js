@@ -14,39 +14,39 @@ var infrastructureTasks = {
             let specialSite = false;
 
             switch (job.type) {
-                case 'rcl.container': {
-                    // RCL adjacent container.
-                    const path = p_spawn.pos.findPathTo(p_room.controller.pos, {
-                        ignoreDestructibleStructures: true,
-                        ignoreCreeps: true
-                    });
+                // case 'rcl.container': {
+                //     // RCL adjacent container.
+                //     const path = p_spawn.pos.findPathTo(p_room.controller.pos, {
+                //         ignoreDestructibleStructures: true,
+                //         ignoreCreeps: true
+                //     });
 
-                    // TODO check that all surrounding tiles are empty and if not move 
-                    // further away from the RCL until condition satisfied/
+                //     // TODO check that all surrounding tiles are empty and if not move 
+                //     // further away from the RCL until condition satisfied/
 
-                    // Far enough away for Upgraders to have it at their backs while working
-                    // but not so close that it gets in the way or too far that they have to 
-                    // travel unnecessarily.
-                    if (path) {
-                        let pos = undefined;
+                //     // Far enough away for Upgraders to have it at their backs while working
+                //     // but not so close that it gets in the way or too far that they have to 
+                //     // travel unnecessarily.
+                //     if (path) {
+                //         let pos = undefined;
 
-                        if (path.length > 10) {
-                            pos = path[Math.ceil(path.length * 0.6)];
-                        } else {
-                            pos = path[path.length - 2];
-                        }
+                //         if (path.length > 10) {
+                //             pos = path[Math.ceil(path.length * 0.6)];
+                //         } else {
+                //             pos = path[path.length - 2];
+                //         }
 
-                        job = {
-                            type: STRUCTURE_CONTAINER,
-                            x: pos.x,
-                            y: pos.y
-                        };
+                //         job = {
+                //             type: STRUCTURE_CONTAINER,
+                //             x: pos.x,
+                //             y: pos.y
+                //         };
 
-                        specialSite = true;
-                    }
+                //         specialSite = true;
+                //     }
 
-                    break;
-                }
+                //     break;
+                // }
                 case 'furthest.source.link': {
                     let longestPath = undefined;
 
@@ -169,6 +169,19 @@ var infrastructureTasks = {
         for (let j = 0; j <= p_room.controller.level; j++) {
             this.processJobs(p_room, spawn, jobs['RCL_' + j].jobs);
         }
+    },
+
+    locateSpawnDumpLocation: function (p_room) {
+        const spawn = p_room.structures().spawn[0];
+
+        new RoomPosition(spawn.pos.x, spawn.pos.y - 1, p_room.name).createFlag(spawn.name + '_DUMP')
+        //Game.flags.Flag1.setPosition();
+
+        // p_room.memory.locations = [];
+        // p_room.memory.locations.push({
+        //     'name': 'SPAWN_DUMP_SITE', 
+        //     'pos': new RoomPosition(spawn.pos.x, spawn.pos.y - 1, p_room.name)
+        // });
     }
 }
 

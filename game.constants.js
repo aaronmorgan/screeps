@@ -1,4 +1,4 @@
-// ICONS ⛔ ⚠️ 🔨 ⛏️ ⚒️ 🛠️ 🔧 ⚙️ ➖ ❌ 💀 🛡️
+// ICONS ⛔ ⚠️ ⛏️ 🔨 ⛏️ ⚒️ 🛠️ 🔧 ⚙️ ➖ ❌ 💀 🛡️
 
 //     STRUCTURE_CONTAINER: 'container',
 //     STRUCTURE_CONTROLLER: 'controller',
@@ -39,6 +39,7 @@ module.exports.EXIT_CODE = {
 
     module.exports.role = {
         HARVESTER: 'Harvester',
+        COURIER: 'Courier',
         DROPMINER: 'DropMiner',
         HAULER: 'Hauler',
         BUILDER: 'Builder',
