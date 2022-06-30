@@ -3,11 +3,12 @@ module.exports.jobs = {
         jobs: []
     },
     RCL_1: {
-        jobs: [{
-            type: "container",
-            x: 4,
-            y: 0
-        }]
+        jobs: []
+        // jobs: [{
+        //     type: "container",
+        //     x: 4,
+        //     y: 0
+        // }]
     },
     RCL_2: {
         jobs: [{
@@ -21,10 +22,15 @@ module.exports.jobs = {
                 y: -1
             },
             {
-                type: "rcl.container",
+                type: "container",
                 x: 0,
-                y: 0
+                y: 3
             },
+            // {
+            //     type: "rcl.container",
+            //     x: 0,
+            //     y: 0
+            // },
             {
                 type: "extension",
                 x: 2,
@@ -78,11 +84,11 @@ module.exports.jobs = {
                 x: -3,
                 y: -1
             },
-            {
-                type: "container",
-                x: 0,
-                y: 3
-            },
+            // {
+            //     type: "container",
+            //     x: 0,
+            //     y: 3
+            // },
             // Roads, north, south, east, west
             {
                 type: "road",

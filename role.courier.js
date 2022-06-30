@@ -41,7 +41,7 @@ var roleCourier = {
         const creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
         p_creep.say('🚚 ' + creepFillPercentage + '%');
 
-        if (creepFillPercentage == 0) {
+        if (creepFillPercentage < 80) {
             const resourceEnergy = p_creep.room.droppedResources();
             const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
 
@@ -62,8 +62,6 @@ var roleCourier = {
                     return;
                 }
             }
-
-            p_creep.memory.isHarvesting = creepFillPercentage > 80;
 
         } else {
             let targets = [];

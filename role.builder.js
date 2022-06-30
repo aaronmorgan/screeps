@@ -44,6 +44,7 @@ var roleBuilder = {
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
         }
+
         if (!p_creep.memory.building && p_creep.carry.energy == p_creep.carryCapacity) {
             p_creep.memory.building = true;
         }
@@ -67,7 +68,7 @@ var roleBuilder = {
                 p_creep.dropResourcesAndDie();
             }
         } else {
-            p_creep.memory.building = false;
+           // p_creep.memory.building = false;
 
             let targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER ||
@@ -113,16 +114,16 @@ var roleBuilder = {
 
             // Don't attempt to mine resources; target droppped preferrably.
             // Local energy sources
-            // let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
+            let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
 
-            // if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-            //     p_creep.memory.harvesting = true;
-            //     return p_creep.moveTo(nearestSource, {
-            //         visualizePathStyle: {
-            //             stroke: '#ffaa00'
-            //         }
-            //     });
-            // }
+            if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+                p_creep.memory.harvesting = true;
+                return p_creep.moveTo(nearestSource, {
+                    visualizePathStyle: {
+                        stroke: '#ffaa00'
+                    }
+                });
+            }
         }
     }
 }

@@ -25,9 +25,16 @@ var creepTasks = {
             if (creepsToDelete > 0) {
                 console.log('DEBUG: Found ' + creepsToDelete + ' DROPMINER creeps to remove...');
 
-                for (let i = 1; i <= creepsToDelete; i++) {
-                    creepsToRemove.push(dropminers[i]);
-                }
+                const oldestCreep = _(dropminers)
+                    .groupBy('ticksToLive')
+                    .map((group) => _.min(group, 'ticksToLive'))
+                    .value();
+
+                console.log('oldest creep is ', JSON.stringify(oldestCreep));
+
+                // for (let i = 1; i <= creepsToDelete; i++) {
+                //     creepsToRemove.push(dropminers[i]);
+                // }
             }
         }
 
@@ -79,30 +86,53 @@ var creepTasks = {
             let creepsToDelete = p_creeps.length - p_maxCreeps;
 
             if (creepsToDelete > 0) {
-                let creepsToRemove = 0;
+                //let creepsToRemove = 0;
 
-                for (let i = 1; i <= creepsToDelete; i++) {
-                    const creep = p_creeps[i];
+                const oldestCreep = _(p_creeps)
+                    .groupBy('ticksToLive')
+                    .map((group) => _.min(group, 'ticksToLive'))
+                    .value()[0];
 
-                    if (!creep || creep.memory.ticksToDie) {
-                        continue;
-                    }
+                    // Maybe check the ticksToLive and if it's <200 don't bother, let if finish?
+           //     console.log('oldest', JSON.stringify(oldestCreep))
+                    oldestCreep.suicide();
+                // if (creep.memory.ticksToDie)
+                // {
+                //     return;
+                // }
 
-                    if (!creep.memory.ticksToDie) {
-                        creepsToRemove += 1;
-                        creep.memory.ticksToDie = global.TICKS_TO_DELETE;
-                    }
-                }
+//                 if (!oldestCreep.timeToLive) {
+//                 //    creepsToRemove += 1;
+//                     oldestCreep.suicide();
+// //                    oldestCreep.ToDie = global.TICKS_TO_DELETE;
+//                 }
 
-                if (creepsToRemove > 0) {
-                    console.log('DEBUG: Marked ' + creepsToRemove + ' HAULER creeps to be removed');
-                }
+                // console.log('222 oldest creep is ', JSON.stringify(oldestCreep));
+
+                // for (let i = 1; i <= creepsToDelete; i++) {
+                //     const creep = p_creeps[i];
+
+                //     if (!creep || creep.memory.ticksToDie) {
+                //         continue;
+                //     }
+
+                //     if (!creep.memory.ticksToDie) {
+                //         creepsToRemove += 1;
+                //         creep.memory.ticksToDie = global.TICKS_TO_DELETE;
+                //     }
+                // }
+
+                // if (creepsToRemove > 0) {
+                //     console.log('DEBUG: Marked ' + creepsToRemove + ' creeps to be removed');
+                // }
             }
-        } else {
-            p_creeps.forEach(creep => {
-                creep.memory.ticksToDie = undefined;
-            });
         }
+        // } else {
+        //     p_creeps.forEach(creep => {
+        //         console.log('Resetting ticksToDie for ' + creep.memory.role + ', ticksToDie=' + creep.memory.ticksToDie);
+        //         creep.memory.ticksToDie = undefined;
+        //     });
+        // }
     }
 }
 

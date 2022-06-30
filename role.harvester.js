@@ -30,6 +30,8 @@ var roleHarvester = {
             for (let source of p_room.memory.sources) {
                 const creepsForThisSource = _.countBy(p_harvesters, x => x.memory.sourceId == source.id).true;
 
+                console.log('creepsForThisSource: ', creepsForThisSource);
+                
                 if (!creepsForThisSource || creepsForThisSource < source.accessPoints) {
                     targetSourceId = source.id;
                     break;

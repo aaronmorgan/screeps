@@ -84,7 +84,7 @@ var roleUpgrader = {
                     });
                 }
             } else {
-                if (p_creep.room.memory.creeps.couriers == 0) {
+               // if (p_creep.room.memory.creeps.couriers == 0) {
                     const resourceEnergy = p_creep.room.droppedResources();
                     const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
 
@@ -121,7 +121,7 @@ var roleUpgrader = {
                             });
                         }
                     }
-                }
+            //    }
             }
         }
     }
