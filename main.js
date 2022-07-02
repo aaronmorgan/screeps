@@ -256,5 +256,12 @@ module.exports.loop = function () {
     creepFactory.processBuildQueue(spawn);
     creepTasks.suicideCreep(spawn.room);
 
+    // Emergency catch all to reset the queue should we end up without any energy gathering screeps.
+    if (harvesters == 0 && dropminers == 0 && !_.isEmpty(spawn.room.memory.creepBuildQueue.queue)) {
+        if (spawn.room.memory.creepBuildQueue.queue[0].name != role.HARVESTER) {
+            spawn.room.memory.creepBuildQueue.queue = [];
+        }
+    }
+
     creepFactory.evaluateBuildQueue(spawn.room);
 }
