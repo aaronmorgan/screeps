@@ -22,14 +22,22 @@ var roleCourier = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(p_spawn, role.COURIER, bodyType, {
-                role: role.COURIER,
-                harvesting: true,
-                targetedDroppedEnergy: {
-                    id: 0,
-                    pos: new RoomPosition(1, 1, p_spawn.room.name)
-                }
-            });
+            const targetSourceId = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().couriers)[0].id;
+
+            if (!targetSourceId) {
+                console.log('ERROR: Attempting to create ' + role.COURIER + ' with an assigned source');
+                return EXIT_CODE.ERR_INVALID_TARGET;
+            } else {
+                return creepFactory.create(p_spawn, role.COURIER, bodyType, {
+                    role: role.COURIER,
+                    sourceId: targetSourceId,
+                    harvesting: false,
+                    targetedDroppedEnergy: {
+                        id: 0,
+                        pos: new RoomPosition(1, 1, p_spawn.room.name)
+                    }
+                });
+            }
         }
     },
 
@@ -40,30 +48,74 @@ var roleCourier = {
 
         const creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
         p_creep.say('🚚 ' + creepFillPercentage + '%');
-        
-        if (creepFillPercentage == 0) {
+
+        // Creep has no energy so we need to move to our source.
+        if (creepFillPercentage == 0 && p_creep.memory.harvesting == false) {
+            let source = Game.getObjectById(p_creep.memory.sourceId);
+
+            if (!p_creep.pos.isNearTo(source)) {
+                var moveResult = p_creep.moveTo(source, {
+                    visualizePathStyle: {
+                        stroke: '#ffaa00'
+                    }
+                });
+
+                return;
+            } else {
+                // Target source is within range so switch to harvesting mode.
+                p_creep.memory.harvesting = true;
+            }
+
+            return;
+        }
+
+        // Creep is not full and within it's preferring collection point.
+        if (creepFillPercentage < 100 && p_creep.memory.harvesting == true) {
             // Needs to find closest dropped energy to the Source.
-            const droppedResources = _.sortBy(p_creep.room.droppedResourcesCloseToSource(), s => s.energy.amount);
-            
+            //const droppedResources = _.sortBy(p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId), s => s.energy.amount);
+            const droppedResources = p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId);
+
             if (droppedResources) {
                 const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
 
                 if (!_.isEmpty(energyTarget)) {
                     let source = Game.getObjectById(energyTarget.id);
 
-                    if (p_creep.pickup(source) == ERR_NOT_IN_RANGE) {
-                        p_creep.moveTo(source, {
-                            visualizePathStyle: {
-                                stroke: '#ffaa00'
-                            }
-                        });
+                    const pickupResult = p_creep.pickup(source);
+
+                    switch (pickupResult) {
+                        case ERR_NOT_IN_RANGE: {
+                            const moveResult = p_creep.moveTo(source, {
+                                visualizePathStyle: {
+                                    stroke: '#ffaa00'
+                                }
+                            });
+                        }
+                        case ERR_FULL: {
+                            p_creep.memory.harvesting = false;
+                        }
+
                     }
 
                     return;
                 }
+
+                if (creepFillPercentage == 100 || droppedResources.length == 0) {
+                    // Don't do any more, wait for the next turn to pickup nearby resources.
+                    p_creep.memory.harvesting = false
+                }
+                if (_.isEmptydroppedResources) {
+                    p_creep.memory.harvesting = false
+                }
+
+                return;
             }
 
-        } else {
+        }
+
+        if (creepFillPercentage == 100 || p_creep.memory.harvesting == false) {
+            p_creep.memory.harvesting = false;
+
             let targets = [];
 
             if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {

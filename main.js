@@ -249,7 +249,7 @@ module.exports.loop = function () {
         }
     } else {
         if (spawn.spawning) {
-            console.log('Spawning: ' + JSON.stringify(spawn.spawning))
+            console.log('Spawning: ' + spawn.spawning.name)
         }
     }
 
