@@ -69,7 +69,7 @@ var roleCourier = {
             return;
         }
 
-        // Creep is not full and within it's preferring collection point.
+        // We've moved to our source now look for resources within it's preferring collection point.
         if (creepFillPercentage < 100 && p_creep.memory.harvesting == true) {
             // Needs to find closest dropped energy to the Source.
             //const droppedResources = _.sortBy(p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId), s => s.energy.amount);
@@ -109,8 +109,30 @@ var roleCourier = {
                 }
 
                 return;
-            }
+            } else {
+                // NOT CONFIRMED AS WORKING!
+                // Look for dropped energy at the spawn dump site first.
+                const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
+                if (target) {
+                    var xyTileEnergy = p_creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
+
+                    if (!_.isEmpty(xyTileEnergy)) {
+                        const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
+                        const pickupResult = p_creep.pickup(droppedEnergy);
+
+                        if (pickupResult == ERR_NOT_IN_RANGE) {
+                            p_creep.moveTo(droppedEnergy, {
+                                visualizePathStyle: {
+                                    stroke: '#ffaa00'
+                                }
+                            });
+                        }
+
+                        p_creep.memory.harvesting = false;
+                    }
+                }
+            }
         }
 
         if (creepFillPercentage == 100 || p_creep.memory.harvesting == false) {
