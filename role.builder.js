@@ -28,7 +28,8 @@ var roleBuilder = {
         if (!_.isEmpty(bodyType)) {
             return creepFactory.create(p_spawn, role.BUILDER, bodyType, {
                 role: role.BUILDER,
-                building: true
+                building: true,
+                ticksWithoutWork: 0
             });
         }
     },
@@ -50,11 +51,21 @@ var roleBuilder = {
         }
 
         if (p_creep.memory.building) {
+            // Attempt to resupply Spawn if there are no couriers.
+            if (p_creep.room.memory.creeps.haresters == 0 && p_creep.room.memory.creeps.couriers == 0) {
+                if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                    targets.push(Game.spawns['Spawn1']);
+                }
+            }
+
             let targets = p_creep.room.constructionSites();
             if (targets.length) {
+                p_creep.memory.ticksWithoutWork = 0;
+
                 targets.sort(function (a, b) {
                     return a.progress > b.progress ? -1 : 1
                 });
+
                 if (p_creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
                     p_creep.moveTo(targets[0], {
                         reusePath: 10,
@@ -64,11 +75,16 @@ var roleBuilder = {
                     });
                 }
             } else {
-                // Creep is idle, we should put the energy back and die.
-                p_creep.dropResourcesAndDie();
+                p_creep.memory.ticksWithoutWork++;
+
+                // Only suicide after n number of turns without a job to do.
+                if (p_creep.memory.ticksWithoutWork > 10) {
+                    // Creep is idle, we should put the energy back and die.
+                    p_creep.dropResourcesAndDie();
+                }
             }
         } else {
-           // p_creep.memory.building = false;
+            // p_creep.memory.building = false;
 
             let targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER ||

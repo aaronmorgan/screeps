@@ -40,7 +40,7 @@ var creepTasks = {
         }
 
         this.findCreepsToDelete(p_room.creeps().haulers, p_room.memory.maxHaulerCreeps);
-        this.findCreepsToDelete(p_room.creeps().builders, p_room.memory.maxBuilderCreeps);
+        // this.findCreepsToDelete(p_room.creeps().builders, p_room.memory.maxBuilderCreeps);
 
         if (upgraders.length > p_room.memory.maxUpgraderCreeps + 1) {
             let creepsToDelete = upgraders.length - p_room.memory.maxUpgraderCreeps;
