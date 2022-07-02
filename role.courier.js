@@ -53,7 +53,7 @@ var roleCourier = {
         if (creepFillPercentage == 0 && p_creep.memory.harvesting == false) {
             let source = Game.getObjectById(p_creep.memory.sourceId);
 
-            if (!p_creep.pos.isNearTo(source)) {
+            if (!p_creep.pos.inRangeTo(source, 2)) {
                 var moveResult = p_creep.moveTo(source, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
