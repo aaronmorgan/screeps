@@ -4,17 +4,13 @@ module.exports.jobs = {
     },
     RCL_1: {
         jobs: [{
-            type: "container",
-            x: 4,
-            y: 0
-        }]
+            type: "extension",
+            x: 1,
+            y: -2
+        },]
     },
     RCL_2: {
-        jobs: [{
-                type: "extension",
-                x: 1,
-                y: -2
-            },
+        jobs: [
             {
                 type: "extension",
                 x: 1,
