@@ -7,11 +7,10 @@ module.exports.jobs = {
             type: "extension",
             x: 1,
             y: -2
-        },]
+        }, ]
     },
     RCL_2: {
-        jobs: [
-            {
+        jobs: [{
                 type: "extension",
                 x: 1,
                 y: -1
@@ -45,45 +44,7 @@ module.exports.jobs = {
                 type: "container",
                 x: -4,
                 y: 0
-            }
-        ]
-    },
-    RCL_3: {
-        jobs: [{
-                type: "tower",
-                x: 3,
-                y: -2
             },
-            {
-                type: "extension",
-                x: -1,
-                y: -2
-            },
-            {
-                type: "extension",
-                x: -1,
-                y: -1
-            },
-            {
-                type: "extension",
-                x: -2,
-                y: -2
-            },
-            {
-                type: "extension",
-                x: -2,
-                y: -1
-            },
-            {
-                type: "extension",
-                x: -3,
-                y: -1
-            },
-            // {
-            //     type: "container",
-            //     x: 0,
-            //     y: 3
-            // },
             // Roads, north, south, east, west
             {
                 type: "road",
@@ -235,6 +196,44 @@ module.exports.jobs = {
                 x: -1,
                 y: -3
             }
+        ]
+    },
+    RCL_3: {
+        jobs: [{
+                type: "tower",
+                x: 3,
+                y: -2
+            },
+            {
+                type: "extension",
+                x: -1,
+                y: -2
+            },
+            {
+                type: "extension",
+                x: -1,
+                y: -1
+            },
+            {
+                type: "extension",
+                x: -2,
+                y: -2
+            },
+            {
+                type: "extension",
+                x: -2,
+                y: -1
+            },
+            {
+                type: "extension",
+                x: -3,
+                y: -1
+            },
+            // {
+            //     type: "container",
+            //     x: 0,
+            //     y: 3
+            // },
         ]
     },
     RCL_4: {
