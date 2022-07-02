@@ -30,17 +30,8 @@ var roleDropMiner = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            let targetSourceId = undefined;
-
-            for (let source of p_spawn.room.memory.sources) {
-                let creepsForThisSource = _.countBy(p_dropminers, x => x.memory.sourceId == source.id).true;
-                creepsForThisSource = Math.min(source.accessPoints, creepsForThisSource);
-
-                if (!creepsForThisSource) {
-                    targetSourceId = source.id;
-                    break;
-                }
-            }
+            // Potential bug: We could end up with a dropminer assigning itself to a source with a remaining harvester.
+            const targetSourceId = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().dropminers)[0].id;
 
             if (!targetSourceId) {
                 console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
