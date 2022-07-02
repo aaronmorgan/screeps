@@ -125,11 +125,8 @@ module.exports.loop = function () {
             // Builders are extra and in preparation for RCL 2 construction projects.
             maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
             maxDropMinerCreeps = 0;
-            maxHarvesterCreeps = 2;//spawn.room.maxSourceAccessPoints || spawn.room.memory.sources.length;
-            maxCourierCreeps = Math.round(harvesters.length / 2);
-            if (maxCourierCreeps == 0) {
-                maxCourierCreeps = harvesters.length;
-            }
+            maxHarvesterCreeps = spawn.room.memory.sources.length;
+            maxCourierCreeps = maxHarvesterCreeps;
             maxHaulerCreeps = 0;
             maxUpgraderCreeps = 1;
             break;
@@ -140,11 +137,8 @@ module.exports.loop = function () {
             // May need to increase builder ceiling from 3 to 4.
             maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 3 : 0;
             maxDropMinerCreeps = 0;
-            maxHarvesterCreeps = 2;//spawn.room.memory.maxSourceAccessPoints || 2;
-            maxCourierCreeps = Math.round(harvesters.length / 2);
-            if (maxCourierCreeps == 0) {
-                maxCourierCreeps = harvesters.length;
-            }
+            maxHarvesterCreeps = spawn.room.memory.sources.length;
+            maxCourierCreeps = maxHarvesterCreeps;
             maxHaulerCreeps = 0;
             maxUpgraderCreeps = 2;
             break;
