@@ -8,7 +8,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleBuilder = {
 
-    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
 
         if (p_energyCapacityAvailable >= 900) {
@@ -26,7 +26,7 @@ var roleBuilder = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(p_room, p_spawn, role.BUILDER, bodyType, {
+            return creepFactory.create(p_spawn, role.BUILDER, bodyType, {
                 role: role.BUILDER,
                 building: true
             });

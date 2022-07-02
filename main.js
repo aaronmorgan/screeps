@@ -46,26 +46,27 @@ let creepFactory = require('tasks.build.creeps');
 module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
     let spawn = Game.spawns['Spawn1'];
-    let room = spawn.room;
 
-    room.structures();
+    spawn.room.structures();
     // room.linkContainers();
-    room.droppedResources();
-    room.determineSourceAccessPoints();
+    spawn.room.droppedResources();
+    spawn.room.determineSourceAccessPoints();
 
-    infrastructureTasks.locateSpawnDumpLocation(room);
+    infrastructureTasks.locateSpawnDumpLocation(spawn.room);
+    if (!spawn.room.memory.creepBuildQueue)
 
-    if (!room.memory.game) {
-        room.memory.game = {
+    if (!spawn.room.memory.game) {
+        spawn.room.memory.game = {
             phase: 1
         }
     }
 
-    const structures = room.structures();
+    creepFactory.validateCache(spawn.room);
+    const structures = spawn.room.structures();
 
     if (structures.tower) {
         structures.tower.forEach(tower => {
-            let hostiles = room.find(FIND_HOSTILE_CREEPS);
+            let hostiles = spawn.room.find(FIND_HOSTILE_CREEPS);
 
             if (hostiles.length) {
                 console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
@@ -81,22 +82,20 @@ module.exports.loop = function () {
         });
     }
 
-    if (_.isEmpty(structures.tower) && room.controller.level >= 3) {
+    if (_.isEmpty(structures.tower) && spawn.room.controller.level >= 3) {
         console.log('⚠️ WARNING: No towers!');
     }
 
-    let energyCapacityAvailable = room.energyCapacityAvailable;
+    let energyCapacityAvailable = spawn.room.energyCapacityAvailable;
 
-    const harvesters = room.creeps().harvesters || [];
-    const couriers = room.creeps().couriers || [];
-    const dropminers = room.creeps().dropminers || [];
-    const haulers = room.creeps().haulers || [];
-    const builders = room.creeps().builders || [];
-    const upgraders = room.creeps().upgraders || [];
+    const harvesters = spawn.room.creeps().harvesters || [];
+    const couriers = spawn.room.creeps().couriers || [];
+    const dropminers = spawn.room.creeps().dropminers || [];
+    const haulers = spawn.room.creeps().haulers || [];
+    const builders = spawn.room.creeps().builders || [];
+    const upgraders = spawn.room.creeps().upgraders || [];
 
-
-
-    room.memory.creeps = {
+    spawn.room.memory.creeps = {
         harvesters: harvesters.length,
         couriers: couriers.length,
         dropminers: dropminers.length,
@@ -105,97 +104,6 @@ module.exports.loop = function () {
         upgraders: upgraders.length
     };
 
-    // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
-    // if ((harvesters.length <= 2 && dropminers.length == 0)) {
-    //     creepFactory.clearBuildQueue(room);
-    //     roleHarvester.tryBuild(room, spawn, room.energyAvailable, harvesters);
-    //     // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
-    // } else if (dropminers.length > 0 && haulers.length == 0) {
-    //     creepFactory.clearBuildQueue(room);
-    //     if (haulers.length <= room.memory.maxHaulers) {
-    //         roleHauler.tryBuild(room, spawn, room.energyAvailable);
-    //     }
-    // } else if (upgraders.length == 0) {
-    //     creepFactory.clearBuildQueue(room);
-
-    //     roleUpgrader.tryBuild(room, spawn, room.energyAvailable);
-    // }
-
-    // Harvesters
-    // if (!room.memory.maxHarvesterCreeps) {
-    //     room.memory.maxHarvesterCreeps = MAX_HARVESTES * room.memory.sources.length;
-    // }
-
-    // Couriers
-    // if (!room.memory.maxCourierCreeps) {
-    //     room.memory.maxCourierCreeps = room.memory.sources.length;
-    // }
-
-    // Drop miners
-    // Not sure if the file ternary condition is correct or not.
-    // if (!room.memory.maxDropMinerCreeps) {
-    //     room.memory.maxDropMinerCreeps = (dropminers.length == 0 && harvesters.length == 0) ? 0 : room.memory.maxSourceAccessPoints;
-    // }
-
-    // if (Game.time % 200 == 0) {
-    //     console.log('⚠️ Info: Re-evaluating creep requirements.')
-
-    //     let allDroppedEnergy = 0;
-    //     room.droppedResources().forEach(x => {
-    //         allDroppedEnergy += x.energy
-    //     });
-
-    //     // let additionalHaulersModifier = room.memory.sources.length;
-
-    //     // if (structures.container) {
-    //     //     let allContainersCapacity = 0;
-
-    //     //     structures.container.forEach(x => {
-    //     //         allContainersCapacity += x.storeCapacity - x.store.energy;
-    //     //     });
-
-    //     //     // Cap the dropped energy count so we don't try to pickup/store more than we have capacity for.
-    //     //     if (allDroppedEnergy > allContainersCapacity) {
-    //     //         allDroppedEnergy = allContainersCapacity;
-    //     //     }
-
-    //     //     if (allContainersCapacity > 0) {
-    //     //         //console.log('Dropped energy vs container capacity: ' + allDroppedEnergy + '/' + allContainersCapacity);
-    //     //         const droppedEnergyAsPercentageOfContainerCapacity = (allDroppedEnergy / allContainersCapacity * 100);
-    //     //         additionalHaulersModifier += Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
-    //     //     } else {
-    //     //         additionalHaulersModifier += Math.floor(allDroppedEnergy / 100);
-    //     //     }
-    //     // } else {
-    //     //     additionalHaulersModifier = Math.floor(allDroppedEnergy / 100);
-    //     // }
-
-    //     // room.memory.maxHaulerCreeps = Math.floor(MAX_HAULERS, dropminers.length + additionalHaulersModifier);
-
-    //     // Upgraders
-    //     if (structures.container) {
-    //         let allContainersCapacity = 0;
-    //         let allContainersEnergy = 0;
-
-    //         structures.container.forEach(x => {
-    //             allContainersCapacity += x.storeCapacity;
-    //             allContainersEnergy += x.store.energy;
-    //         });
-
-    //         if (allContainersCapacity > 0) {
-    //             const droppedEnergyAsPercentageOfContainerCapacity = (allContainersEnergy / allContainersCapacity * 100);
-    //             const additionalHaulersModifier = Math.ceil(Math.floor(droppedEnergyAsPercentageOfContainerCapacity) / 25);
-
-    //             room.memory.maxUpgraderCreeps = Math.floor(MAX_UPGRADERS, upgraders.length + additionalHaulersModifier);
-    //         } else {
-    //             room.memory.maxUpgraderCreeps = MAX_UPGRADERS;
-    //         }
-    //     } else {
-    //         room.memory.maxUpgraderCreeps = MAX_UPGRADERS;
-    //     }
-    // }
-
-
     let maxBuilderCreeps = 2;
     let maxCourierCreeps = 0;
     let maxDropMinerCreeps = 0;
@@ -203,68 +111,69 @@ module.exports.loop = function () {
     let maxHaulerCreeps = 0;
     let maxUpgraderCreeps = 2;
 
-    let rclLevel = room.controller.level;
-
     // TODO Only do this mod n times, e.g. % 10.
-    infrastructureTasks.buildLinks(room);
+    infrastructureTasks.buildLinks(spawn.room);
 
-    switch (rclLevel) {
+    switch (spawn.room.controller.level) {
         case 0: {
 
             break;
         }
         case 1: {
-            room.memory.game.phase = 1;
+            spawn.room.memory.game.phase = 1;
             // Goal is to quickly get to RCL 2 by creating two Upgraders.
             // Builders are extra and in preparation for RCL 2 construction projects.
-            maxBuilderCreeps = room.constructionSites().length > 0 ? 2 : 0;
-            maxCourierCreeps = 0;
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
             maxDropMinerCreeps = 0;
-            maxHarvesterCreeps = 2;
-            maxHaulerCreeps = 0;
-            maxUpgraderCreeps = 2;
-            break;
-        }
-        case 2: {
-            room.memory.game.phase = 2;
-
-            // May need to increase builder ceiling from 3 to 4.
-            maxBuilderCreeps = room.constructionSites().length > 0 ? 3 : 0;
+            maxHarvesterCreeps = 2;//spawn.room.maxSourceAccessPoints || spawn.room.memory.sources.length;
             maxCourierCreeps = Math.round(harvesters.length / 2);
             if (maxCourierCreeps == 0) {
                 maxCourierCreeps = harvesters.length;
             }
+            maxHaulerCreeps = 0;
+            maxUpgraderCreeps = 1;
+            break;
+        }
+        case 2: {
+            spawn.room.memory.game.phase = 2;
+
+            // May need to increase builder ceiling from 3 to 4.
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 3 : 0;
             maxDropMinerCreeps = 0;
-            maxHarvesterCreeps = builders.length == maxBuilderCreeps ? 4 : 2;
+            maxHarvesterCreeps = 2;//spawn.room.memory.maxSourceAccessPoints || 2;
+            maxCourierCreeps = Math.round(harvesters.length / 2);
+            if (maxCourierCreeps == 0) {
+                maxCourierCreeps = harvesters.length;
+            }
             maxHaulerCreeps = 0;
             maxUpgraderCreeps = 2;
             break;
         }
 
         default: {
-            room.memory.game.phase = 999;
+            spawn.room.memory.game.phase = 999;
 
-            maxBuilderCreeps = room.constructionSites().length > 0 ? 3 : 0;
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 3 : 0;
             maxCourierCreeps = Math.round(harvesters.length / 2);
             if (maxCourierCreeps == 0) {
                 maxCourierCreeps = harvesters.length;
             }
-            maxDropMinerCreeps = room.memory.maxDropMinerCreeps || room.memory.maxSouceAccessPoints;
-            maxHarvesterCreeps = Math.max(0, room.memory.maxSouceAccessPoints - dropminers.length);
+            maxDropMinerCreeps = spawn.room.memory.maxDropMinerCreeps || spawn.room.memory.maxSouceAccessPoints;
+            maxHarvesterCreeps = Math.max(0, spawn.room.memory.maxSouceAccessPoints - dropminers.length);
             maxHaulerCreeps = 0;
-            maxUpgraderCreeps = Math.min(4, room.controller.level);
+            maxUpgraderCreeps = Math.min(4, spawn.room.controller.level);
         }
 
     }
 
-    room.memory.maxBuilderCreeps = maxBuilderCreeps;
-    room.memory.maxCourierCreeps = maxCourierCreeps;
-    room.memory.maxDropMinerCreeps = maxDropMinerCreeps;
-    room.memory.maxHarvesterCreeps = maxHarvesterCreeps;
-    room.memory.maxHaulerCreeps = maxHaulerCreeps;
-    room.memory.maxUpgraderCreeps = maxUpgraderCreeps;
+    spawn.room.memory.maxBuilderCreeps = maxBuilderCreeps;
+    spawn.room.memory.maxCourierCreeps = maxCourierCreeps;
+    spawn.room.memory.maxDropMinerCreeps = maxDropMinerCreeps;
+    spawn.room.memory.maxHarvesterCreeps = maxHarvesterCreeps;
+    spawn.room.memory.maxHaulerCreeps = maxHaulerCreeps;
+    spawn.room.memory.maxUpgraderCreeps = maxUpgraderCreeps;
 
-    const sufficientBuilders = builders.length >= maxBuilderCreeps;
+    const sufficientBuilders = builders.length >= maxBuilderCreeps; // Should also include harvesters?
     const sufficientCouriers = couriers.length >= maxCourierCreeps;
     const sufficientDropMiners = dropminers.length >= maxDropMinerCreeps;
     const sufficientHarvesters = harvesters.length >= maxHarvesterCreeps;
@@ -273,17 +182,13 @@ module.exports.loop = function () {
 
 
     // Summary of actual vs target numbers.
-    console.log('  Game Phase: ' + room.memory.game.phase);
+    console.log('  Game Phase: ' + spawn.room.memory.game.phase);
     console.log('  Harvesters: ' + harvesters.length + '/' + maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));
     console.log('  Couriers: ' + couriers.length + '/' + maxCourierCreeps + ' ' + (sufficientCouriers ? '✔️' : '❌'));
     console.log('  Drop Miners: ' + dropminers.length + '/' + maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '❌'));
     console.log('  Haulers: ' + haulers.length + '/' + maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '❌'));
     console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
-
-    creepFactory.processBuildQueue(room, spawn);
-    creepFactory.evaluateBuildQueue(room);
-    //creepFactory.showSpawningCreepInfo(room, spawn)
 
     if (Game.time % 50 == 0) {
         console.log('⚠️ INFO: Checking for deleted creeps...');
@@ -294,14 +199,14 @@ module.exports.loop = function () {
         }
     }
 
-    room.myCreeps().forEach(c => {
+    spawn.room.myCreeps().forEach(c => {
         const creep = Game.creeps[c.name];
 
-        if (creep.memory.role == role.HARVESTER) {
-            roleHarvester.run(creep);
-        }
         if (creep.memory.role == role.COURIER) {
             roleCourier.run(creep);
+        }
+        if (creep.memory.role == role.HARVESTER) {
+            roleHarvester.run(creep);
         }
         if (creep.memory.role == role.DROPMINER) {
             roleDropMiner.run(creep);
@@ -317,136 +222,39 @@ module.exports.loop = function () {
         }
     });
 
-    creepTasks.suicideCreep(room);
+    if (spawn.spawning === null && spawn.room.memory.creepBuildQueue.queue.length == 0) {
+        console.log(4)
+    //    if (spawn.room.memory.creepBuildQueue.queue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
 
-    if (!spawn.spawning && room.memory.creepBuildQueue && (room.memory.creepBuildQueue.queue.length < global.MAX_CREEP_BUILD_QUEUE_LENGTH)) {
+            if (harvesters.length == 0 && dropminers.length == 0) {
+                energyCapacityAvailable = spawn.room.energyAvailable;
+            }
 
-        // HARVESTERS
-        if (!sufficientHarvesters) {
-            roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters);
-            return;
-        }
-
-        // COURIERS
-        if (!sufficientCouriers) {
-            roleCourier.tryBuild(room, spawn, energyCapacityAvailable);
-            return;
-        }
-
-        // DROPMINERS
-        if (!sufficientDropMiners) {
-            roleDropMiner.tryBuild(room, spawn, energyCapacityAvailable, dropminers);
-            return;
-        }
-
-        // UPGRADERS
-        if (!sufficientUpgraders) {
-            roleUpgrader.tryBuild(room, spawn, energyCapacityAvailable);
-            return;
-        }
-
-        // BUILDERS
-        if (sufficientHarvesters && !sufficientBuilders) {
-            roleBuilder.tryBuild(room, spawn, energyCapacityAvailable);
-            return;
-        }
-
-        //            break;
-        //       }
-        // case 2: {
-        //     // With the Harvester from phase 1 get an Upgrader out immediately to get the RCL to level 2.
-        //     if (upgraders.length == 0) {
-        //         roleUpgrader.tryBuild(room, spawn, energyCapacityAvailable);
-        //     } else {
-        //         room.memory.game.phase = 3;
-        //     }
-        //     break;
-        // }
-        // case 3: {
-        //     // With the Upgrader from phase 2 get a builder out to work on extensions.
-        //     if (!sufficientUpgraders) {
-        //         roleUpgrader.tryBuild(room, spawn, energyCapacityAvailable);
-        //     } else {
-        //         room.memory.game.phase = 4;
-        //     }
-
-        //     room.memory.maxBuilderCreeps = 2;
-        //     break;
-        // }
-        // case 4: {
-        //     // With the Upgraders working on their own get some couriers out to shift us into drop mining mode.
-        //     if (couriers.length <= 2) {
-        //         roleCourier.tryBuild(room, spawn, energyCapacityAvailable);
-        //     } else {
-        //         room.memory.game.phase = 5;
-        //     }
-
-        //     room.memory.maxBuilderCreeps = 2;
-        //     break;
-        // }
-        // // case 5: {
-        // //     room.memory.maxBuilderCreeps = 2;
-        // //     break;
-        // // }
-        // default: {
-        //     // Manage the build queue in case we're in a situation where it's jammed up with something it cannot build
-        //     // TODO Fix this, it flushes the build queue in the early game.
-        //     // if ((harvesters.length == 0 && dropminers.length == 0) ||
-        //     //     (harvesters.length == 0 && haulers.length == 0)) {
-        //     //     creepFactory.clearBuildQueue(room);
-
-        //     //     // Drop down to only what's available incase we're trying to queue creeps we cannot affort.
-        //     //     energyCapacityAvailable = room.energyAvailable;
-        //     // }
-
-        //     // HARVESTER creeps
-        //     if (!sufficientHarvesters) {
-        //         roleHarvester.tryBuild(room, spawn, energyCapacityAvailable, harvesters);
-        //         break;
-        //     }
-
-        //     // DROPMINER creeps
-        //     // if (!sufficientDropMiners &&
-        //     //     (harvesters.length > 0 || haulers.length > 0)) {
-
-        //     //     roleDropMiner.tryBuild(room, spawn, energyCapacityAvailable, dropminers);
-        //     //     break;
-        //     // }
-
-        //     // HAULER creeps
-        //     // if (!sufficientHaulers) {
-        //     //     roleHauler.tryBuild(room, spawn, energyCapacityAvailable);
-        //     //     break;
-        //     // }
-
-        //     // COURIERS 
-        //     if (!sufficientCouriers) {
-        //         roleCourier.tryBuild(room, spawn, energyCapacityAvailable);
-        //         break;
-        //     }
-
-        //     // BUILDER creeps
-        //     if (!sufficientBuilders &&
-        //         (harvesters.length > 0 || (haulers.length > 0 && dropminers.length > 0))) {
-
-        //         roleBuilder.tryBuild(room, spawn, energyCapacityAvailable);
-        //         break;
-        //     }
-
-        //     // UPGRADER creeps
-        //     if (!sufficientUpgraders) {
-        //         roleUpgrader.tryBuild(room, spawn, energyCapacityAvailable);
-        //         break;
-        //     }
-        // }
-
-        // // Check continually to see if builders are required.
-        // if (!sufficientBuilders) {
-        //     roleBuilder.tryBuild(room, spawn, energyCapacityAvailable)
-        // } else {
-        //     room.memory.game.phase++;
-        // }
-
-        //    }
+            // HARVESTERS
+            if (!sufficientHarvesters) {
+                roleHarvester.tryBuild(spawn, energyCapacityAvailable);
+            }
+            // COURIERS
+            if (!sufficientCouriers) {
+                roleCourier.tryBuild(spawn, energyCapacityAvailable);
+            }
+            // DROPMINERS
+            if (!sufficientDropMiners) {
+                roleDropMiner.tryBuild(spawn, energyCapacityAvailable, dropminers);
+            }
+            // UPGRADERS
+            if (!sufficientUpgraders) {
+                roleUpgrader.tryBuild(spawn, energyCapacityAvailable);
+            }
+            // BUILDERS
+            if (!sufficientBuilders) {
+                roleBuilder.tryBuild(spawn, energyCapacityAvailable);
+            }
+   //     }
     }
+
+    creepFactory.processBuildQueue(spawn);
+    creepTasks.suicideCreep(spawn.room);
+
+    creepFactory.evaluateBuildQueue(spawn.room);
 }

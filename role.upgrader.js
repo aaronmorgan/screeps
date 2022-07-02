@@ -1,5 +1,6 @@
 const {
-    role
+    role,
+    energyCollection
 } = require('game.constants');
 
 require('prototype.creep')();
@@ -8,16 +9,16 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleUpgrader = {
 
-    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
 
-        if (p_room.storage && p_energyCapacityAvailable >= 1750) {
+        if (p_spawn.room.storage && p_energyCapacityAvailable >= 1750) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE, MOVE
             ];
-        } else if (p_room.storage && p_energyCapacityAvailable >= 1000) {
+        } else if (p_spawn.room.storage && p_energyCapacityAvailable >= 1000) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY,
@@ -36,7 +37,7 @@ var roleUpgrader = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(p_room, p_spawn, role.UPGRADER, bodyType, {
+            return creepFactory.create(p_spawn, role.UPGRADER, bodyType, {
                 role: role.UPGRADER
             });
         }
@@ -45,6 +46,8 @@ var roleUpgrader = {
     /** @param {Creep} p_creep **/
     run: function (p_creep) {
         p_creep.checkTicksToLive();
+
+            //p_creep.memory.energyCollection = energyCollection.UNKNOWN;
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
         p_creep.say('⚒️ ' + creepFillPercentage + '%');
@@ -66,6 +69,11 @@ var roleUpgrader = {
                 });
             }
         } else {
+            if (p_creep.room.memory.maxSourceAccessPoints <= p_creep.room.creeps().harvesters.length) {
+            
+                p_creep.memory.energyCollection = energyCollection.SCAVENGING;
+        }
+
             const targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (
                         structure.structureType == STRUCTURE_CONTAINER ||
@@ -84,7 +92,9 @@ var roleUpgrader = {
                     });
                 }
             } else {
-               // if (p_creep.room.memory.creeps.couriers == 0) {
+                // if (p_creep.room.memory.creeps.couriers == 0) {
+
+                if (p_creep.memory.energyCollection != energyCollection.MINING) {
                     const resourceEnergy = p_creep.room.droppedResources();
                     const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
 
@@ -95,6 +105,8 @@ var roleUpgrader = {
                             source = Game.getObjectById(energyTarget.id);
 
                             const pickupResult = p_creep.pickup(source);
+
+                            p_creep.memory.energyCollection = energyCollection.SCAVENGING;
 
                             if (pickupResult == ERR_NOT_IN_RANGE) {
                                 p_creep.moveTo(source, {
@@ -108,20 +120,25 @@ var roleUpgrader = {
                                 p_creep.room.refreshDroppedResources();
                             }
                         }
-                    } else {
 
-                        let sources = p_creep.room.sources();
-                        let nearestSource = p_creep.pos.findClosestByPath(sources);
-
-                        if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                            p_creep.moveTo(nearestSource, {
-                                visualizePathStyle: {
-                                    stroke: '#3370ac'
-                                }
-                            });
-                        }
+                        return;
                     }
-            //    }
+                }
+
+                // Last resort, go and mine the energy.
+                let sources = p_creep.room.sources();
+                let nearestSource = p_creep.pos.findClosestByPath(sources);
+
+                p_creep.memory.energyCollection = energyCollection.MINING;
+
+                if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+                    p_creep.moveTo(nearestSource, {
+                        visualizePathStyle: {
+                            stroke: '#3370ac'
+                        }
+                    });
+                }
+                //    }
             }
         }
     }

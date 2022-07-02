@@ -9,7 +9,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleHauler = {
 
-    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
 
         if (p_energyCapacityAvailable >= 450) {
@@ -23,12 +23,12 @@ var roleHauler = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(p_room, p_spawn, role.HAULER, bodyType, {
+            return creepFactory.create(p_spawn, role.HAULER, bodyType, {
                 role: role.HAULER,
                 harvesting: true,
                 targetedDroppedEnergy: {
                     id: 0,
-                    pos: new RoomPosition(1, 1, p_room.name)
+                    pos: new RoomPosition(1, 1, p_spawn.room.name)
                 }
             });
         }

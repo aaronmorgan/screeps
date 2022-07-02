@@ -25,6 +25,7 @@
 module.exports.EXIT_CODE = {
         '0': 'OK',
         '-1': 'ERR_NOT_OWNER',
+        '-2': 'ERR_NO_PATH',
         '-3': 'ERR_NAME_EXISTS',
         '-4': 'ERR_BUSY',
         '-6': 'ERR_NOT_ENOUGH_ENERGY',
@@ -44,6 +45,12 @@ module.exports.EXIT_CODE = {
         HAULER: 'Hauler',
         BUILDER: 'Builder',
         UPGRADER: 'Upgrader'
+    },
+
+    module.exports.energyCollection = {
+        UNKNOWN: 'UNKNOWN',
+        MINING: 'MINING',
+        SCAVENGING: 'SCAVENGING'
     },
 
     module.exports.global = {

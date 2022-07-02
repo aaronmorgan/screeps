@@ -16,9 +16,8 @@ const {
 
 var creepFactory = {
 
-    create: function (p_room, p_spawn, p_role, p_body, p_memory) {
+    create: function (p_spawn, p_role, p_body, p_memory) {
         this.enqueueBuildJob(
-            p_room,
             p_spawn, {
                 body: p_body,
                 name: p_role,
@@ -34,10 +33,10 @@ var creepFactory = {
         }
     },
 
-    enqueueBuildJob: function (p_room, p_spawn, p_buildJob) {
-        this.validateCache(p_room);
+    enqueueBuildJob: function (p_spawn, p_buildJob) {
+        this.validateCache(p_spawn.room);
 
-        if (p_room.memory.creepBuildQueue.queue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
+        if (p_spawn.room.memory.creepBuildQueue.queue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
             return;
         }
 
@@ -47,34 +46,34 @@ var creepFactory = {
         //     return;
         // }
 
-        p_room.memory.creepBuildQueue.queue.push(p_buildJob);
+        p_spawn.room.memory.creepBuildQueue.queue.push(p_buildJob);
         //console.log('INFO: New creep build job added, ' + p_room.memory.creepBuildQueue.queue.length + ' jobs queued');
     },
 
-    processBuildQueue: function (p_room, p_spawn) {
+    processBuildQueue: function (p_spawn) {
         if (p_spawn.spawning) {
             return;
         }
 
-        this.validateCache(p_room);
+        this.validateCache(p_spawn.room);
 
-        if (p_room.memory.creepBuildQueue.queue.length == 0) {
+        if (p_spawn.room.memory.creepBuildQueue.queue.length == 0) {
             return;
         }
 
-        const job = p_room.memory.creepBuildQueue.queue[0];
-        const name = job.name + '_' + p_room.name + '_' + Game.time;
+        const nextQueuedJob = p_spawn.room.memory.creepBuildQueue.queue[0];
+        const name = nextQueuedJob.name + '_' + p_spawn.name + '_' + Game.time;
 
-        const bodyCost = this.bodyCost(job.body);
+        const bodyCost = this.bodyCost(nextQueuedJob.body);
 
-        if (bodyCost > p_room.energyAvailable) {
+        if (bodyCost > p_spawn.room.energyAvailable) {
             return;
         }
 
         //console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory), +', cost=' + bodyCost);
 
-        const result = p_spawn.spawnCreep(job.body, name, {
-            memory: job.memory
+        const result = p_spawn.spawnCreep(nextQueuedJob.body, name, {
+            memory: nextQueuedJob.memory
         });
 
         if (result != OK) {
@@ -82,19 +81,23 @@ var creepFactory = {
             return;
         }
 
-        p_room.memory.creepBuildQueue.queue.shift();
+        p_spawn.room.memory.creepBuildQueue.queue.shift();
     },
 
     evaluateBuildQueue: function (p_room) {
+        if (!p_room.memory.creepBuildQueue || !p_room.memory.creepBuildQueue.queue) {
+            return;
+        }
+
         if (p_room.memory.creepBuildQueue.queue.length == 0) {
             return;
         }
 
-        const job = p_room.memory.creepBuildQueue.queue[0];
+        const nextQueuedJob = p_room.memory.creepBuildQueue.queue[0];
 
-        this.logBuildQueueDetails(p_room, job);
+        this.logBuildQueueDetails(p_room, nextQueuedJob);
 
-        var buildCost = this.bodyCost(job.body);
+        var buildCost = this.bodyCost(nextQueuedJob.body);
 
         if (buildCost > p_room.energyCapacityAvailable) {
             p_room.memory.creepBuildQueue.queue.shift();
@@ -108,7 +111,7 @@ var creepFactory = {
     },
 
     showSpawningCreepInfo: function (p_room, p_spawn) {
-        if (p_spawn.spawning) {
+        if (p_spawn.spawning !== null) {
             let spawningCreep = Game.creeps[p_spawn.spawning.name];
 
             if (_.isEmpty(spawningCreep.memory)) {

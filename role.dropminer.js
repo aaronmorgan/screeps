@@ -9,30 +9,30 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleDropMiner = {
 
-    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable, p_dropminers) {
+    tryBuild: function (p_spawn, p_energyCapacityAvailable, p_dropminers) {
         let bodyType = [];
 
         if (p_energyCapacityAvailable >= 700) {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE];
-            p_room.memory.minersPerSource = 1;
+            p_spawn.room.memory.minersPerSource = 1;
         } else if (p_energyCapacityAvailable >= 600) {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
-            p_room.memory.minersPerSource = 1;
+            p_spawn.room.memory.minersPerSource = 1;
         } else if (p_energyCapacityAvailable >= 400) {
             bodyType = [WORK, WORK, WORK, MOVE, MOVE];
-            p_room.memory.minersPerSource = 2;
+            p_spawn.room.memory.minersPerSource = 2;
         } else if (p_energyCapacityAvailable >= 350) {
             bodyType = [WORK, WORK, WORK, MOVE];
-            p_room.memory.minersPerSource = 2;
+            p_spawn.room.memory.minersPerSource = 2;
         } else {
             bodyType = [WORK, WORK, MOVE, MOVE];
-            p_room.memory.minersPerSource = 2;
+            p_spawn.room.memory.minersPerSource = 2;
         }
 
         if (!_.isEmpty(bodyType)) {
             let targetSourceId = undefined;
 
-            for (let source of p_room.memory.sources) {
+            for (let source of p_spawn.room.memory.sources) {
                 let creepsForThisSource = _.countBy(p_dropminers, x => x.memory.sourceId == source.id).true;
                 creepsForThisSource = Math.min(source.accessPoints, creepsForThisSource);
 
@@ -46,7 +46,7 @@ var roleDropMiner = {
                 console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
-                return creepFactory.create(p_room, p_spawn, role.DROPMINER, bodyType, {
+                return creepFactory.create(p_spawn, role.DROPMINER, bodyType, {
                     role: role.DROPMINER,
                     sourceId: targetSourceId
                 });

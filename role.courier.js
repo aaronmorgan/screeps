@@ -8,7 +8,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleCourier = {
 
-    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
 
         if (p_energyCapacityAvailable >= 450) {
@@ -22,12 +22,12 @@ var roleCourier = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(p_room, p_spawn, role.COURIER, bodyType, {
+            return creepFactory.create(p_spawn, role.COURIER, bodyType, {
                 role: role.COURIER,
                 harvesting: true,
                 targetedDroppedEnergy: {
                     id: 0,
-                    pos: new RoomPosition(1, 1, p_room.name)
+                    pos: new RoomPosition(1, 1, p_spawn.room.name)
                 }
             });
         }
@@ -40,13 +40,13 @@ var roleCourier = {
 
         const creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
         p_creep.say('🚚 ' + creepFillPercentage + '%');
-
-        if (creepFillPercentage < 80) {
-            const resourceEnergy = p_creep.room.droppedResources();
-            const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
-
+        
+        if (creepFillPercentage == 0) {
+            // Needs to find closest dropped energy to the Source.
+            const droppedResources = _.sortBy(p_creep.room.droppedResourcesCloseToSource(), s => s.energy.amount);
+            
             if (droppedResources) {
-                const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
+                const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
 
                 if (!_.isEmpty(energyTarget)) {
                     let source = Game.getObjectById(energyTarget.id);
@@ -97,11 +97,15 @@ var roleCourier = {
 
             // Head home so we're close to base when energy slots open up.
             if (targets.length == 0) {
-                const target = Game.spawns['Spawn1'];
+                //const target = Game.spawns['Spawn1'];
+                const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
+
                 p_creep.moveTo(target);
 
                 if (!p_creep.pos.isEqualTo(target)) {
-                    p_creep.moveTo(target, {
+                    p_creep.dropResources();
+
+                    const moveToResult = p_creep.moveTo(target, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }

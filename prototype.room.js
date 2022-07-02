@@ -60,6 +60,20 @@ module.exports = function () {
         return this._droppedResources;
     };
 
+    // Finds all the dropped energy within a 7x7 area around the Source object.
+    Room.prototype.droppedResourcesCloseToSource = function () {
+        if (!this._droppedResourcesCloseToSource) {
+
+            this._droppedResourcesCloseToSource = [];
+
+            this.sources().forEach(source => {
+                this._droppedResourcesCloseToSource.push(...this.lookForAtArea(LOOK_ENERGY, source.pos.y - 3, source.pos.x - 3, source.pos.y + 3, source.pos.x + 3, true));
+            });
+        }
+
+        return this._droppedResourcesCloseToSource;
+    };
+
     // Used by creeps that might pickup energy; resetting the room for other creeps that tick.
     Room.prototype.refreshDroppedResources = function () {
         this._droppedResources = [];
@@ -79,14 +93,14 @@ module.exports = function () {
      * @returns {number|*}
      */
     Room.prototype.selectAvailableSource =
-        function (dropMiners) {
-            if (dropMiners.length == 0) {
+        function (creeps) {
+            if (creeps.length == 0) {
                 return this.sources();
             }
 
-            return sources = _.filter(this._sources, (s) => {
-                for (let i = 0; i < dropMiners.length; i++) {
-                    if (dropMiners[i].memory.sourceId != s.id) {
+            return sources = _.filter(this.memory.sources, (s) => {
+                for (let i = 0; i < creeps.length; i++) {
+                    if (creeps[i].memory.sourceId != s.id) {
                         return true;
                     }
                 }
@@ -114,7 +128,7 @@ module.exports = function () {
             })
 
             this.memory.sources = _.sortBy(sources, s => this.structures().spawn[0].pos.getRangeTo(s))
-            this.memory.maxSouceAccessPoints = accessPoints;
+            this.memory.maxSourceAccessPoints = accessPoints;
         },
 
         Room.prototype.determineRCLAccessPoints = function () {

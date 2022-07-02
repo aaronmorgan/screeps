@@ -9,7 +9,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleHarvester = {
 
-    tryBuild: function (p_room, p_spawn, p_energyCapacityAvailable, p_harvesters) {
+    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
 
         if (p_energyCapacityAvailable >= 500) {
@@ -25,24 +25,13 @@ var roleHarvester = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            let targetSourceId = undefined;
-
-            for (let source of p_room.memory.sources) {
-                const creepsForThisSource = _.countBy(p_harvesters, x => x.memory.sourceId == source.id).true;
-
-                console.log('creepsForThisSource: ', creepsForThisSource);
-                
-                if (!creepsForThisSource || creepsForThisSource < source.accessPoints) {
-                    targetSourceId = source.id;
-                    break;
-                }
-            };
+            const targetSourceId = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().harvesters)[0].id;
 
             if (!targetSourceId) {
                 console.log('ERROR: Attempting to create ' + role.HARVESTER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
-                return creepFactory.create(p_room, p_spawn, role.HARVESTER, bodyType, {
+                return creepFactory.create(p_spawn, role.HARVESTER, bodyType, {
                     role: role.HARVESTER,
                     sourceId: targetSourceId,
                     isHarvesting: true
@@ -61,6 +50,18 @@ var roleHarvester = {
 
         if ((p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0)) { // ||
 
+
+            //   var a = p_creep.room.selectAvailableSource(p_creep.room.creeps().harvesters);
+            //    console.log(JSON.stringify(a))
+            // for (let source of p_creep.room.memory.sources) {
+            //     console.log(JSON.stringify(source))
+
+            //     console.log(JSON.stringify(p_creep.room.creeps().harvesters))                
+            //     console.log(JSON.stringify(p_creep.room.memory.sources))
+            // const creepsForThisSource = _.countBy(p_creep.room.harvesters, x => x.memory.sourceId == source.id);
+            // console.log(JSON.stringify(creepsForThisSource));
+            //    }
+
             // Cater for the siuation where the creep wanders into another room.
             if (_.isEmpty(p_creep.room.memory.sources)) {
                 return;
@@ -71,11 +72,23 @@ var roleHarvester = {
             const harvestResult = p_creep.harvest(source);
 
             if (harvestResult == ERR_NOT_IN_RANGE) {
-                p_creep.moveTo(source, {
+                const moveResult = p_creep.moveTo(source, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }
                 });
+
+                if (moveResult == ERR_NO_PATH) {
+                    const sources = p_creep.room.selectAvailableSource(p_creep.room.creeps().harvesters);
+
+                    if (!_.isEmpty(sources)) {
+                        const sourceId = sources[0].id;
+
+                        console.log('INFO: Attempting set new target source, id=' + sourceId);
+                        p_creep.memory.sourceId = sourceId;
+                    }
+                }
+
             } else if (harvestResult == OK) {
                 p_creep.memory.isHarvesting = p_creep.store.getFreeCapacity() != 0;
                 if (!p_creep.memory.isHarvesting && p_creep.room.memory.creeps.couriers > 0) {
