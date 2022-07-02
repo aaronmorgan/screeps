@@ -10,6 +10,16 @@ module.exports = function () {
             const allStructures = this.find(FIND_STRUCTURES);
             this._structures = _.groupBy(allStructures, "structureType");
             this._structures.all = allStructures;
+
+            // Calculate the distance from the spawn to controller and store it once. It's used as a base to calculate number of 
+            // required Upgraders. i.e. the further away the controller is the more Upgraders required.
+            // Should be moved to a 'run once' function.
+            if (!this.memory._distanceToRCL || Number.isNaN(this.memory._distanceToRCL) || this.memory._distanceToRCL % 1 !== 0) {
+                this.memory._distanceToRCL = this.structures().spawn[0].pos.findPathTo(this.controller.pos, {
+                    maxOps: 1000,
+                    ignoreDestructibleStructures: true
+                }).length;
+            }
         }
 
         return this._structures;

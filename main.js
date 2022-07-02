@@ -24,7 +24,6 @@ IMPROVEMENTS:
 */
 
 require('prototype.room')();
-//require('prototype.source');
 
 const {
     role,
@@ -146,7 +145,9 @@ module.exports.loop = function () {
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
             maxHaulerCreeps = 0;
-            maxUpgraderCreeps = 2;
+
+            var x = spawn.room.memory._distanceToRCL % 10;
+            maxUpgraderCreeps = Math.round(x + (x / 2));
             break;
         }
 
