@@ -126,7 +126,7 @@ module.exports.loop = function () {
             // Set only one harvester per source and with a courier act like dropminers. 
             // At this time before we start producing lots of energy then there'll be room for builders/upgraders
             // to also source energy without having to compete with numerous harvester creeps.
-            maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
+            maxDropMinerCreeps = (upgraders.lenth > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
             maxHaulerCreeps = 0;
@@ -141,7 +141,7 @@ module.exports.loop = function () {
             // Set only one harvester per source and with a courier act like dropminers. 
             // At this time before we start producing lots of energy then there'll be room for builders/upgraders
             // to also source energy without having to compete with numerous harvester creeps.
-            maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
+            maxDropMinerCreeps = (upgraders.length > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
             maxHaulerCreeps = 0;
