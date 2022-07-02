@@ -47,7 +47,7 @@ var roleUpgrader = {
     run: function (p_creep) {
         p_creep.checkTicksToLive();
 
-            //p_creep.memory.energyCollection = energyCollection.UNKNOWN;
+        //p_creep.memory.energyCollection = energyCollection.UNKNOWN;
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
         p_creep.say('⚒️ ' + creepFillPercentage + '%');
@@ -70,10 +70,32 @@ var roleUpgrader = {
             }
         } else {
             if (p_creep.room.memory.maxSourceAccessPoints <= p_creep.room.creeps().harvesters.length) {
-            
                 p_creep.memory.energyCollection = energyCollection.SCAVENGING;
-        }
+            }
 
+            // Look for dropped energy at the spawn dump site first.
+            const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
+
+            if (target) {
+                var xyTileEnergy = p_creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
+
+                if (!_.isEmpty(xyTileEnergy)) {
+                    const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
+                    const pickupResult = p_creep.pickup(droppedEnergy);
+
+                    if (pickupResult == ERR_NOT_IN_RANGE) {
+                        p_creep.moveTo(droppedEnergy, {
+                            visualizePathStyle: {
+                                stroke: '#ffaa00'
+                            }
+                        });
+                    }
+
+                    return;
+                }
+            }
+
+            // Then look for energy in the normal storage locations...
             const targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (
                         structure.structureType == STRUCTURE_CONTAINER ||
