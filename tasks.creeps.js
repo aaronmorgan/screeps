@@ -17,7 +17,8 @@ var creepTasks = {
 
         let creepsToRemove = [];
 
-        this.findCreepsToDelete(p_room.creeps().harvesters, p_room.memory.maxHarvesterCreeps);
+        // Deliberately don't remove harvesters, eager removal could leave us short on gatherers.
+        // this.findCreepsToDelete(p_room.creeps().harvesters, p_room.memory.maxHarvesterCreeps);
 
         if (dropminers.length > p_room.memory.maxDropMinerCreeps + 1) {
             let creepsToDelete = dropminers.length - p_room.memory.maxDropMinerCreeps;
