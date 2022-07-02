@@ -146,8 +146,7 @@ module.exports.loop = function () {
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
             maxHaulerCreeps = 0;
 
-            var x = spawn.room.memory._distanceToRCL % 10;
-            maxUpgraderCreeps = Math.round(x + (x / 2));
+            maxUpgraderCreeps = Math.floor(spawn.room.memory._distanceToRCL / 10) * 2;
             break;
         }
 
