@@ -84,8 +84,29 @@ var roleBuilder = {
                 }
             }
         } else {
-            // p_creep.memory.building = false;
+            // Look for dropped energy at the spawn dump site first.
+            const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
+            if (target) {
+                var xyTileEnergy = p_creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
+
+                if (!_.isEmpty(xyTileEnergy)) {
+                    const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
+                    const pickupResult = p_creep.pickup(droppedEnergy);
+
+                    if (pickupResult == ERR_NOT_IN_RANGE) {
+                        p_creep.moveTo(droppedEnergy, {
+                            visualizePathStyle: {
+                                stroke: '#ffaa00'
+                            }
+                        });
+                    }
+
+                    return;
+                }
+            }
+
+            // Then look for energy in the normal storage locations...
             let targets = _.filter(p_creep.room.structures().all, (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
