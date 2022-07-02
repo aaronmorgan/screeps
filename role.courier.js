@@ -103,7 +103,6 @@ var roleCourier = {
                 p_creep.moveTo(target);
 
                 if (!p_creep.pos.isEqualTo(target)) {
-                    p_creep.dropResources();
 
                     const moveToResult = p_creep.moveTo(target, {
                         visualizePathStyle: {
@@ -112,6 +111,10 @@ var roleCourier = {
                     })
 
                     return;
+                } else {
+                    // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
+                    // to pickup.
+                    p_creep.dropResources();
                 }
             }
         }
