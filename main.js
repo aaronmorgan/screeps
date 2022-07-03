@@ -137,7 +137,7 @@ module.exports.loop = function () {
             spawn.room.memory.game.phase = 2;
 
             // May need to increase builder ceiling from 3 to 4.
-            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 3 : 0;
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
             // Set only one harvester per source and with a courier act like dropminers. 
             // At this time before we start producing lots of energy then there'll be room for builders/upgraders
             // to also source energy without having to compete with numerous harvester creeps.
@@ -153,15 +153,17 @@ module.exports.loop = function () {
         default: {
             spawn.room.memory.game.phase = 999;
 
-            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 3 : 0;
-            maxCourierCreeps = Math.round(harvesters.length / 2);
-            if (maxCourierCreeps == 0) {
-                maxCourierCreeps = harvesters.length;
-            }
-            maxDropMinerCreeps = spawn.room.memory.maxDropMinerCreeps || spawn.room.memory.maxSouceAccessPoints;
-            maxHarvesterCreeps = Math.max(0, spawn.room.memory.maxSouceAccessPoints - dropminers.length);
+            // May need to increase builder ceiling from 3 to 4.
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
+            // Set only one harvester per source and with a courier act like dropminers. 
+            // At this time before we start producing lots of energy then there'll be room for builders/upgraders
+            // to also source energy without having to compete with numerous harvester creeps.
+            maxDropMinerCreeps = (upgraders.length > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
+            maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
+            maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
             maxHaulerCreeps = 0;
-            maxUpgraderCreeps = Math.min(4, spawn.room.controller.level);
+
+            maxUpgraderCreeps = Math.floor(spawn.room.memory._distanceToRCL / 10) * 2;
         }
 
     }
