@@ -8,12 +8,63 @@ const {
 
 var infrastructureTasks = {
 
-    processJobs: function (p_room, p_spawn, p_jobs) {
+    processJobs: function (p_spawn, p_jobs) {
+
         for (let i = 0; i < p_jobs.length; i++) {
             let job = p_jobs[i];
             let specialSite = false;
 
             switch (job.type) {
+                case 'road.to.controller': {
+                    const path = p_spawn.pos.findPathTo(p_spawn.room.controller.pos, {
+                        ignoreDestructibleStructures: true,
+                        ignoreCreeps: true
+                    });
+
+                    if (path) {
+                        for (let index = 0; index < path.length - 1; index++) {
+                            const pos = path[index];
+                            p_spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+                        }
+
+                        job = {
+                            type: STRUCTURE_ROAD,
+                            x: path[0].x,
+                            y: path[0].y
+                        };
+
+                        specialSite = true;
+                    }
+
+                    break;
+                }
+                case 'road.to.source': {
+                    p_spawn.room.memory.sources.forEach(obj => {
+                        const source = Game.getObjectById(obj.id);
+
+                        const path = p_spawn.pos.findPathTo(source.pos, {
+                            ignoreDestructibleStructures: true,
+                            ignoreCreeps: true
+                        });
+
+                        if (path) {
+                            for (let index = 0; index < path.length - 1; index++) {
+                                const pos = path[index];
+                                p_spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+                            }
+
+                            job = {
+                                type: STRUCTURE_ROAD,
+                                x: path[0].x,
+                                y: path[0].y
+                            };
+
+                            specialSite = true;
+                        }
+                    });
+
+                    break;
+                }
                 // case 'rcl.container': {
                 //     // RCL adjacent container.
                 //     const path = p_spawn.pos.findPathTo(p_room.controller.pos, {
@@ -50,7 +101,7 @@ var infrastructureTasks = {
                 case 'furthest.source.link': {
                     let longestPath = undefined;
 
-                    p_room.memory.sources.forEach(source => {
+                    p_spawn.room.memory.sources.forEach(source => {
                         const path = p_spawn.pos.findPathTo(Game.getObjectById(source.id).pos, {
                             ignoreDestructibleStructures: true,
                             ignoreCreeps: true
@@ -112,7 +163,7 @@ var infrastructureTasks = {
                 y = job.y;
             }
 
-            const tileObjects = p_room.lookAt(x, y).filter(function (x) {
+            const tileObjects = p_spawn.room.lookAt(x, y).filter(function (x) {
                 return (
                     x.type != 'resource' &&
                     x.type != 'energy' &&
@@ -123,7 +174,7 @@ var infrastructureTasks = {
             if (tileObjects.length < 3 &&
                 (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
 
-                let result = p_room.createConstructionSite(x, y, job.type);
+                let result = p_spawn.room.createConstructionSite(x, y, job.type);
 
                 switch (result) {
                     case OK: {
@@ -167,14 +218,14 @@ var infrastructureTasks = {
         const spawn = p_room.structures().spawn[0];
 
         for (let j = 0; j <= p_room.controller.level; j++) {
-            this.processJobs(p_room, spawn, jobs['RCL_' + j].jobs);
+            this.processJobs(spawn, jobs['RCL_' + j].jobs);
         }
     },
 
     locateSpawnDumpLocation: function (p_room) {
         const spawn = p_room.structures().spawn[0];
 
-        new RoomPosition(spawn.pos.x, spawn.pos.y - 1, p_room.name).createFlag(spawn.name + '_DUMP')
+        new RoomPosition(spawn.pos.x, spawn.pos.y + 3, p_room.name).createFlag(spawn.name + '_DUMP')
         //Game.flags.Flag1.setPosition();
 
         // p_room.memory.locations = [];

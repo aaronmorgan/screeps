@@ -1,3 +1,6 @@
+// Reserved tiles:
+// x: 0, y: 3 - energy dumping spot.
+
 module.exports.jobs = {
     RCL_0: {
         jobs: []
@@ -195,6 +198,16 @@ module.exports.jobs = {
                 type: "road",
                 x: -1,
                 y: -3
+            },
+            {
+                type: "road.to.controller",
+                x: 0,
+                y: 0
+            },
+            {
+                type: "road.to.source",
+                x: 0,
+                y: 0
             }
         ]
     },
@@ -228,12 +241,7 @@ module.exports.jobs = {
                 type: "extension",
                 x: -3,
                 y: -1
-            },
-            // {
-            //     type: "container",
-            //     x: 0,
-            //     y: 3
-            // },
+            }
         ]
     },
     RCL_4: {
