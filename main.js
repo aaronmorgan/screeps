@@ -258,7 +258,10 @@ module.exports.loop = function () {
 
     // Emergency catch all to reset the queue should we end up without any energy gathering screeps.
     if (harvesters == 0 && dropminers == 0 && !_.isEmpty(spawn.room.memory.creepBuildQueue.queue)) {
-        if (spawn.room.memory.creepBuildQueue.queue[0].name != role.HARVESTER) {
+        const job = spawn.room.memory.creepBuildQueue.queue[0];
+
+        if ((job.name != role.HARVESTER) ||
+            creepFactory.bodyCost(job.body > 300)) {
             spawn.room.memory.creepBuildQueue.queue = [];
         }
     }
