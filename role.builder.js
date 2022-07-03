@@ -102,6 +102,8 @@ var roleBuilder = {
                         });
                     }
 
+                    p_creep.memory.building = true;
+
                     return;
                 }
             }
@@ -152,6 +154,35 @@ var roleBuilder = {
             // Don't attempt to mine resources; target droppped preferrably.
             // Local energy sources
             let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
+
+            const droppedResources = p_creep.room.droppedResourcesCloseToSource(nearestSource.id);
+
+            if (droppedResources) {
+                const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
+
+                if (!_.isEmpty(energyTarget)) {
+                    let source = Game.getObjectById(energyTarget.id);
+
+                    const pickupResult = p_creep.pickup(source);
+
+                    switch (pickupResult) {
+                        case ERR_NOT_IN_RANGE: {
+                            const moveResult = p_creep.moveTo(source, {
+                                visualizePathStyle: {
+                                    stroke: '#ffaa00'
+                                }
+                            });
+                        }
+                        case ERR_FULL: { }
+                    }
+
+                    return;
+                }
+
+                if (creepFillPercentage == 100 ) {
+                    return;
+                }
+            }
 
             if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
                 p_creep.memory.harvesting = true;

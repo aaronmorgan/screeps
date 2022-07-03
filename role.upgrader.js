@@ -27,9 +27,9 @@ var roleUpgrader = {
             // Prioritise movement overy carry capaciity. If the container is repeatedly low
             // on energy we don't want to be waiting.
         } else if (p_energyCapacityAvailable >= 550) {
-            bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+            bodyType = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 400) {
-            bodyType = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+            bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE];
         } else if (p_energyCapacityAvailable >= 350) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
         } else {
@@ -38,7 +38,8 @@ var roleUpgrader = {
 
         if (!_.isEmpty(bodyType)) {
             return creepFactory.create(p_spawn, role.UPGRADER, bodyType, {
-                role: role.UPGRADER
+                role: role.UPGRADER,
+                energyCollection: energyCollection.UNKNOWN
             });
         }
     },
@@ -76,7 +77,7 @@ var roleUpgrader = {
             // Look for dropped energy at the spawn dump site first.
             const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
-            if (target) {
+            if (!p_creep.memory.energyCollection == energyCollection.MINING && target) {
                 var xyTileEnergy = p_creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
 
                 if (!_.isEmpty(xyTileEnergy)) {
@@ -90,6 +91,8 @@ var roleUpgrader = {
                             }
                         });
                     }
+
+                    p_creep.memory.upgrading = true;
 
                     return;
                 }
@@ -148,8 +151,36 @@ var roleUpgrader = {
                 }
 
                 // Last resort, go and mine the energy.
-                let sources = p_creep.room.sources();
-                let nearestSource = p_creep.pos.findClosestByPath(sources);
+                let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
+
+                const droppedResources = p_creep.room.droppedResourcesCloseToSource(nearestSource.id);
+
+                if (droppedResources) {
+                    const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
+
+                    if (!_.isEmpty(energyTarget)) {
+                        let source = Game.getObjectById(energyTarget.id);
+
+                        const pickupResult = p_creep.pickup(source);
+
+                        switch (pickupResult) {
+                            case ERR_NOT_IN_RANGE: {
+                                const moveResult = p_creep.moveTo(source, {
+                                    visualizePathStyle: {
+                                        stroke: '#ffaa00'
+                                    }
+                                });
+                            }
+                            case ERR_FULL: {}
+                        }
+
+                        return;
+                    }
+
+                    if (creepFillPercentage == 100) {
+                        return;
+                    }
+                }
 
                 p_creep.memory.energyCollection = energyCollection.MINING;
 
