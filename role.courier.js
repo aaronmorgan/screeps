@@ -10,13 +10,14 @@ var roleCourier = {
 
     tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
-
-        if (p_energyCapacityAvailable >= 450) {
-            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+        if (p_energyCapacityAvailable >= 500) {
+            bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (p_energyCapacityAvailable >= 450) {
+            bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 400) {
-            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 350) {
-            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else {
             bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         }
@@ -51,7 +52,7 @@ var roleCourier = {
 
         // Creep has no energy so we need to move to our source.
         if (creepFillPercentage == 0 && p_creep.memory.harvesting == false) {
-            let source = Game.getObjectById(p_creep.memory.sourceId);
+            const source = Game.getObjectById(p_creep.memory.sourceId);
 
             if (!p_creep.pos.inRangeTo(source, 2)) {
                 var moveResult = p_creep.moveTo(source, {
@@ -71,8 +72,6 @@ var roleCourier = {
 
         // We've moved to our source now look for resources within it's preferring collection point.
         if (creepFillPercentage < 100 && p_creep.memory.harvesting == true) {
-            // Needs to find closest dropped energy to the Source.
-            //const droppedResources = _.sortBy(p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId), s => s.energy.amount);
             const droppedResources = p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId);
 
             if (droppedResources) {
@@ -100,11 +99,8 @@ var roleCourier = {
                     return;
                 }
 
-                if (creepFillPercentage == 100 || droppedResources.length == 0) {
+                if (creepFillPercentage == 100 || _.isEmpty(droppedResources)) {
                     // Don't do any more, wait for the next turn to pickup nearby resources.
-                    p_creep.memory.harvesting = false
-                }
-                if (_.isEmptydroppedResources) {
                     p_creep.memory.harvesting = false
                 }
 
