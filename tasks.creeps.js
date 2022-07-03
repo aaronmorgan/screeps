@@ -39,7 +39,6 @@ var creepTasks = {
             }
         }
 
-        this.findCreepsToDelete(p_room.creeps().haulers, p_room.memory.maxHaulerCreeps);
         // this.findCreepsToDelete(p_room.creeps().builders, p_room.memory.maxBuilderCreeps);
 
         if (upgraders.length > p_room.memory.maxUpgraderCreeps + 1) {
@@ -62,7 +61,6 @@ var creepTasks = {
                 }
 
                 if (creep.memory.role == role.HARVESTER ||
-                    creep.memory.role == role.HAULER ||
                     creep.memory.role == role.BUILDER) {
 
                     console.log('⛔ Error: creep with role ' + creep.memory.role + ' should manage it\'s own cleanup');

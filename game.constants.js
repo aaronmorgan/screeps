@@ -42,7 +42,6 @@ module.exports.EXIT_CODE = {
         HARVESTER: 'Harvester',
         COURIER: 'Courier',
         DROPMINER: 'DropMiner',
-        HAULER: 'Hauler',
         BUILDER: 'Builder',
         UPGRADER: 'Upgrader'
     },

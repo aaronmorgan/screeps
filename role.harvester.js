@@ -108,12 +108,6 @@ var roleHarvester = {
                 return;
             }
 
-            // This is designed to allow the Harvester to act as a sort of Dropminer.
-            if (p_creep.room.creeps().haulers.length > 0 && p_creep.room.creeps().dropminers.length == 0) {
-                p_creep.drop(RESOURCE_ENERGY)
-                return;
-            }
-
             let targets = [];
 
             if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {

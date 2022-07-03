@@ -1,25 +1,10 @@
 /*
 
-BUGS: 
-1. If there are no Harvesters or Haulers/Dropminers then Builders etc should not get energy from the spawn. It blocks creeps from spawning.
-2. Add a 'harvestingSatisfied' flag that would fix #1 above and mean that other creeps like builders cannot be done if not true.
-3. Harvestrs are quitting after 32%.
-6. Harvesters are dropping off resouces then going to pick up more if they're left with less than 32%.
-7. Harvesters are not correctly using their sourceId value.
-8. Race condition if a creep type is spawning the logic may queue another of that type because it's not 
-9. Builder will not build until it's at 100% capacity.
-
 IMPROVEMENTS:
-7. The auto scaling for Haulers is working well but if it scales back up a creep already marked for death won't be unmarked.
-8. Haulers should target nearest dropped energy.
-9. Should check build queue before enquing a second creep of the same type just built.
-11. If Harvester cannot access energy source it should pickup dropped energy.
 12. Should the rcl.container simply be placed -30% away from the rcl, back towards the spawn?
 15. Spawn name should be stored in room memory.
-16. Don't clear the build queue in the first few turns; check game phase?s
 17. Don't build the RCL container if there's already a base container withing range. 10? 15? tiles.
 18. Determine the size of the Upgraders based on the distance of the RCL from the base. 
-19. When a harvester or hauler has a transfer target set it shouldn't reassess and waste time changing direction.
 
 */
 
@@ -35,7 +20,6 @@ let roleCourier = require('role.courier');
 let roleUpgrader = require('role.upgrader');
 let roleBuilder = require('role.builder');
 let roleDropMiner = require('role.dropminer');
-let roleHauler = require('role.hauler');
 
 let infrastructureTasks = require('tasks.infrastructure');
 let creepTasks = require('tasks.creeps');
@@ -90,7 +74,6 @@ module.exports.loop = function () {
     const harvesters = spawn.room.creeps().harvesters || [];
     const couriers = spawn.room.creeps().couriers || [];
     const dropminers = spawn.room.creeps().dropminers || [];
-    const haulers = spawn.room.creeps().haulers || [];
     const builders = spawn.room.creeps().builders || [];
     const upgraders = spawn.room.creeps().upgraders || [];
 
@@ -98,7 +81,6 @@ module.exports.loop = function () {
         harvesters: harvesters.length,
         couriers: couriers.length,
         dropminers: dropminers.length,
-        haulers: haulers.length,
         builders: builders.length,
         upgraders: upgraders.length
     };
@@ -107,7 +89,6 @@ module.exports.loop = function () {
     let maxCourierCreeps = 0;
     let maxDropMinerCreeps = 0;
     let maxHarvesterCreeps = 2;
-    let maxHaulerCreeps = 0;
     let maxUpgraderCreeps = 2;
 
     // TODO Only do this mod n times, e.g. % 10.
@@ -129,7 +110,6 @@ module.exports.loop = function () {
             maxDropMinerCreeps = (upgraders.lenth > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
-            maxHaulerCreeps = 0;
             maxUpgraderCreeps = 1;
             break;
         }
@@ -144,7 +124,6 @@ module.exports.loop = function () {
             maxDropMinerCreeps = (upgraders.length > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
-            maxHaulerCreeps = 0;
 
             maxUpgraderCreeps = Math.floor(spawn.room.memory._distanceToRCL / 10) * 2;
             break;
@@ -161,7 +140,6 @@ module.exports.loop = function () {
             maxDropMinerCreeps = (upgraders.length > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
-            maxHaulerCreeps = 0;
 
             maxUpgraderCreeps = Math.floor(spawn.room.memory._distanceToRCL / 10) * 2;
         }
@@ -172,14 +150,12 @@ module.exports.loop = function () {
     spawn.room.memory.maxCourierCreeps = maxCourierCreeps;
     spawn.room.memory.maxDropMinerCreeps = maxDropMinerCreeps;
     spawn.room.memory.maxHarvesterCreeps = maxHarvesterCreeps;
-    spawn.room.memory.maxHaulerCreeps = maxHaulerCreeps;
     spawn.room.memory.maxUpgraderCreeps = maxUpgraderCreeps;
 
     const sufficientBuilders = builders.length >= maxBuilderCreeps; // Should also include harvesters?
     const sufficientCouriers = couriers.length >= maxCourierCreeps;
     const sufficientDropMiners = dropminers.length >= maxDropMinerCreeps;
     const sufficientHarvesters = harvesters.length >= maxHarvesterCreeps;
-    const sufficientHaulers = haulers.length >= maxHaulerCreeps; // dropminers.length > 0 && (haulers.length >= room.memory.maxHaulerCreeps);
     const sufficientUpgraders = upgraders.length >= maxUpgraderCreeps;
 
 
@@ -188,7 +164,6 @@ module.exports.loop = function () {
     console.log('  Harvesters: ' + harvesters.length + '/' + maxHarvesterCreeps + ' ' + (sufficientHarvesters ? '✔️' : '❌'));
     console.log('  Couriers: ' + couriers.length + '/' + maxCourierCreeps + ' ' + (sufficientCouriers ? '✔️' : '❌'));
     console.log('  Drop Miners: ' + dropminers.length + '/' + maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '❌'));
-    console.log('  Haulers: ' + haulers.length + '/' + maxHaulerCreeps + ' ' + (sufficientHaulers ? '✔️' : '❌'));
     console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
 
@@ -212,9 +187,6 @@ module.exports.loop = function () {
         }
         if (creep.memory.role == role.DROPMINER) {
             roleDropMiner.run(creep);
-        }
-        if (creep.memory.role == role.HAULER) {
-            roleHauler.run(creep);
         }
         if (creep.memory.role == role.BUILDER) {
             roleBuilder.run(creep);
