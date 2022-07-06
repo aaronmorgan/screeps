@@ -56,8 +56,6 @@ var roleCourier = {
                         stroke: '#ffaa00'
                     }
                 });
-
-                return;
             } else {
                 // Target source is within range so switch to harvesting mode.
                 p_creep.memory.harvesting = true;
@@ -89,21 +87,13 @@ var roleCourier = {
                                     stroke: '#ffaa00'
                                 }
                             });
+                            break;
                         }
                         case ERR_FULL: {
                             p_creep.memory.harvesting = false;
                         }
                     }
-
-                    return;
                 }
-
-                if (creepFillPercentage == 100 || _.isEmpty(droppedResources)) {
-                    // Don't do any more, wait for the next turn to pickup nearby resources.
-                    p_creep.memory.harvesting = false
-                }
-
-                return;
             }
         }
 
