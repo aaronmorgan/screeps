@@ -71,7 +71,7 @@ var roleCourier = {
             const droppedResources = p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId);
 
             if (droppedResources) {
-                const energyTarget = _.last(p_creep.room.droppedResources());
+                const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
 
                 if (!_.isEmpty(energyTarget)) {
                     let source = Game.getObjectById(energyTarget.id);
@@ -79,6 +79,10 @@ var roleCourier = {
                     const pickupResult = p_creep.pickup(source);
 
                     switch (pickupResult) {
+                        case OK: {
+                            p_creep.say('🚚 ' + creepFillPercentage + '%');
+                            break;
+                        }
                         case ERR_NOT_IN_RANGE: {
                             const moveResult = p_creep.moveTo(source, {
                                 visualizePathStyle: {
@@ -89,7 +93,6 @@ var roleCourier = {
                         case ERR_FULL: {
                             p_creep.memory.harvesting = false;
                         }
-
                     }
 
                     return;
@@ -99,8 +102,6 @@ var roleCourier = {
                     // Don't do any more, wait for the next turn to pickup nearby resources.
                     p_creep.memory.harvesting = false
                 }
-
-                p_creep.say('🚚 ' + creepFillPercentage + '%');
 
                 return;
             }
