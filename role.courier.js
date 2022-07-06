@@ -32,11 +32,7 @@ var roleCourier = {
                 return creepFactory.create(p_spawn, role.COURIER, bodyType, {
                     role: role.COURIER,
                     sourceId: targetSourceId,
-                    harvesting: false,
-                    targetedDroppedEnergy: {
-                        id: 0,
-                        pos: new RoomPosition(1, 1, p_spawn.room.name)
-                    }
+                    harvesting: false
                 });
             }
         }
@@ -75,7 +71,7 @@ var roleCourier = {
             const droppedResources = p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId);
 
             if (droppedResources) {
-                const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
+                const energyTarget = _.last(p_creep.room.droppedResources());
 
                 if (!_.isEmpty(energyTarget)) {
                     let source = Game.getObjectById(energyTarget.id);
@@ -107,29 +103,6 @@ var roleCourier = {
                 p_creep.say('🚚 ' + creepFillPercentage + '%');
 
                 return;
-            } else {
-                // NOT CONFIRMED AS WORKING!
-                // Look for dropped energy at the spawn dump site first.
-                const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
-
-                if (target) {
-                    var xyTileEnergy = p_creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
-
-                    if (!_.isEmpty(xyTileEnergy)) {
-                        const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
-                        const pickupResult = p_creep.pickup(droppedEnergy);
-
-                        if (pickupResult == ERR_NOT_IN_RANGE) {
-                            p_creep.moveTo(droppedEnergy, {
-                                visualizePathStyle: {
-                                    stroke: '#ffaa00'
-                                }
-                            });
-                        }
-
-                        p_creep.memory.harvesting = false;
-                    }
-                }
             }
         }
 
