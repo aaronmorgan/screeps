@@ -26,10 +26,7 @@ var roleGopher = {
             return creepFactory.create(p_spawn, role.GOPHER, bodyType, {
                 role: role.GOPHER,
                 harvesting: false,
-                targetedDroppedEnergy: {
-                    id: 0,
-                    pos: new RoomPosition(1, 1, p_spawn.room.name)
-                }
+                targetedDroppedEnergy: undefined
             });
         }
     },
@@ -41,17 +38,33 @@ var roleGopher = {
 
         const creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
 
-        // Creep has no energy so we need to move to our source.
-        if (creepFillPercentage == 0 && p_creep.memory.harvesting == false) {
-            const source = _.last(p_creep.room.droppedResources());
+        if (_.isEmpty(p_creep.memory.targetedDroppedEnergy)) {
+            // Identify the lowest dropped energy
+            const droppedEnergy = p_creep.room.droppedResources();
+            const randomIndex = [Math.floor((Math.random() * droppedEnergy.length))];
+            const targetEnergy = droppedEnergy[randomIndex];
+
+            if (!targetEnergy) {
+                return;
+            }
 
             p_creep.memory.targetedDroppedEnergy = {
-                id: source.id,
-                pos: source.pos
+                id: targetEnergy.id,
+                pos: targetEnergy.pos
             };
+        }
 
-            if (p_creep.pos && !p_creep.pos.inRangeTo(source, 4)) {
-                var moveResult = p_creep.moveTo(source, {
+        // Creep has no energy so we need to move to our source.
+        if (creepFillPercentage == 0 && p_creep.memory.harvesting == false) {
+            const energyTarget = Game.getObjectById(p_creep.memory.targetedDroppedEnergy.id);
+
+            if (!energyTarget) {
+                p_creep.memory.targetedDroppedEnergy = undefined;
+                return;
+            }
+
+            if (p_creep.pos && !p_creep.pos.inRangeTo(energyTarget, 2)) {
+                var moveResult = p_creep.moveTo(energyTarget, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }
@@ -72,22 +85,26 @@ var roleGopher = {
 
             if (!energyTarget) {
                 p_creep.memory.harvesting = false;
+                p_creep.memory.targetedDroppedEnergy = undefined;
                 return;
             }
 
             const pickupResult = p_creep.pickup(energyTarget);
 
             switch (pickupResult) {
+                case OK: {
+                    p_creep.say('🚄 ' + creepFillPercentage + '%');
+                    break;
+                }
                 case ERR_NOT_IN_RANGE: {
                     const moveResult = p_creep.moveTo(energyTarget, {
                         visualizePathStyle: {
                             stroke: '#ffaa00'
                         }
                     });
+                    break;
                 }
-                case ERR_INVALID_TARGET: {
-                    p_creep.memory.harvesting = false;
-                }
+                case ERR_INVALID_TARGET:
                 case ERR_FULL: {
                     p_creep.memory.harvesting = false;
                 }
@@ -105,6 +122,9 @@ var roleGopher = {
                 targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             }
             if (targets.length == 0) {
+                targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+            }
+            if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             }
             if (targets.length == 0) {
@@ -112,9 +132,6 @@ var roleGopher = {
             }
             if (targets.length == 0 && Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 targets.push(Game.spawns['Spawn1']);
-            }
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             }
 
             if (targets.length > 0) {
