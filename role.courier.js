@@ -48,7 +48,7 @@ var roleCourier = {
         p_creep.checkTicksToLive();
 
         const creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-        p_creep.say('🚚 ' + creepFillPercentage + '%');
+        // p_creep.say('🚚 ' + creepFillPercentage + '%');
 
         // Creep has no energy so we need to move to our source.
         if (creepFillPercentage == 0 && p_creep.memory.harvesting == false) {
@@ -103,6 +103,8 @@ var roleCourier = {
                     // Don't do any more, wait for the next turn to pickup nearby resources.
                     p_creep.memory.harvesting = false
                 }
+
+                p_creep.say('🚚 ' + creepFillPercentage + '%');
 
                 return;
             } else {
@@ -185,8 +187,11 @@ var roleCourier = {
                     // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
                     // to pickup.
                     p_creep.dropResources();
+                    return;
                 }
             }
+
+            p_creep.say('🚚 ' + creepFillPercentage + '%');
         }
     }
 };

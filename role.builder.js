@@ -40,7 +40,7 @@ var roleBuilder = {
         p_creep.checkTicksToLive();
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-        p_creep.say('🔨 ' + creepFillPercentage + '%')
+        // p_creep.say('🔨 ' + creepFillPercentage + '%')
 
         if (p_creep.memory.building && p_creep.carry.energy == 0) {
             p_creep.memory.building = false;
@@ -73,6 +73,8 @@ var roleBuilder = {
                             stroke: '#ffffff'
                         }
                     });
+
+                    p_creep.say('🔨 ' + creepFillPercentage + '%')
                 }
             } else {
                 p_creep.memory.ticksWithoutWork++;

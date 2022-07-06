@@ -51,7 +51,7 @@ var roleUpgrader = {
         //p_creep.memory.energyCollection = energyCollection.UNKNOWN;
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-        p_creep.say('⚒️ ' + creepFillPercentage + '%');
+//        p_creep.say('⚒️ ' + creepFillPercentage + '%');
 
         if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
             p_creep.memory.upgrading = false;
@@ -68,6 +68,8 @@ var roleUpgrader = {
                         stroke: '#4189d0'
                     }
                 });
+
+                p_creep.say('⚒️ ' + creepFillPercentage + '%');
             }
         } else {
             if (p_creep.room.memory.maxSourceAccessPoints <= p_creep.room.creeps().harvesters.length) {
