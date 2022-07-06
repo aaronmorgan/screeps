@@ -20,6 +20,7 @@ let roleCourier = require('role.courier');
 let roleUpgrader = require('role.upgrader');
 let roleBuilder = require('role.builder');
 let roleDropMiner = require('role.dropminer');
+let roleGopher = require('role.gopher');
 
 let infrastructureTasks = require('tasks.infrastructure');
 let creepTasks = require('tasks.creeps');
@@ -76,13 +77,15 @@ module.exports.loop = function () {
     const dropminers = spawn.room.creeps().dropminers || [];
     const builders = spawn.room.creeps().builders || [];
     const upgraders = spawn.room.creeps().upgraders || [];
+    const gophers = spawn.room.creeps().gophers || [];
 
     spawn.room.memory.creeps = {
         harvesters: harvesters.length,
         couriers: couriers.length,
         dropminers: dropminers.length,
         builders: builders.length,
-        upgraders: upgraders.length
+        upgraders: upgraders.length,
+        gophers: gophers.length
     };
 
     let maxBuilderCreeps = 2;
@@ -90,6 +93,7 @@ module.exports.loop = function () {
     let maxDropMinerCreeps = 0;
     let maxHarvesterCreeps = 2;
     let maxUpgraderCreeps = 2;
+    let maxGopherCreeps = 1;
 
     // TODO Only do this mod n times, e.g. % 10.
     infrastructureTasks.buildLinks(spawn.room);
@@ -151,12 +155,14 @@ module.exports.loop = function () {
     spawn.room.memory.maxDropMinerCreeps = maxDropMinerCreeps;
     spawn.room.memory.maxHarvesterCreeps = maxHarvesterCreeps;
     spawn.room.memory.maxUpgraderCreeps = maxUpgraderCreeps;
+    spawn.room.memory.maxGopherCreeps = maxGopherCreeps;
 
     const sufficientBuilders = builders.length >= maxBuilderCreeps; // Should also include harvesters?
     const sufficientCouriers = couriers.length >= maxCourierCreeps;
     const sufficientDropMiners = dropminers.length >= maxDropMinerCreeps;
     const sufficientHarvesters = harvesters.length >= maxHarvesterCreeps;
     const sufficientUpgraders = upgraders.length >= maxUpgraderCreeps;
+    const sufficientGophers = gophers.length >= maxGopherCreeps;
 
 
     // Summary of actual vs target numbers.
@@ -166,6 +172,7 @@ module.exports.loop = function () {
     console.log('  Drop Miners: ' + dropminers.length + '/' + maxDropMinerCreeps + ' ' + (sufficientDropMiners ? '✔️' : '❌'));
     console.log('  Builders: ' + builders.length + '/' + maxBuilderCreeps + ' ' + (sufficientBuilders ? '✔️' : '❌'));
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
+    console.log('  Gophers: ' + gophers.length + '/' + maxGopherCreeps + ' ' + (sufficientGophers ? '✔️' : '❌'));
 
     if (Game.time % 50 == 0) {
         console.log('⚠️ INFO: Checking for deleted creeps...');
@@ -194,6 +201,9 @@ module.exports.loop = function () {
         if (creep.memory.role == role.UPGRADER) {
             roleUpgrader.run(creep);
         }
+        if (creep.memory.role == role.GOPHER) {
+            roleGopher.run(creep);
+        }
     });
 
     if (spawn.spawning === null && spawn.room.memory.creepBuildQueue.queue.length == 0) {
@@ -204,6 +214,10 @@ module.exports.loop = function () {
         // HARVESTERS
         if (!sufficientHarvesters) {
             roleHarvester.tryBuild(spawn, energyCapacityAvailable);
+        }
+        // GOPHERS
+        if (!sufficientGophers) {
+            roleGopher.tryBuild(spawn, energyCapacityAvailable);
         }
         // COURIERS
         if (!sufficientCouriers) {

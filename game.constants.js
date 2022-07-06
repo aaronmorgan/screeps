@@ -39,10 +39,11 @@ module.exports.EXIT_CODE = {
     },
 
     module.exports.role = {
-        HARVESTER: 'Harvester',
+        BUILDER: 'Builder',
         COURIER: 'Courier',
         DROPMINER: 'DropMiner',
-        BUILDER: 'Builder',
+        GOPHER: 'Gopher',
+        HARVESTER: 'Harvester',
         UPGRADER: 'Upgrader'
     },
 
