@@ -48,7 +48,7 @@ var infrastructureTasks = {
                         });
 
                         if (path) {
-                            for (let index = 0; index < path.length - 1; index++) {
+                            for (let index = 0; index < path.length - 3; index++) {
                                 const pos = path[index];
                                 p_spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
                             }
@@ -201,7 +201,7 @@ var infrastructureTasks = {
                 }
 
                 if (tile.structure.structureType != job.type) {
-                    console.log('⚠️ WARNING: Position x: ' + tile.structure.pos.x + ', y: ' + tile.structure.pos.y + ', is already allocated with a ' + tile.structure.structureType);
+                    console.log('⚠️ WARNING: Cannot build ' + job.type + ', position x: ' + tile.structure.pos.x + ', y: ' + tile.structure.pos.y + ', is already allocated with a ' + tile.structure.structureType);
                 }
             }
         }
