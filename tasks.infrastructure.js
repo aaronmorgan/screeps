@@ -98,31 +98,31 @@ var infrastructureTasks = {
 
                 //     break;
                 // }
-                case 'furthest.source.link': {
-                    let longestPath = undefined;
-
+                // Iterate all Source locations and find the first without a Link structure.
+                case 'source.link': {
                     p_spawn.room.memory.sources.forEach(source => {
                         const path = p_spawn.pos.findPathTo(Game.getObjectById(source.id).pos, {
                             ignoreDestructibleStructures: true,
                             ignoreCreeps: true
                         });
 
-                        if (!longestPath || path.length > longestPath.length) {
-                            longestPath = path;
+                        const pos = path[path.length - 3];
+
+
+                        var foundLinkStructure = p_spawn.room.lookAt(pos.x, pos.y).filter(x => x.type === 'structure' && x.structure.structureType ===
+                            'link').length > 0;
+
+                        if (foundLinkStructure === false) {
+
+                            job = {
+                                type: STRUCTURE_LINK,
+                                x: pos.x,
+                                y: pos.y
+                            };
+
+                            specialSite = true;
                         }
                     });
-
-                    if (longestPath) {
-                        const pos = longestPath[longestPath.length - 3]; // TODO is this correct?
-
-                        job = {
-                            type: STRUCTURE_LINK,
-                            x: pos.x,
-                            y: pos.y
-                        };
-
-                        specialSite = true;
-                    }
 
                     break;
                 }

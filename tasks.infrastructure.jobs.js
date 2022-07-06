@@ -314,7 +314,7 @@ module.exports.jobs = {
                 y: -4
             },
             {
-                type: "furthest.source.link",
+                type: "source.link",
                 x: 0,
                 y: 0
             },
@@ -361,7 +361,12 @@ module.exports.jobs = {
         ]
     },
     RCL_6: {
-        jobs: []
+        jobs: [{
+                type: "source.link",
+                x: 0,
+                y: 0
+            }
+        ]
     },
     RCL_7: {
         jobs: []
