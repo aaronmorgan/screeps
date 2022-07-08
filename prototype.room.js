@@ -7,7 +7,9 @@ module.exports = function () {
     // Should be called once per tick and then the cached result should be used.
     Room.prototype.structures = function () {
         if (!this._structures || _.isEmpty(this._structures)) {
-            const allStructures = this.find(FIND_STRUCTURES);
+            const allStructures = this.find(FIND_STRUCTURES, {
+                filter: (x) => x.structureType !== STRUCTURE_ROAD // There's too many and we don't need to know about individual road segments.
+            });
             this._structures = _.groupBy(allStructures, "structureType");
             this._structures.all = allStructures;
 
