@@ -10,7 +10,11 @@ var roleGopher = {
 
     tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
-        if (p_energyCapacityAvailable >= 500) {
+        if (p_energyCapacityAvailable >= 600) {
+            bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (p_energyCapacityAvailable >= 550) {
+            bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        } else if (p_energyCapacityAvailable >= 500) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 450) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
@@ -109,8 +113,6 @@ var roleGopher = {
                     p_creep.memory.harvesting = false;
                 }
             }
-
-            return;
         }
 
         if (creepFillPercentage == 100 || p_creep.memory.harvesting == false) {
@@ -118,20 +120,20 @@ var roleGopher = {
 
             let targets = [];
 
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+            if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                targets.push(Game.spawns['Spawn1']);
             }
             if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             }
             if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+                targets = _.filter(p_creep.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity() / structure.store.getCapacity() * 100) < 50);
             }
             if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().tower, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+                targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             }
-            if (targets.length == 0 && Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                targets.push(Game.spawns['Spawn1']);
+            if (targets.length == 0) {
+                targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             }
 
             if (targets.length > 0) {
