@@ -53,10 +53,11 @@ var roleLinkBaseHarvester = {
                 targets.push(Game.spawns['Spawn1']);
             }
             if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+                // Only refil the Tower if the fill percentage is < 20%.
+                targets = _.filter(p_creep.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
             }
             if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity() / structure.store.getCapacity() * 100) < 50);
+                targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             }
             if (targets.length == 0) {
                 targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
@@ -78,7 +79,9 @@ var roleLinkBaseHarvester = {
                 }
             }
 
-            p_creep.memory.harvesting = true;
+            if (p_creep.store.getUsedCapacity() === 0) {
+                p_creep.memory.harvesting = true;
+            }
 
             p_creep.say(creepFillPercentage + '%');
         }
