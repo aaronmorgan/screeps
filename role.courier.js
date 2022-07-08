@@ -43,50 +43,75 @@ var roleCourier = {
     },
 
     /** @param {Creep} creep **/
-    run: function (p_creep) {
-        p_creep.checkTicksToDie();
-        p_creep.checkTicksToLive();
+    run: function (creep) {
+        creep.checkTicksToDie();
+        creep.checkTicksToLive();
 
-        const creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-        // p_creep.say('🚚 ' + creepFillPercentage + '%');
+        const creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+        // creep.say('🚚 ' + creepFillPercentage + '%');
 
         // Creep has no energy so we need to move to our source.
-        if (creepFillPercentage == 0 && p_creep.memory.harvesting == false) {
-            const source = Game.getObjectById(p_creep.memory.sourceId);
+        if (creepFillPercentage == 0 && creep.memory.harvesting == false) {
+            const source = Game.getObjectById(creep.memory.sourceId);
 
-            if (!p_creep.pos.inRangeTo(source, 4)) {
-                var moveResult = p_creep.moveTo(source, {
+            if (!creep.pos.inRangeTo(source, 4)) {
+                var moveResult = creep.moveTo(source, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }
                 });
             } else {
                 // Target source is within range so switch to harvesting mode.
-                p_creep.memory.harvesting = true;
+                creep.memory.harvesting = true;
             }
 
             return;
         }
 
+        if (creep.memory.isLinkTranfer && creep.memory.isLinkTranfer === true)
+        {
+            var target = creep.pos.findClosestByPath(creep.room.structures().link)
+
+            creep.memory.isLinkTranfer = true;
+
+            const transferResult = creep.transfer(target, RESOURCE_ENERGY);
+
+            if (transferResult == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, {
+                    visualizePathStyle: {
+                        stroke: '#ffffff'
+                    }
+                });
+            }
+        }
+
         // We've moved to our source now look for resources within it's preferring collection point.
-        if (creepFillPercentage < 100 && p_creep.memory.harvesting == true) {
-            const droppedResources = p_creep.room.droppedResourcesCloseToSource(p_creep.memory.sourceId);
+        if (creepFillPercentage < 100 && creep.memory.harvesting == true) {
+            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.sourceId);
 
             if (droppedResources) {
-                const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
+                const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
 
                 if (!_.isEmpty(energyTarget)) {
                     let source = Game.getObjectById(energyTarget.id);
 
-                    const pickupResult = p_creep.pickup(source);
-
+                    const pickupResult = creep.pickup(source);
+console.log(pickupResult)
                     switch (pickupResult) {
                         case OK: {
-                            p_creep.say('🚚 ' + creepFillPercentage + '%');
+                            creep.say('🚚 ' + creepFillPercentage + '%');
+
+                            //if (creepFillPercentage === 100) {
+                                creep.memory.harvesting = false;
+    
+                                if (creep.room.structures().link) {
+                                    creep.memory.isLinkTranfer = true;
+                                }
+                          //  }
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
-                            const moveResult = p_creep.moveTo(source, {
+                            const moveResult = creep.moveTo(source, {
                                 visualizePathStyle: {
                                     stroke: '#ffaa00'
                                 }
@@ -94,58 +119,29 @@ var roleCourier = {
                             break;
                         }
                         case ERR_FULL: {
-                            p_creep.memory.harvesting = false;
+                            creep.memory.harvesting = false;
                         }
                     }
                 }
             }
         }
 
-        if (creepFillPercentage == 100 || p_creep.memory.harvesting == false) {
-            p_creep.memory.harvesting = false;
+        if (creepFillPercentage == 100 || creep.memory.harvesting == false) {
+            creep.memory.harvesting = false;
 
-            let targets = [];
+            const targets = creep.findEnergyTransferTarget();
 
-            if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                targets.push(Game.spawns['Spawn1']);
-            }
-            if (targets.length == 0) {
-                // Only refil the Tower if the fill percentage is < 20%.
-                targets = _.filter(p_creep.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
-            }
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-            }
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-            }
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-            }
-
-            if (targets.length > 0) {
-                const target = p_creep.pos.findClosestByPath(targets)
-                const transferResult = p_creep.transfer(target, RESOURCE_ENERGY);
-
-                if (transferResult == ERR_NOT_IN_RANGE) {
-                    p_creep.moveTo(target, {
-                        visualizePathStyle: {
-                            stroke: '#ffffff'
-                        }
-                    });
-                }
-            }
 
             // Head home so we're close to base when energy slots open up.
             if (targets.length == 0) {
                 //const target = Game.spawns['Spawn1'];
                 const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
-                p_creep.moveTo(target);
+                creep.moveTo(target);
 
-                if (!p_creep.pos.isEqualTo(target)) {
+                if (!creep.pos.isEqualTo(target)) {
 
-                    const moveToResult = p_creep.moveTo(target, {
+                    const moveToResult = creep.moveTo(target, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
@@ -155,12 +151,12 @@ var roleCourier = {
                 } else {
                     // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
                     // to pickup.
-                    p_creep.dropResources();
+                    creep.dropResources();
                     return;
                 }
             }
 
-            p_creep.say('🚚 ' + creepFillPercentage + '%');
+            creep.say('🚚 ' + creepFillPercentage + '%');
         }
     }
 };

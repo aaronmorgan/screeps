@@ -40,108 +40,91 @@ var roleHarvester = {
         }
     },
 
-    /** @param {Creep} p_creep **/
-    run: function (p_creep) {
-        p_creep.checkTicksToDie();
-        p_creep.checkTicksToLive();
+    /** @param {Creep} creep **/
+    run: function (creep) {
+        creep.checkTicksToDie();
+        creep.checkTicksToLive();
 
-        let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-        p_creep.say('⛏️ ' + creepFillPercentage + '%')
+        let creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+        creep.say('⛏️ ' + creepFillPercentage + '%')
 
-        if ((p_creep.memory.isHarvesting && p_creep.store.getFreeCapacity() != 0)) { // ||
+        if ((creep.memory.isHarvesting && creep.store.getFreeCapacity() != 0)) { // ||
 
 
-            //   var a = p_creep.room.selectAvailableSource(p_creep.room.creeps().harvesters);
+            //   var a = creep.room.selectAvailableSource(creep.room.creeps().harvesters);
             //    console.log(JSON.stringify(a))
-            // for (let source of p_creep.room.memory.sources) {
+            // for (let source of creep.room.memory.sources) {
             //     console.log(JSON.stringify(source))
 
-            //     console.log(JSON.stringify(p_creep.room.creeps().harvesters))                
-            //     console.log(JSON.stringify(p_creep.room.memory.sources))
-            // const creepsForThisSource = _.countBy(p_creep.room.harvesters, x => x.memory.sourceId == source.id);
+            //     console.log(JSON.stringify(creep.room.creeps().harvesters))                
+            //     console.log(JSON.stringify(creep.room.memory.sources))
+            // const creepsForThisSource = _.countBy(creep.room.harvesters, x => x.memory.sourceId == source.id);
             // console.log(JSON.stringify(creepsForThisSource));
             //    }
 
             // Cater for the siuation where the creep wanders into another room.
-            if (_.isEmpty(p_creep.room.memory.sources)) {
+            if (_.isEmpty(creep.room.memory.sources)) {
                 return;
             }
 
-            const source = Game.getObjectById(p_creep.memory.sourceId);
+            const source = Game.getObjectById(creep.memory.sourceId);
 
-            const harvestResult = p_creep.harvest(source);
+            const harvestResult = creep.harvest(source);
 
             if (harvestResult == ERR_NOT_IN_RANGE) {
-                const moveResult = p_creep.moveTo(source, {
+                const moveResult = creep.moveTo(source, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }
                 });
 
                 if (moveResult == ERR_NO_PATH) {
-                    const sources = p_creep.room.selectAvailableSource(p_creep.room.creeps().harvesters);
+                    const sources = creep.room.selectAvailableSource(creep.room.creeps().harvesters);
 
                     if (!_.isEmpty(sources)) {
                         const sourceId = sources[0].id;
 
                         console.log('INFO: Attempting set new target source, id=' + sourceId);
-                        p_creep.memory.sourceId = sourceId;
+                        creep.memory.sourceId = sourceId;
                     }
                 }
 
             } else if (harvestResult == OK) {
-                p_creep.memory.isHarvesting = p_creep.store.getFreeCapacity() != 0;
-                if (!p_creep.memory.isHarvesting && p_creep.room.memory.creeps.couriers > 0) {
-                    for (const resourceType in p_creep.carry) {
-                        p_creep.drop(resourceType);
+                creep.memory.isHarvesting = creep.store.getFreeCapacity() != 0;
+                if (!creep.memory.isHarvesting && creep.room.memory.creeps.couriers > 0) {
+                    for (const resourceType in creep.carry) {
+                        creep.drop(resourceType);
                     }
                 }
             }
             //     }
         } else {
-            if (p_creep.room.memory.creeps.couriers > 0) {
-                for (const resourceType in p_creep.carry) {
-                    p_creep.drop(resourceType);
+            if (creep.room.memory.creeps.couriers > 0) {
+                for (const resourceType in creep.carry) {
+                    creep.drop(resourceType);
                 }
 
-                p_creep.memory.isHarvesting = true;
+                creep.memory.isHarvesting = true;
                 return;
             }
 
-            let targets = [];
-
-            if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                targets.push(Game.spawns['Spawn1']);
-            }
-            if (targets.length == 0) {
-                // Only refil the Tower if the fill percentage is < 20%.
-                targets = _.filter(p_creep.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
-            }
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-            }
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-            }
-            if (targets.length == 0) {
-                targets = _.filter(p_creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-            }
+            const targets = creep.findEnergyTransferTarget();
 
             if (targets.length > 0) {
-                const target = p_creep.pos.findClosestByPath(targets)
-                p_creep.memory.isHarvesting = false;
+                const target = creep.pos.findClosestByPath(targets)
+                creep.memory.isHarvesting = false;
 
-                const transferResult = p_creep.transfer(target, RESOURCE_ENERGY);
+                const transferResult = creep.transfer(target, RESOURCE_ENERGY);
                 if (transferResult == ERR_NOT_IN_RANGE) {
-                    p_creep.moveTo(target, {
+                    creep.moveTo(target, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
                     });
                 } else if (transferResult == ERR_NOT_ENOUGH_ENERGY) {
-                    p_creep.memory.isHarvesting = true;
-                } else if (transferResult == OK && p_creep.store.getUsedCapacity() == 0) {
-                    p_creep.memory.isHarvesting = true;
+                    creep.memory.isHarvesting = true;
+                } else if (transferResult == OK && creep.store.getUsedCapacity() == 0) {
+                    creep.memory.isHarvesting = true;
                 }
 
                 return;
@@ -149,17 +132,17 @@ var roleHarvester = {
 
             var target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
-            if (!p_creep.pos.isEqualTo(target)) {
-                p_creep.moveTo(target, {
+            if (!creep.pos.isEqualTo(target)) {
+                creep.moveTo(target, {
                     visualizePathStyle: {
                         stroke: '#ffffff'
                     }
                 })
             } else {
-                for (const resourceType in p_creep.store) {
-                    p_creep.drop(resourceType);
+                for (const resourceType in creep.store) {
+                    creep.drop(resourceType);
                 }
-                p_creep.memory.isHarvesting = true;
+                creep.memory.isHarvesting = true;
             }
         }
     }

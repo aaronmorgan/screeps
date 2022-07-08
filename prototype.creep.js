@@ -32,4 +32,40 @@ module.exports = function () {
 
         this.suicide();
     };
+
+    Creep.prototype.findEnergyTransferTarget = function () {
+        let targets = [];
+
+        if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            targets.push(Game.spawns['Spawn1']);
+        }
+        if (targets.length == 0) {
+            // Only refil the Tower if the fill percentage is < 20%.
+            targets = _.filter(this.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
+        }
+        if (targets.length == 0) {
+            targets = _.filter(this.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+        }
+        if (targets.length == 0) {
+            targets = _.filter(this.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+        }
+        if (targets.length == 0) {
+            targets = _.filter(this.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+        }
+
+        if (targets.length > 0) {
+            const target = this.pos.findClosestByPath(targets)
+            const transferResult = this.transfer(target, RESOURCE_ENERGY);
+
+            if (transferResult == ERR_NOT_IN_RANGE) {
+                this.moveTo(target, {
+                    visualizePathStyle: {
+                        stroke: '#ffffff'
+                    }
+                });
+            }
+        }
+
+        return targets;
+    }
 };
