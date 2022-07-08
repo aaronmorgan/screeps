@@ -15,13 +15,13 @@ var roleCourier = {
         } else if (p_energyCapacityAvailable >= 550) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 500) {
-            bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
+            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 450) {
-            bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 400) {
-            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
         } else if (p_energyCapacityAvailable >= 350) {
-            bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+            bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         } else {
             bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         }

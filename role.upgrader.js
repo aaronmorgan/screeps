@@ -20,14 +20,18 @@ var roleUpgrader = {
             ];
         } else if (p_spawn.room.storage && p_energyCapacityAvailable >= 1000) {
             bodyType = [
-                WORK, WORK, WORK, WORK, WORK, WORK,
+                WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE, MOVE
+                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
             ];
             // Prioritise movement overy carry capaciity. If the container is repeatedly low
             // on energy we don't want to be waiting.
-        } else if (p_energyCapacityAvailable >= 550) {
-            bodyType = [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        } else if (p_energyCapacityAvailable >= 850) {
+            bodyType = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY];
+        } else if (p_energyCapacityAvailable >= 700) {
+            bodyType = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY, CARRY];
+        } else if (p_energyCapacityAvailable >= 600) {
+            bodyType = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY];
         } else if (p_energyCapacityAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE];
         } else if (p_energyCapacityAvailable >= 350) {
@@ -51,7 +55,7 @@ var roleUpgrader = {
         //p_creep.memory.energyCollection = energyCollection.UNKNOWN;
 
         let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
-//        p_creep.say('⚒️ ' + creepFillPercentage + '%');
+        //        p_creep.say('⚒️ ' + creepFillPercentage + '%');
 
         if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
             p_creep.memory.upgrading = false;

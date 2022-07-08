@@ -84,7 +84,6 @@ var roleGopher = {
         }
 
         if (creepFillPercentage < 100 && creep.memory.harvesting == true) {
-            //const energyTarget = _.last(creep.room.droppedResources())
             const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
             if (!energyTarget) {
