@@ -2,15 +2,15 @@ const {
     EXIT_CODE
 } = require('game.constants');
 
-const {
-    jobs
-} = require('tasks.infrastructure.jobs');
-
 var infrastructureTasks = {
 
     processJobs: function (p_spawn, p_jobs) {
 
         for (let i = 0; i < p_jobs.length; i++) {
+            if (p_jobs[i].built) {
+                continue;
+            }
+
             let job = p_jobs[i];
             let specialSite = false;
 
@@ -50,6 +50,7 @@ var infrastructureTasks = {
                         if (path) {
                             for (let index = 0; index < path.length - 3; index++) {
                                 const pos = path[index];
+
                                 p_spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
                             }
 
@@ -65,39 +66,51 @@ var infrastructureTasks = {
 
                     break;
                 }
-                // case 'rcl.container': {
-                //     // RCL adjacent container.
-                //     const path = p_spawn.pos.findPathTo(p_room.controller.pos, {
-                //         ignoreDestructibleStructures: true,
-                //         ignoreCreeps: true
-                //     });
+                case 'rcl.container': {
+                    // RCL adjacent container.
+                    const path = p_spawn.pos.findPathTo(p_spawn.room.controller.pos, {
+                        ignoreDestructibleStructures: true,
+                        ignoreCreeps: true
+                    });
 
-                //     // TODO check that all surrounding tiles are empty and if not move 
-                //     // further away from the RCL until condition satisfied/
+                    // Far enough away for Upgraders to have it at their backs while working
+                    // but not so close that it gets in the way or too far that they have to 
+                    // travel unnecessarily.
+                    if (path) {
+                        let pos = undefined;
 
-                //     // Far enough away for Upgraders to have it at their backs while working
-                //     // but not so close that it gets in the way or too far that they have to 
-                //     // travel unnecessarily.
-                //     if (path) {
-                //         let pos = undefined;
+                        if (path.length > 10) {
+                            pos = path[Math.ceil(path.length * 0.3)]; // Find a position 30% of the way towards the RCL.
 
-                //         if (path.length > 10) {
-                //             pos = path[Math.ceil(path.length * 0.6)];
-                //         } else {
-                //             pos = path[path.length - 2];
-                //         }
+                            const area = p_spawn.room.lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1, pos.y + 1, pos.x + 1, true);
 
-                //         job = {
-                //             type: STRUCTURE_CONTAINER,
-                //             x: pos.x,
-                //             y: pos.y
-                //         };
+                            for (let index = 0; index < area.length; index++) {
+                                const element = area[index];
 
-                //         specialSite = true;
-                //     }
+                                if (element.terrain !== 'plain') {
+                                    continue;
+                                }
 
-                //     break;
-                // }
+                                var z = p_spawn.room.lookForAt(LOOK_STRUCTURES, element.x, element.y);
+
+                                if (z.length == 0) {
+                                    pos = area[index];
+                                    break;
+                                }
+                            }
+                        }
+
+                        job = {
+                            type: STRUCTURE_CONTAINER,
+                            x: pos.x,
+                            y: pos.y
+                        };
+
+                        specialSite = true;
+                    }
+
+                    break;
+                }
                 // Iterate all Source locations and find the first without a Link structure.
                 case 'source.link': {
                     p_spawn.room.memory.sources.forEach(source => {
@@ -107,7 +120,6 @@ var infrastructureTasks = {
                         });
 
                         const pos = path[path.length - 3];
-
 
                         var foundLinkStructure = p_spawn.room.lookAt(pos.x, pos.y).filter(x => x.type === 'structure' && x.structure.structureType ===
                             'link').length > 0;
@@ -178,6 +190,8 @@ var infrastructureTasks = {
 
                 switch (result) {
                     case OK: {
+                        p_jobs[i].built = true;
+
                         // Only set down one construction site at a time.
                         return;
                     }
@@ -209,23 +223,23 @@ var infrastructureTasks = {
 
     // Doesn't use a traditional queue or any cache but instead looks at current construction site objects
     // to determine whether to continue or not.
-    buildLinks: function (p_room) {
+    buildLinks: function (room) {
         // Only enqueue one construction site at a time.
-        if (p_room.constructionSites().length > 0) {
+        if (room.constructionSites().length > 0) {
             return;
         }
 
-        const spawn = p_room.structures().spawn[0];
+        const spawn = room.structures().spawn[0];
 
-        for (let j = 0; j <= p_room.controller.level; j++) {
-            this.processJobs(spawn, jobs['RCL_' + j].jobs);
+        for (let j = 0; j <= room.controller.level; j++) {
+            this.processJobs(spawn, room.memory.jobs.jobs['RCL_' + j].jobs);
         }
     },
 
-    locateSpawnDumpLocation: function (p_room) {
-        const spawn = p_room.structures().spawn[0];
+    locateSpawnDumpLocation: function (room) {
+        const spawn = room.structures().spawn[0];
 
-        new RoomPosition(spawn.pos.x, spawn.pos.y + 3, p_room.name).createFlag(spawn.name + '_DUMP')
+        new RoomPosition(spawn.pos.x, spawn.pos.y + 3, room.name).createFlag(spawn.name + '_DUMP')
         //Game.flags.Flag1.setPosition();
 
         // p_room.memory.locations = [];

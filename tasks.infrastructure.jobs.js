@@ -241,7 +241,13 @@ module.exports.jobs = {
                 type: "extension",
                 x: -3,
                 y: -1
-            }
+            },
+            {
+                type: "rcl.container",
+                x: 0,
+                y: 0,
+                built: false
+            },
         ]
     },
     RCL_4: {
@@ -362,11 +368,10 @@ module.exports.jobs = {
     },
     RCL_6: {
         jobs: [{
-                type: "source.link",
-                x: 0,
-                y: 0
-            }
-        ]
+            type: "source.link",
+            x: 0,
+            y: 0
+        }]
     },
     RCL_7: {
         jobs: []

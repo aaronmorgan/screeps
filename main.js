@@ -46,6 +46,11 @@ module.exports.loop = function () {
             }
         }
 
+        if (!spawn.room.memory.jobs) {
+            console.log('loading jobs against room')
+            spawn.room.memory.jobs = require('tasks.infrastructure.jobs');
+        }
+
     creepFactory.validateCache(spawn.room);
 
     if (structures.tower) {
@@ -78,10 +83,6 @@ module.exports.loop = function () {
 
         // const transferResult = target.transferEnergy(storage, RESOURCE_ENERGY);
         // console.log('storage transfer result', transferResult)
-    }
-
-    if (_.isEmpty(structures.tower) && spawn.room.controller.level >= 3) {
-        console.log('⚠️ WARNING: No towers!');
     }
 
     let energyCapacityAvailable = spawn.room.energyCapacityAvailable;
