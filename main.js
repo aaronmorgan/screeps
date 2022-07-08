@@ -226,7 +226,7 @@ module.exports.loop = function () {
         }
         // DROPMINERS
         if (!sufficientDropMiners) {
-            roleDropMiner.tryBuild(spawn, energyCapacityAvailable, dropminers);
+            roleDropMiner.tryBuild(spawn, energyCapacityAvailable);
         }
         // UPGRADERS
         if (!sufficientUpgraders) {

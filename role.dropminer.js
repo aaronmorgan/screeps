@@ -9,7 +9,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleDropMiner = {
 
-    tryBuild: function (p_spawn, p_energyCapacityAvailable, p_dropminers) {
+    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
 
         if (p_energyCapacityAvailable >= 700) {
