@@ -31,7 +31,8 @@ module.exports.loop = function () {
     console.log("--- NEW TICK -----------------------------");
     let spawn = Game.spawns['Spawn1'];
 
-    spawn.room.structures();
+    const structures = spawn.room.structures();
+
     // room.linkContainers();
     spawn.room.droppedResources();
     spawn.room.determineSourceAccessPoints();
@@ -46,7 +47,6 @@ module.exports.loop = function () {
         }
 
     creepFactory.validateCache(spawn.room);
-    const structures = spawn.room.structures();
 
     if (structures.tower) {
         structures.tower.forEach(tower => {
