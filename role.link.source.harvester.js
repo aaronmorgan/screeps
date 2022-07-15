@@ -8,22 +8,17 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleLinkSourceHarvester = {
 
-    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
-        let bodyType = [];
-        if (p_energyCapacityAvailable >= 350) {
-            bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
-        } else {
-            bodyType = [CARRY, MOVE, MOVE];
-        }
+    tryBuild: function (spawn, energyCapacityAvailable) {
+        let bodyType = [CARRY, MOVE, MOVE];
 
         if (!_.isEmpty(bodyType)) {
-            const targetLinkId = p_spawn.room.selectAvailableSourceLink(p_spawn.room.creeps().roleLinkSourceHarvesters);
+            const targetLinkId = spawn.room.selectAvailableSourceLink(spawn.room.creeps().roleLinkSourceHarvesters);
 
             if (_.isEmpty(targetLinkId)) {
                 console.log('ERROR: Attempting to create ' + role.LINK_SOURCE_HARVESTER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
-                return creepFactory.create(p_spawn, role.LINK_SOURCE_HARVESTER, bodyType, {
+                return creepFactory.create(spawn, role.LINK_SOURCE_HARVESTER, bodyType, {
                     role: role.LINK_SOURCE_HARVESTER,
                     linkId: targetLinkId[0].linkId,
                     sourceId: targetLinkId[0].id,
@@ -85,12 +80,17 @@ var roleLinkSourceHarvester = {
 
             const transferResult = creep.transfer(sourceLink, RESOURCE_ENERGY);
 
-            if (transferResult == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sourceLink, {
-                    visualizePathStyle: {
-                        stroke: '#ffffff'
-                    }
-                });
+            switch (transferResult) {
+                case (ERR_NOT_IN_RANGE): {
+                    creep.moveTo(sourceLink, {
+                        visualizePathStyle: {
+                            stroke: '#ffffff'
+                        }
+                    });
+                    break;
+                }
+                default:
+                    console.log('transferResult', transferResult)
             }
 
             creep.say('🔌 ' + creepFillPercentage + '%');
