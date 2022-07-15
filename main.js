@@ -254,13 +254,13 @@ module.exports.loop = function () {
         if (!sufficientHarvesters) {
             roleHarvester.tryBuild(spawn, energyCapacityAvailable);
         }
-        // GOPHERS
-        if (!sufficientGophers) {
-            roleGopher.tryBuild(spawn, energyCapacityAvailable);
-        }
         // COURIERS
         if (!sufficientCouriers) {
             roleCourier.tryBuild(spawn, energyCapacityAvailable);
+        }
+        // GOPHERS
+        if (!sufficientGophers) {
+            roleGopher.tryBuild(spawn, energyCapacityAvailable);
         }
         // DROPMINERS
         if (!sufficientDropMiners) {

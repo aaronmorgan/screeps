@@ -99,7 +99,8 @@ var roleHarvester = {
             }
             //     }
         } else {
-            if (creep.room.memory.creeps.couriers > 0) {
+            if (creep.room.memory.creeps.couriers > 0 ||
+                creep.room.memory.creeps.gophers > 0) {
                 for (const resourceType in creep.carry) {
                     creep.drop(resourceType);
                 }

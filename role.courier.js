@@ -72,8 +72,6 @@ var roleCourier = {
         {
             var target = creep.pos.findClosestByPath(creep.room.structures().link)
 
-            creep.memory.isLinkTranfer = true;
-
             const transferResult = creep.transfer(target, RESOURCE_ENERGY);
 
             if (transferResult == ERR_NOT_IN_RANGE) {
