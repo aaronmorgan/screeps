@@ -52,7 +52,7 @@ var roleBuilder = {
 
         if (p_creep.memory.building) {
             // Attempt to resupply Spawn if there are no couriers.
-            if (p_creep.room.memory.creeps.haresters == 0 && p_creep.room.memory.creeps.couriers == 0) {
+            if (p_creep.room.memory.creeps.harvesters == 0 && p_creep.room.memory.creeps.couriers == 0) {
                 if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                     targets.push(Game.spawns['Spawn1']);
                 }
@@ -66,8 +66,10 @@ var roleBuilder = {
                     return a.progress > b.progress ? -1 : 1
                 });
 
-                if (p_creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                    p_creep.moveTo(targets[0], {
+                const closestBuildingSite = p_creep.pos.findClosestByPath(targets);
+
+                if (p_creep.build(closestBuildingSite) == ERR_NOT_IN_RANGE) {
+                    p_creep.moveTo(closestBuildingSite, {
                         reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffffff'
