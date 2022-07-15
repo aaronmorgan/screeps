@@ -45,7 +45,8 @@ module.exports.EXIT_CODE = {
         GOPHER: 'Gopher',
         HARVESTER: 'Harvester',
         UPGRADER: 'Upgrader',
-        LINK_BASE_HARVESTER: 'LinkBase'
+        LINK_BASE_HARVESTER: 'LinkBase',
+        LINK_SOURCE_HARVESTER: 'LinkSource'
     },
 
     module.exports.energyCollection = {

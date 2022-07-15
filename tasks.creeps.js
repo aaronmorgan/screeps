@@ -20,24 +20,24 @@ var creepTasks = {
         // Deliberately don't remove harvesters, eager removal could leave us short on gatherers.
         // this.findCreepsToDelete(p_room.creeps().harvesters, p_room.memory.maxHarvesterCreeps);
 
-        if (dropminers.length > p_room.memory.maxDropMinerCreeps + 1) {
-            let creepsToDelete = dropminers.length - p_room.memory.maxDropMinerCreeps;
+        // if (dropminers.length > p_room.memory.maxDropMinerCreeps + 1) {
+        //     let creepsToDelete = dropminers.length - p_room.memory.maxDropMinerCreeps;
 
-            if (creepsToDelete > 0) {
-                console.log('DEBUG: Found ' + creepsToDelete + ' DROPMINER creeps to remove...');
+        //     if (creepsToDelete > 0) {
+        //         console.log('DEBUG: Found ' + creepsToDelete + ' DROPMINER creeps to remove...');
 
-                const oldestCreep = _(dropminers)
-                    .groupBy('ticksToLive')
-                    .map((group) => _.min(group, 'ticksToLive'))
-                    .value();
+        //         const oldestCreep = _(dropminers)
+        //             .groupBy('ticksToLive')
+        //             .map((group) => _.min(group, 'ticksToLive'))
+        //             .value();
 
-                console.log('oldest creep is ', JSON.stringify(oldestCreep));
+        //         console.log('oldest creep is ', JSON.stringify(oldestCreep));
 
-                // for (let i = 1; i <= creepsToDelete; i++) {
-                //     creepsToRemove.push(dropminers[i]);
-                // }
-            }
-        }
+        //         // for (let i = 1; i <= creepsToDelete; i++) {
+        //         //     creepsToRemove.push(dropminers[i]);
+        //         // }
+        //     }
+        // }
 
         // this.findCreepsToDelete(p_room.creeps().builders, p_room.memory.maxBuilderCreeps);
 

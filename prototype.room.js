@@ -36,7 +36,8 @@ module.exports = function () {
                 builders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.BUILDER),
                 upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER),
                 gophers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.GOPHER),
-                linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER)
+                linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER),
+                roleLinkSourceHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_SOURCE_HARVESTER)
             }
         }
 
@@ -95,10 +96,7 @@ module.exports = function () {
         return this._sources;
     };
 
-    /**
-     * Returns the stored amount of energy in the room.
-     * @returns {number|*}
-     */
+
     Room.prototype.selectAvailableSource =
         function (creeps) {
             if (creeps.length == 0) {
@@ -114,7 +112,27 @@ module.exports = function () {
             });
         };
 
-    Room.prototype.determineSourceAccessPoints = function () {
+    // Attempt to locate all Link structures near to Source objects that don't have a creep already assigned.
+    Room.prototype.selectAvailableSourceLink =
+        function (creeps) {
+            if (!creeps || creeps.length == 0) {
+                console.log(44)
+                return this.sources();
+            }
+
+            return sources = _.filter(this.memory.sources, (s) => {
+                for (let i = 0; i < creeps.length; i++) {
+                    if (creeps[i].memory.linkId != s.linkId) {
+                        console.log('s.linkId', s.linkId)
+                        console.log('creep',creeps[i].memory.linkId)
+                        return true;
+                    }
+                }
+            });
+        };
+
+    Room.prototype.determineSourceAccessPoints =
+        function () {
             if (this.memory.sources) {
                 return;
             }
