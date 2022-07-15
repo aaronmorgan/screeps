@@ -4,19 +4,19 @@ const {
 
 var infrastructureTasks = {
 
-    processJobs: function (p_spawn, p_jobs) {
+    processJobs: function (spawn, jobs) {
 
-        for (let i = 0; i < p_jobs.length; i++) {
-            if (p_jobs[i].built) {
-                continue;
+        for (let i = 0; i < jobs.length; i++) {
+            if (jobs[i].built) {
+                //    continue;
             }
 
-            let job = p_jobs[i];
+            let job = jobs[i];
             let specialSite = false;
 
             switch (job.type) {
                 case 'road.to.controller': {
-                    const path = p_spawn.pos.findPathTo(p_spawn.room.controller.pos, {
+                    const path = spawn.pos.findPathTo(spawn.room.controller.pos, {
                         ignoreDestructibleStructures: true,
                         ignoreCreeps: true
                     });
@@ -24,7 +24,7 @@ var infrastructureTasks = {
                     if (path) {
                         for (let index = 0; index < path.length - 1; index++) {
                             const pos = path[index];
-                            p_spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+                            spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
                         }
 
                         job = {
@@ -39,10 +39,10 @@ var infrastructureTasks = {
                     break;
                 }
                 case 'road.to.source': {
-                    p_spawn.room.memory.sources.forEach(obj => {
+                    spawn.room.memory.sources.forEach(obj => {
                         const source = Game.getObjectById(obj.id);
 
-                        const path = p_spawn.pos.findPathTo(source.pos, {
+                        const path = spawn.pos.findPathTo(source.pos, {
                             ignoreDestructibleStructures: true,
                             ignoreCreeps: true
                         });
@@ -51,7 +51,7 @@ var infrastructureTasks = {
                             for (let index = 0; index < path.length - 3; index++) {
                                 const pos = path[index];
 
-                                p_spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+                                spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
                             }
 
                             job = {
@@ -68,7 +68,7 @@ var infrastructureTasks = {
                 }
                 case 'rcl.container': {
                     // RCL adjacent container.
-                    const path = p_spawn.pos.findPathTo(p_spawn.room.controller.pos, {
+                    const path = spawn.pos.findPathTo(spawn.room.controller.pos, {
                         ignoreDestructibleStructures: true,
                         ignoreCreeps: true
                     });
@@ -82,49 +82,64 @@ var infrastructureTasks = {
                         if (path.length > 10) {
                             pos = path[Math.ceil(path.length * 0.3)]; // Find a position 30% of the way towards the RCL.
 
-                            const area = p_spawn.room.lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1, pos.y + 1, pos.x + 1, true);
+                            const roomPosition = spawn.room.getPositionAt(pos.x, pos.y)
+                            const containerStructure = roomPosition.findInRange(FIND_STRUCTURES, 3, {
+                                filter: {
+                                    structureType: STRUCTURE_CONTAINER
+                                }
+                            })[0];
 
-                            for (let index = 0; index < area.length; index++) {
-                                const element = area[index];
+                            if (_.isEmpty(containerStructure)) {
 
-                                if (element.terrain !== 'plain') {
-                                    continue;
+                                const area = spawn.room
+                                    .lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1, pos.y + 1, pos.x + 1, true);
+
+                                for (let index = 0; index < area.length; index++) {
+                                    const element = area[index];
+
+                                    if (element.terrain !== 'plain') {
+                                        continue;
+                                    }
+
+                                    var z = spawn.room.lookForAt(LOOK_STRUCTURES, element.x, element.y);
+
+                                    if (z.length == 0) {
+                                        pos = area[index];
+                                        break;
+                                    }
                                 }
 
-                                var z = p_spawn.room.lookForAt(LOOK_STRUCTURES, element.x, element.y);
+                                job = {
+                                    type: STRUCTURE_CONTAINER,
+                                    x: pos.x,
+                                    y: pos.y
+                                };
 
-                                if (z.length == 0) {
-                                    pos = area[index];
-                                    break;
-                                }
+                                specialSite = true;
+                            } else {
+                                job = undefined;
                             }
                         }
-
-                        job = {
-                            type: STRUCTURE_CONTAINER,
-                            x: pos.x,
-                            y: pos.y
-                        };
-
-                        specialSite = true;
                     }
 
                     break;
                 }
                 // Iterate all Source locations and find the first without a Link structure.
                 case 'source.link': {
-                    p_spawn.room.memory.sources.forEach(source => {
-                        const path = p_spawn.pos.findPathTo(Game.getObjectById(source.id).pos, {
+                    spawn.room.memory.sources.forEach(source => {
+                        const path = spawn.pos.findPathTo(Game.getObjectById(source.id).pos, {
                             ignoreDestructibleStructures: true,
                             ignoreCreeps: true
                         });
 
-                        const pos = path[path.length - 3];
+                        const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+                            filter: {
+                                structureType: STRUCTURE_LINK
+                            }
+                        })[0];
 
-                        var foundLinkStructure = p_spawn.room.lookAt(pos.x, pos.y).filter(x => x.type === 'structure' && x.structure.structureType ===
-                            'link').length > 0;
-
-                        if (foundLinkStructure === false) {
+                        if (_.isEmpty(linkStructure)) {
+                            const pos = path[path.length - 3];
 
                             job = {
                                 type: STRUCTURE_LINK,
@@ -133,6 +148,9 @@ var infrastructureTasks = {
                             };
 
                             specialSite = true;
+                        } else {
+                            source.linkId = linkStructure.id;
+                            job = undefined;
                         }
                     });
 
@@ -167,15 +185,17 @@ var infrastructureTasks = {
             //   break;
             //     }
 
-            let x = p_spawn.pos.x + job.x;
-            let y = p_spawn.pos.y + job.y;
+            if (!job) continue;
+
+            let x = spawn.pos.x + job.x;
+            let y = spawn.pos.y + job.y;
 
             if (specialSite) {
                 x = job.x;
                 y = job.y;
             }
 
-            const tileObjects = p_spawn.room.lookAt(x, y).filter(function (x) {
+            const tileObjects = spawn.room.lookAt(x, y).filter(function (x) {
                 return (
                     x.type != 'resource' &&
                     x.type != 'energy' &&
@@ -186,11 +206,11 @@ var infrastructureTasks = {
             if (tileObjects.length < 3 &&
                 (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
 
-                let result = p_spawn.room.createConstructionSite(x, y, job.type);
+                let result = spawn.room.createConstructionSite(x, y, job.type);
 
                 switch (result) {
                     case OK: {
-                        p_jobs[i].built = true;
+                        jobs[i].built = true;
 
                         // Only set down one construction site at a time.
                         return;
@@ -239,14 +259,19 @@ var infrastructureTasks = {
     locateSpawnDumpLocation: function (room) {
         const spawn = room.structures().spawn[0];
 
-        new RoomPosition(spawn.pos.x, spawn.pos.y + 3, room.name).createFlag(spawn.name + '_DUMP')
-        //Game.flags.Flag1.setPosition();
+        if (room.structures().storage) {
+            const flags = spawn.room.lookAt(spawn.pos.x, spawn.pos.y + 3).filter(function (x) {
+                return (x.type == 'flag');
+            });
 
-        // p_room.memory.locations = [];
-        // p_room.memory.locations.push({
-        //     'name': 'SPAWN_DUMP_SITE', 
-        //     'pos': new RoomPosition(spawn.pos.x, spawn.pos.y - 1, p_room.name)
-        // });
+            if (_.isEmpty(flags)) return;
+
+            Game.flags[flags[0].flag.name].remove();
+
+            return;
+        }
+
+        new RoomPosition(spawn.pos.x, spawn.pos.y + 3, room.name).createFlag(spawn.name + '_DUMP')
     }
 }
 
