@@ -66,64 +66,64 @@ var infrastructureTasks = {
 
                     break;
                 }
-                case 'rcl.container': {
-                    // RCL adjacent container.
-                    const path = spawn.pos.findPathTo(spawn.room.controller.pos, {
-                        ignoreDestructibleStructures: true,
-                        ignoreCreeps: true
-                    });
+                // case 'rcl.container': {
+                //     // RCL adjacent container.
+                //     const path = spawn.pos.findPathTo(spawn.room.controller.pos, {
+                //         ignoreDestructibleStructures: true,
+                //         ignoreCreeps: true
+                //     });
 
-                    // Far enough away for Upgraders to have it at their backs while working
-                    // but not so close that it gets in the way or too far that they have to 
-                    // travel unnecessarily.
-                    if (path) {
-                        let pos = undefined;
+                //     // Far enough away for Upgraders to have it at their backs while working
+                //     // but not so close that it gets in the way or too far that they have to 
+                //     // travel unnecessarily.
+                //     if (path) {
+                //         let pos = undefined;
 
-                        if (path.length > 10) {
-                            pos = path[Math.ceil(path.length * 0.3)]; // Find a position 30% of the way towards the RCL.
+                //         if (path.length > 10) {
+                //             pos = path[Math.ceil(path.length * 0.3)]; // Find a position 30% of the way towards the RCL.
 
-                            const roomPosition = spawn.room.getPositionAt(pos.x, pos.y)
-                            const containerStructure = roomPosition.findInRange(FIND_STRUCTURES, 3, {
-                                filter: {
-                                    structureType: STRUCTURE_CONTAINER
-                                }
-                            })[0];
+                //             const roomPosition = spawn.room.getPositionAt(pos.x, pos.y)
+                //             const containerStructure = roomPosition.findInRange(FIND_STRUCTURES, 3, {
+                //                 filter: {
+                //                     structureType: STRUCTURE_CONTAINER
+                //                 }
+                //             })[0];
 
-                            if (_.isEmpty(containerStructure)) {
+                //             if (_.isEmpty(containerStructure)) {
 
-                                const area = spawn.room
-                                    .lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1, pos.y + 1, pos.x + 1, true);
+                //                 const area = spawn.room
+                //                     .lookForAtArea(LOOK_TERRAIN, pos.y - 1, pos.x - 1, pos.y + 1, pos.x + 1, true);
 
-                                for (let index = 0; index < area.length; index++) {
-                                    const element = area[index];
+                //                 for (let index = 0; index < area.length; index++) {
+                //                     const element = area[index];
 
-                                    if (element.terrain !== 'plain') {
-                                        continue;
-                                    }
+                //                     if (element.terrain !== 'plain') {
+                //                         continue;
+                //                     }
 
-                                    var z = spawn.room.lookForAt(LOOK_STRUCTURES, element.x, element.y);
+                //                     var z = spawn.room.lookForAt(LOOK_STRUCTURES, element.x, element.y);
 
-                                    if (z.length == 0) {
-                                        pos = area[index];
-                                        break;
-                                    }
-                                }
+                //                     if (z.length == 0) {
+                //                         pos = area[index];
+                //                         break;
+                //                     }
+                //                 }
 
-                                job = {
-                                    type: STRUCTURE_CONTAINER,
-                                    x: pos.x,
-                                    y: pos.y
-                                };
+                //                 job = {
+                //                     type: STRUCTURE_CONTAINER,
+                //                     x: pos.x,
+                //                     y: pos.y
+                //                 };
 
-                                specialSite = true;
-                            } else {
-                                job = undefined;
-                            }
-                        }
-                    }
+                //                 specialSite = true;
+                //             } else {
+                //                 job = undefined;
+                //             }
+                //         }
+                //     }
 
-                    break;
-                }
+                //     break;
+                // }
                 // Iterate all Source locations and find the first without a Link structure.
                 case 'source.link': {
                     spawn.room.memory.sources.forEach(source => {
