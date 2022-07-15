@@ -119,7 +119,6 @@ var roleGopher = {
 
             const targets = creep.findEnergyTransferTarget();
 
-
             // Head home so we're close to base when energy slots open up.
             if (targets.length == 0) {
                 //const target = Game.spawns['Spawn1'];

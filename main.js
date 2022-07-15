@@ -25,7 +25,6 @@ const roleLinkBaseHarvester = require('role.link.base.harvester');
 const roleLinkSourceHarvester = require('role.link.source.harvester');
 
 let infrastructureTasks = require('tasks.infrastructure');
-let creepTasks = require('tasks.creeps');
 let creepFactory = require('tasks.build.creeps');
 
 
@@ -307,7 +306,5 @@ module.exports.loop = function () {
     }
 
     creepFactory.processBuildQueue(spawn);
-   // creepTasks.suicideCreep(spawn.room);
-
     creepFactory.evaluateBuildQueue(spawn.room);
 }

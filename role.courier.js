@@ -68,19 +68,19 @@ var roleCourier = {
             return;
         }
 
-        if (creep.memory.isLinkTranfer && creep.memory.isLinkTranfer === true) {
-            var target = creep.pos.findClosestByPath(creep.room.structures().link)
+        // if (creep.memory.isLinkTranfer && creep.memory.isLinkTranfer === true) {
+        //     var baseLink = creep.pos.findClosestByPath(creep.room.structures().link)
 
-            const transferResult = creep.transfer(target, RESOURCE_ENERGY);
+        //     const transferResult = creep.transfer(baseLink, RESOURCE_ENERGY);
 
-            if (transferResult == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, {
-                    visualizePathStyle: {
-                        stroke: '#ffffff'
-                    }
-                });
-            }
-        }
+        //     if (transferResult == ERR_NOT_IN_RANGE) {
+        //         creep.moveTo(baseLink, {
+        //             visualizePathStyle: {
+        //                 stroke: '#ffffff'
+        //             }
+        //         });
+        //     }
+        // }
 
         // We've moved to our source now look for resources within it's preferring collection point.
         if (creepFillPercentage < 100 && creep.memory.harvesting == true) {
@@ -100,9 +100,9 @@ var roleCourier = {
 
                             creep.memory.harvesting = false;
 
-                            if (creep.room.structures().link) {
-                                creep.memory.isLinkTranfer = true;
-                            }
+                            // if (creep.room.structures().link) {
+                            //     creep.memory.isLinkTranfer = true;
+                            // }
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
