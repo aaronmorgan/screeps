@@ -281,8 +281,7 @@ module.exports.loop = function () {
     if (harvesters == 0 && dropminers == 0 && !_.isEmpty(spawn.room.memory.creepBuildQueue.queue)) {
         const job = spawn.room.memory.creepBuildQueue.queue[0];
 
-        if ((job.name != role.HARVESTER) ||
-            creepFactory.bodyCost(job.body > 300)) {
+        if ((job.name != role.HARVESTER) || creepFactory.bodyCost(job.body) > 300) {
             spawn.room.memory.creepBuildQueue.queue = [];
         }
     }
