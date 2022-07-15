@@ -9,29 +9,29 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleHarvester = {
 
-    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (spawn, energyCapacityAvailable) {
         let bodyType = [];
 
-        if (p_energyCapacityAvailable >= 500) {
+        if (energyCapacityAvailable >= 500) {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 450) {
+        } else if (energyCapacityAvailable >= 450) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 400) {
+        } else if (energyCapacityAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 350) {
+        } else if (energyCapacityAvailable >= 350) {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
-            const targetSourceId = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().harvesters)[0].id;
+            const targetSourceId = spawn.room.selectAvailableSource(spawn.room.creeps().harvesters)[0].id;
 
             if (!targetSourceId) {
                 console.log('ERROR: Attempting to create ' + role.HARVESTER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
-                return creepFactory.create(p_spawn, role.HARVESTER, bodyType, {
+                return creepFactory.create(spawn, role.HARVESTER, bodyType, {
                     role: role.HARVESTER,
                     sourceId: targetSourceId,
                     isHarvesting: true

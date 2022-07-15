@@ -8,22 +8,22 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleLinkBaseHarvester = {
 
-    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (spawn, energyCapacityAvailable) {
         let bodyType = [];
-        if (p_energyCapacityAvailable >= 500) {
+        if (energyCapacityAvailable >= 500) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 450) {
+        } else if (energyCapacityAvailable >= 450) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 400) {
+        } else if (energyCapacityAvailable >= 400) {
             bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 350) {
+        } else if (energyCapacityAvailable >= 350) {
             bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         } else {
             bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(p_spawn, role.LINK_BASE_HARVESTER, bodyType, {
+            return creepFactory.create(spawn, role.LINK_BASE_HARVESTER, bodyType, {
                 role: role.LINK_BASE_HARVESTER,
                 harvesting: false
             });

@@ -8,32 +8,32 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleCourier = {
 
-    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (spawn, energyCapacityAvailable) {
         let bodyType = [];
-        if (p_energyCapacityAvailable >= 600) {
+        if (energyCapacityAvailable >= 600) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 550) {
+        } else if (energyCapacityAvailable >= 550) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 500) {
+        } else if (energyCapacityAvailable >= 500) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 450) {
+        } else if (energyCapacityAvailable >= 450) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 400) {
+        } else if (energyCapacityAvailable >= 400) {
             bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
-        } else if (p_energyCapacityAvailable >= 350) {
+        } else if (energyCapacityAvailable >= 350) {
             bodyType = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         } else {
             bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
-            const targetSourceId = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().couriers)[0].id;
+            const targetSourceId = spawn.room.selectAvailableSource(spawn.room.creeps().couriers)[0].id;
 
             if (!targetSourceId) {
                 console.log('ERROR: Attempting to create ' + role.COURIER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
-                return creepFactory.create(p_spawn, role.COURIER, bodyType, {
+                return creepFactory.create(spawn, role.COURIER, bodyType, {
                     role: role.COURIER,
                     sourceId: targetSourceId,
                     harvesting: false

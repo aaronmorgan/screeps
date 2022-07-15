@@ -9,16 +9,16 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleUpgrader = {
 
-    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
+    tryBuild: function (spawn, energyCapacityAvailable) {
         let bodyType = [];
 
-        if (p_spawn.room.storage && p_energyCapacityAvailable >= 1750) {
+        if (spawn.room.storage && energyCapacityAvailable >= 1750) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE, MOVE
             ];
-        } else if (p_spawn.room.storage && p_energyCapacityAvailable >= 1000) {
+        } else if (spawn.room.storage && energyCapacityAvailable >= 1000) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY,
@@ -26,22 +26,22 @@ var roleUpgrader = {
             ];
             // Prioritise movement overy carry capaciity. If the container is repeatedly low
             // on energy we don't want to be waiting.
-        } else if (p_energyCapacityAvailable >= 850) {
+        } else if (energyCapacityAvailable >= 850) {
             bodyType = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY];
-        } else if (p_energyCapacityAvailable >= 700) {
+        } else if (energyCapacityAvailable >= 700) {
             bodyType = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY, CARRY];
-        } else if (p_energyCapacityAvailable >= 600) {
+        } else if (energyCapacityAvailable >= 600) {
             bodyType = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY];
-        } else if (p_energyCapacityAvailable >= 400) {
+        } else if (energyCapacityAvailable >= 400) {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE];
-        } else if (p_energyCapacityAvailable >= 350) {
+        } else if (energyCapacityAvailable >= 350) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
         } else {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(p_spawn, role.UPGRADER, bodyType, {
+            return creepFactory.create(spawn, role.UPGRADER, bodyType, {
                 role: role.UPGRADER,
                 energyCollection: energyCollection.UNKNOWN
             });
