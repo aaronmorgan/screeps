@@ -46,10 +46,10 @@ module.exports.loop = function () {
             }
         }
 
-        if (!spawn.room.memory.jobs) {
-            console.log('loading jobs against room')
-            spawn.room.memory.jobs = require('tasks.infrastructure.jobs');
-        }
+    if (!spawn.room.memory.jobs) {
+        console.log('loading jobs against room')
+        spawn.room.memory.jobs = require('tasks.infrastructure.jobs');
+    }
 
     creepFactory.validateCache(spawn.room);
 
@@ -112,6 +112,16 @@ module.exports.loop = function () {
     let maxUpgraderCreeps = 2;
     let maxGopherCreeps = 1;
     let maxLinkBaseHarvesters = 0;
+
+    // Emergency catch all to reset the queue should we end up without any energy gathering screeps.
+    if (harvesters.length <= 2 && dropminers.length == 0 && !_.isEmpty(spawn.room.memory.creepBuildQueue.queue)) {
+        const job = spawn.room.memory.creepBuildQueue.queue[0];
+
+        if ((job.name != role.HARVESTER) || creepFactory.bodyCost(job.body) > 300) {
+            spawn.room.memory.creepBuildQueue.queue = [];
+            energyCapacityAvailable = 300;
+        }
+    }
 
     // TODO Only do this mod n times, e.g. % 10.
     infrastructureTasks.buildLinks(spawn.room);
@@ -276,15 +286,6 @@ module.exports.loop = function () {
 
     creepFactory.processBuildQueue(spawn);
     creepTasks.suicideCreep(spawn.room);
-
-    // Emergency catch all to reset the queue should we end up without any energy gathering screeps.
-    if (harvesters == 0 && dropminers == 0 && !_.isEmpty(spawn.room.memory.creepBuildQueue.queue)) {
-        const job = spawn.room.memory.creepBuildQueue.queue[0];
-
-        if ((job.name != role.HARVESTER) || creepFactory.bodyCost(job.body) > 300) {
-            spawn.room.memory.creepBuildQueue.queue = [];
-        }
-    }
 
     creepFactory.evaluateBuildQueue(spawn.room);
 }
