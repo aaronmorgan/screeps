@@ -68,8 +68,7 @@ var roleCourier = {
             return;
         }
 
-        if (creep.memory.isLinkTranfer && creep.memory.isLinkTranfer === true)
-        {
+        if (creep.memory.isLinkTranfer && creep.memory.isLinkTranfer === true) {
             var target = creep.pos.findClosestByPath(creep.room.structures().link)
 
             const transferResult = creep.transfer(target, RESOURCE_ENERGY);
@@ -94,18 +93,16 @@ var roleCourier = {
                     let source = Game.getObjectById(energyTarget.id);
 
                     const pickupResult = creep.pickup(source);
-console.log(pickupResult)
+
                     switch (pickupResult) {
                         case OK: {
                             creep.say('🚚 ' + creepFillPercentage + '%');
 
-                            //if (creepFillPercentage === 100) {
-                                creep.memory.harvesting = false;
-    
-                                if (creep.room.structures().link) {
-                                    creep.memory.isLinkTranfer = true;
-                                }
-                          //  }
+                            creep.memory.harvesting = false;
+
+                            if (creep.room.structures().link) {
+                                creep.memory.isLinkTranfer = true;
+                            }
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
