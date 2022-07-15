@@ -45,7 +45,7 @@ var roleHarvester = {
         creep.checkTicksToDie();
         creep.checkTicksToLive();
 
-        let creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+        const creepFillPercentage = creep.CreepFillPercentage();
         creep.say('⛏️ ' + creepFillPercentage + '%')
 
         if ((creep.memory.isHarvesting && creep.store.getFreeCapacity() != 0)) { // ||

@@ -32,7 +32,11 @@ var roleLinkBaseHarvester = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-        const creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+        const creepFillPercentage = creep.CreepFillPercentage();
+
+        if (creepFillPercentage > 0) {
+            creep.say(creepFillPercentage + '%');
+        }
 
         if (creepFillPercentage == 100) {
             creep.memory.harvesting = false;
@@ -57,8 +61,6 @@ var roleLinkBaseHarvester = {
             if (creep.store.getUsedCapacity() === 0) {
                 creep.memory.harvesting = true;
             }
-
-            creep.say(creepFillPercentage + '%');
         }
     }
 };

@@ -47,7 +47,7 @@ var roleCourier = {
         creep.checkTicksToDie();
         creep.checkTicksToLive();
 
-        const creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+        const creepFillPercentage = creep.CreepFillPercentage();
         // creep.say('🚚 ' + creepFillPercentage + '%');
 
         // Creep has no energy so we need to move to our source.

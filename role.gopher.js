@@ -40,7 +40,7 @@ var roleGopher = {
         creep.checkTicksToDie();
         creep.checkTicksToLive();
 
-        const creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+        const creepFillPercentage = creep.CreepFillPercentage();
 
         if (_.isEmpty(creep.memory.targetedDroppedEnergy)) {
             // Identify the lowest dropped energy

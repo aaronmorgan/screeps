@@ -48,75 +48,75 @@ var roleUpgrader = {
         }
     },
 
-    /** @param {Creep} p_creep **/
-    run: function (p_creep) {
-        p_creep.checkTicksToLive();
+    /** @param {Creep} creep **/
+    run: function (creep) {
+        creep.checkTicksToLive();
 
         //p_creep.memory.energyCollection = energyCollection.UNKNOWN;
 
-        let creepFillPercentage = Math.round(p_creep.store.getUsedCapacity() / p_creep.store.getCapacity() * 100);
+        const creepFillPercentage = creep.CreepFillPercentage();
         //        p_creep.say('⚒️ ' + creepFillPercentage + '%');
 
-        if (p_creep.memory.upgrading && p_creep.store[RESOURCE_ENERGY] == 0) {
-            p_creep.memory.upgrading = false;
+        if (creep.memory.upgrading && creep.store[RESOURCE_ENERGY] == 0) {
+            creep.memory.upgrading = false;
         }
 
-        if (!p_creep.memory.upgrading && p_creep.store.getFreeCapacity() == 0) {
-            p_creep.memory.upgrading = true;
+        if (!creep.memory.upgrading && creep.store.getFreeCapacity() == 0) {
+            creep.memory.upgrading = true;
         }
 
-        if (p_creep.memory.upgrading) {
-            if (p_creep.upgradeController(p_creep.room.controller) == ERR_NOT_IN_RANGE) {
-                p_creep.moveTo(p_creep.room.controller, {
+        if (creep.memory.upgrading) {
+            if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(creep.room.controller, {
                     visualizePathStyle: {
                         stroke: '#4189d0'
                     }
                 });
 
-                p_creep.say('⚒️ ' + creepFillPercentage + '%');
+                creep.say('⚒️ ' + creepFillPercentage + '%');
             }
         } else {
-            if (p_creep.room.memory.maxSourceAccessPoints <= p_creep.room.creeps().harvesters.length) {
-                p_creep.memory.energyCollection = energyCollection.SCAVENGING;
+            if (creep.room.memory.maxSourceAccessPoints <= creep.room.creeps().harvesters.length) {
+                creep.memory.energyCollection = energyCollection.SCAVENGING;
             }
 
             // Look for dropped energy at the spawn dump site first.
             const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
-            if (!p_creep.memory.energyCollection == energyCollection.MINING && target) {
-                var xyTileEnergy = p_creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
+            if (!creep.memory.energyCollection == energyCollection.MINING && target) {
+                var xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
 
                 if (!_.isEmpty(xyTileEnergy)) {
                     const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
-                    const pickupResult = p_creep.pickup(droppedEnergy);
+                    const pickupResult = creep.pickup(droppedEnergy);
 
                     if (pickupResult == ERR_NOT_IN_RANGE) {
-                        p_creep.moveTo(droppedEnergy, {
+                        creep.moveTo(droppedEnergy, {
                             visualizePathStyle: {
                                 stroke: '#ffaa00'
                             }
                         });
                     }
 
-                    p_creep.memory.upgrading = true;
+                    creep.memory.upgrading = true;
 
                     return;
                 }
             }
 
             // Then look for energy in the normal storage locations...
-            const targets = _.filter(p_creep.room.structures().all, (structure) => {
+            const targets = _.filter(creep.room.structures().all, (structure) => {
                 return (
                         structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
-                    structure.store.getUsedCapacity(RESOURCE_ENERGY) >= p_creep.store.getFreeCapacity(); // TODO: Should this getFreeCapacity check be here?
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity(); // TODO: Should this getFreeCapacity check be here?
             });
 
             if (targets.length > 0) {
-                const dropSite = p_creep.pos.findClosestByPath(targets);
+                const dropSite = creep.pos.findClosestByPath(targets);
 
-                if (p_creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    p_creep.moveTo(dropSite, {
+                if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(dropSite, {
                         visualizePathStyle: {
                             stroke: '#3370ac'
                         }
@@ -125,9 +125,9 @@ var roleUpgrader = {
             } else {
                 // if (p_creep.room.memory.creeps.couriers == 0) {
 
-                if (p_creep.memory.energyCollection != energyCollection.MINING) {
-                    const resourceEnergy = p_creep.room.droppedResources();
-                    const droppedResources = p_creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+                if (creep.memory.energyCollection != energyCollection.MINING) {
+                    const resourceEnergy = creep.room.droppedResources();
+                    const droppedResources = creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
 
                     if (droppedResources) {
                         const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
@@ -135,12 +135,12 @@ var roleUpgrader = {
                         if (!_.isEmpty(energyTarget)) {
                             source = Game.getObjectById(energyTarget.id);
 
-                            const pickupResult = p_creep.pickup(source);
+                            const pickupResult = creep.pickup(source);
 
-                            p_creep.memory.energyCollection = energyCollection.SCAVENGING;
+                            creep.memory.energyCollection = energyCollection.SCAVENGING;
 
                             if (pickupResult == ERR_NOT_IN_RANGE) {
-                                p_creep.moveTo(source, {
+                                creep.moveTo(source, {
                                     visualizePathStyle: {
                                         stroke: '#ffaa00'
                                     }
@@ -148,7 +148,7 @@ var roleUpgrader = {
 
                                 return;
                             } else if (pickupResult == OK) {
-                                p_creep.room.refreshDroppedResources();
+                                creep.room.refreshDroppedResources();
                             }
                         }
 
@@ -157,21 +157,21 @@ var roleUpgrader = {
                 }
 
                 // Last resort, go and mine the energy.
-                let nearestSource = p_creep.pos.findClosestByPath(p_creep.room.sources());
+                let nearestSource = creep.pos.findClosestByPath(creep.room.sources());
 
-                const droppedResources = p_creep.room.droppedResourcesCloseToSource(nearestSource.id);
+                const droppedResources = creep.room.droppedResourcesCloseToSource(nearestSource.id);
 
                 if (droppedResources) {
-                    const energyTarget = p_creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
+                    const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
 
                     if (!_.isEmpty(energyTarget)) {
                         let source = Game.getObjectById(energyTarget.id);
 
-                        const pickupResult = p_creep.pickup(source);
+                        const pickupResult = creep.pickup(source);
 
                         switch (pickupResult) {
                             case ERR_NOT_IN_RANGE: {
-                                const moveResult = p_creep.moveTo(source, {
+                                const moveResult = creep.moveTo(source, {
                                     visualizePathStyle: {
                                         stroke: '#ffaa00'
                                     }
@@ -188,10 +188,10 @@ var roleUpgrader = {
                     }
                 }
 
-                p_creep.memory.energyCollection = energyCollection.MINING;
+                creep.memory.energyCollection = energyCollection.MINING;
 
-                if (p_creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                    p_creep.moveTo(nearestSource, {
+                if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(nearestSource, {
                         visualizePathStyle: {
                             stroke: '#3370ac'
                         }

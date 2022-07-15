@@ -10,8 +10,10 @@ var roleLinkSourceHarvester = {
 
     tryBuild: function (p_spawn, p_energyCapacityAvailable) {
         let bodyType = [];
-        if (p_energyCapacityAvailable >= 300) {
+        if (p_energyCapacityAvailable >= 350) {
             bodyType = [CARRY, CARRY, MOVE, MOVE, MOVE];
+        } else {
+            bodyType = [CARRY, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
@@ -33,7 +35,7 @@ var roleLinkSourceHarvester = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-        const creepFillPercentage = Math.round(creep.store.getUsedCapacity() / creep.store.getCapacity() * 100);
+        const creepFillPercentage = creep.CreepFillPercentage();
 
         if (creepFillPercentage == 100) {
             creep.memory.harvesting = false;

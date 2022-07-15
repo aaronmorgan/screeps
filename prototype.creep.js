@@ -67,5 +67,10 @@ module.exports = function () {
         }
 
         return targets;
-    }
+    };
+
+    Creep.prototype.CreepFillPercentage = function () {
+        return Math.round(this.store.getUsedCapacity() / this.store.getCapacity() * 100);
+    };
+
 };
