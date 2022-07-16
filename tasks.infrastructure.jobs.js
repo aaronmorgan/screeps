@@ -208,6 +208,11 @@ module.exports.jobs = {
                 type: "road.to.source",
                 x: 0,
                 y: 0
+            },
+            {
+                type: "container",
+                x: 4,
+                y: 0
             }
         ]
     },
@@ -243,10 +248,9 @@ module.exports.jobs = {
                 y: -1
             },
             {
-                type: "rcl.container",
+                type: "container",
                 x: 0,
-                y: 0,
-                built: false
+                y: 3
             },
         ]
     },
