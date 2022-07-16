@@ -48,13 +48,15 @@ var roleCourier = {
         creep.checkTicksToLive();
 
         const creepFillPercentage = creep.CreepFillPercentage();
-        // creep.say('🚚 ' + creepFillPercentage + '%');
+        if (creepFillPercentage > 0) {
+            creep.say('🚚 ' + creepFillPercentage + '%');
+        }
 
         // Creep has no energy so we need to move to our source.
         if (creepFillPercentage == 0 && creep.memory.harvesting == false) {
             const source = Game.getObjectById(creep.memory.sourceId);
 
-            if (!creep.pos.inRangeTo(source, 4)) {
+            if (!creep.pos.inRangeTo(source, 3)) {
                 var moveResult = creep.moveTo(source, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
@@ -68,23 +70,9 @@ var roleCourier = {
             return;
         }
 
-        // if (creep.memory.isLinkTranfer && creep.memory.isLinkTranfer === true) {
-        //     var baseLink = creep.pos.findClosestByPath(creep.room.structures().link)
-
-        //     const transferResult = creep.transfer(baseLink, RESOURCE_ENERGY);
-
-        //     if (transferResult == ERR_NOT_IN_RANGE) {
-        //         creep.moveTo(baseLink, {
-        //             visualizePathStyle: {
-        //                 stroke: '#ffffff'
-        //             }
-        //         });
-        //     }
-        // }
-
         // We've moved to our source now look for resources within it's preferring collection point.
         if (creepFillPercentage < 100 && creep.memory.harvesting == true) {
-            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.sourceId);
+            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.sourceId, 2);
 
             if (droppedResources) {
                 const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
@@ -96,13 +84,7 @@ var roleCourier = {
 
                     switch (pickupResult) {
                         case OK: {
-                            creep.say('🚚 ' + creepFillPercentage + '%');
-
                             creep.memory.harvesting = false;
-
-                            // if (creep.room.structures().link) {
-                            //     creep.memory.isLinkTranfer = true;
-                            // }
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
@@ -129,7 +111,6 @@ var roleCourier = {
 
             // Head home so we're close to base when energy slots open up.
             if (targets.length == 0) {
-                //const target = Game.spawns['Spawn1'];
                 const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
                 creep.moveTo(target);
@@ -150,8 +131,6 @@ var roleCourier = {
                     return;
                 }
             }
-
-            creep.say('🚚 ' + creepFillPercentage + '%');
         }
     }
 };

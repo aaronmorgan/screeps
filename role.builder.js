@@ -40,7 +40,9 @@ var roleBuilder = {
         creep.checkTicksToLive();
 
         const creepFillPercentage = creep.CreepFillPercentage();
-        // p_creep.say('🔨 ' + creepFillPercentage + '%')
+        if (creepFillPercentage > 0) {
+            creep.say('🔨 ' + creepFillPercentage + '%')
+        }
 
         if (creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
@@ -76,8 +78,6 @@ var roleBuilder = {
                             stroke: '#ffffff'
                         }
                     });
-
-                    creep.say('🔨 ' + creepFillPercentage + '%')
                 }
             } else {
                 creep.memory.ticksWithoutWork++;
@@ -154,48 +154,6 @@ var roleBuilder = {
                         return;
                     }
                 }
-            }
-
-            // Don't attempt to mine resources; target droppped preferrably.
-            // Local energy sources
-            let nearestSource = creep.pos.findClosestByPath(creep.room.sources());
-
-            const droppedResources = creep.room.droppedResourcesCloseToSource(nearestSource.id);
-
-            if (droppedResources) {
-                const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy))
-
-                if (!_.isEmpty(energyTarget)) {
-                    let source = Game.getObjectById(energyTarget.id);
-
-                    const pickupResult = creep.pickup(source);
-
-                    switch (pickupResult) {
-                        case ERR_NOT_IN_RANGE: {
-                            const moveResult = creep.moveTo(source, {
-                                visualizePathStyle: {
-                                    stroke: '#ffaa00'
-                                }
-                            });
-                        }
-                        case ERR_FULL: {}
-                    }
-
-                    return;
-                }
-
-                if (creepFillPercentage == 100) {
-                    return;
-                }
-            }
-
-            if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                creep.memory.harvesting = true;
-                return creep.moveTo(nearestSource, {
-                    visualizePathStyle: {
-                        stroke: '#ffaa00'
-                    }
-                });
             }
         }
     }

@@ -75,12 +75,12 @@ module.exports = function () {
     };
 
     // Finds all the dropped energy within a 7x7 area around the target object or structure.
-    Room.prototype.droppedResourcesCloseToSource = function (objId) {
+    Room.prototype.droppedResourcesCloseToSource = function (objId, range) {
         const obj = Game.getObjectById(objId);
 
         if (!obj) return;
 
-        return this.lookForAtArea(LOOK_ENERGY, obj.pos.y - 3, obj.pos.x - 3, obj.pos.y + 3, obj.pos.x + 3, true);
+        return this.lookForAtArea(LOOK_ENERGY, obj.pos.y - range, obj.pos.x - range, obj.pos.y + range, obj.pos.x + range, true);
     };
 
     // Used by creeps that might pickup energy; resetting the room for other creeps that tick.

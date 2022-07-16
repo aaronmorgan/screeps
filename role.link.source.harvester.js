@@ -39,7 +39,7 @@ var roleLinkSourceHarvester = {
         }
 
         if (creepFillPercentage < 100 || creep.memory.harvesting == true) {
-            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.linkId);
+            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.linkId, 2);
 
             if (droppedResources) {
                 const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));

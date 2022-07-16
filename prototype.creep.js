@@ -19,7 +19,6 @@ module.exports = function () {
 
     Creep.prototype.dropResources = function () {
         for (const resourceType in this.carry) {
-            console.log('Creep: ' + this.name + ', dropping resource: ' + resourceType)
             this.drop(resourceType);
         }
     };

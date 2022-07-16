@@ -71,6 +71,21 @@ module.exports.loop = function () {
         });
     }
 
+    let storedEnergy = 0;
+
+    if (structures.container) {
+        structures.container.forEach(function (x) {
+            storedEnergy += x.store.energy;
+        });
+    }
+    if (structures.storage) {
+        structures.storage.forEach(function (x) {
+            storedEnergy += x.store.energy;
+        });
+    }
+
+    console.log(storedEnergy);
+
     spawn.room.memory.sources.forEach(function (source) {
         if (source.linkId) {
             const sourceLink = Game.getObjectById(source.linkId);
@@ -120,7 +135,7 @@ module.exports.loop = function () {
     let maxDropMinerCreeps = 0;
     let maxHarvesterCreeps = 2;
     let maxUpgraderCreeps = 2;
-    let maxGopherCreeps = 1;
+    let maxGopherCreeps = 0;
     let maxLinkBaseHarvesters = 0;
     let maxLinkSourceHarvesters = 0;
 
@@ -147,10 +162,7 @@ module.exports.loop = function () {
             // Goal is to quickly get to RCL 2 by creating two Upgraders.
             // Builders are extra and in preparation for RCL 2 construction projects.
             maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
-            // Set only one harvester per source and with a courier act like dropminers. 
-            // At this time before we start producing lots of energy then there'll be room for builders/upgraders
-            // to also source energy without having to compete with numerous harvester creeps.
-            maxDropMinerCreeps = (upgraders.lenth > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
+            maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
             maxUpgraderCreeps = 1;
@@ -161,16 +173,14 @@ module.exports.loop = function () {
 
             // May need to increase builder ceiling from 3 to 4.
             maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
-            // Set only one harvester per source and with a courier act like dropminers. 
-            // At this time before we start producing lots of energy then there'll be room for builders/upgraders
-            // to also source energy without having to compete with numerous harvester creeps.
-            maxDropMinerCreeps = (upgraders.length > 0 && couriers.length) > 0 ? spawn.room.memory.sources.length : 0;
+            maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
+            maxUpgraderCreeps = Math.max(2, Math.floor(storedEnergy / 800)) + 2;
 
-            maxUpgraderCreeps = Math.floor(spawn.room.memory._distanceToRCL / 10) * 2;
-
-            maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
+            if (structures.link) {
+                maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
+            }
 
             break;
         }
@@ -187,11 +197,13 @@ module.exports.loop = function () {
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = linkSourceHarvesters.length > 0 ? 0 : Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
 
-            maxUpgraderCreeps = Math.floor(spawn.room.memory._distanceToRCL / 10) * 2;
+            maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
             maxGopherCreeps = linkSourceHarvesters.length > 0 ? 0 : 2;
 
-            maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
-            maxLinkSourceHarvesters = structures.link.length > 2 ? structures.link.length - 1 : 0;
+            if (structures.link) {
+                maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
+                maxLinkSourceHarvesters = structures.link.length > 2 ? structures.link.length - 1 : 0;
+            }
         }
     }
 
