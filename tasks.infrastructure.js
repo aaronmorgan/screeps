@@ -271,7 +271,7 @@ var infrastructureTasks = {
             return;
         }
 
-        new RoomPosition(spawn.pos.x, spawn.pos.y + 3, room.name).createFlag(spawn.name + '_DUMP')
+        new RoomPosition(spawn.pos.x, spawn.pos.y + 4, room.name).createFlag(spawn.name + '_DUMP')
     }
 }
 
