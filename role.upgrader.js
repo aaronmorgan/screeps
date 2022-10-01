@@ -97,53 +97,26 @@ var roleUpgrader = {
                 return (
                         structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
-                    structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity(); // TODO: Should this getFreeCapacity check be here?
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
             });
 
             if (targets.length > 0) {
                 const dropSite = creep.pos.findClosestByPath(targets);
 
-                if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(dropSite, {
-                        visualizePathStyle: {
-                            stroke: '#3370ac'
-                        }
-                    });
-                }
-            } else {
-                const resourceEnergy = creep.room.droppedResources();
-                const droppedResources = creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
+                const withdrawResult = creep.withdraw(dropSite, RESOURCE_ENERGY);
 
-                if (droppedResources) {
-                    const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
-
-                    if (!_.isEmpty(energyTarget)) {
-                        source = Game.getObjectById(energyTarget.id);
-
-                        const pickupResult = creep.pickup(source);
-
-                        if (pickupResult == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(source, {
-                                visualizePathStyle: {
-                                    stroke: '#ffaa00'
-                                }
-                            });
-
-                            return;
-                        } else if (pickupResult == OK) {
-                            creep.room.refreshDroppedResources();
-                        }
+                switch (withdrawResult) {
+                    case OK: {
+                        creep.memory.upgrading = true;
+                        break;
                     }
-
-                    return;
-                }
-
-                if (creep.harvest(nearestSource) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(nearestSource, {
-                        visualizePathStyle: {
-                            stroke: '#3370ac'
-                        }
-                    });
+                    case (ERR_NOT_IN_RANGE): {
+                        return creep.moveTo(dropSite, {
+                            visualizePathStyle: {
+                                stroke: '#3370ac'
+                            }
+                        });
+                    }
                 }
             }
         }

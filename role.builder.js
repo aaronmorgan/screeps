@@ -117,41 +117,24 @@ var roleBuilder = {
             let targets = _.filter(creep.room.structures().all, (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER ||
                         structure.structureType == STRUCTURE_STORAGE) &&
-                    //structure.structureType == 'extension') &&
-                    structure.store.getUsedCapacity(RESOURCE_ENERGY) >= creep.store.getFreeCapacity();
+                        structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
             });
 
             if (targets.length > 0) {
                 const dropSite = creep.pos.findClosestByPath(targets);
+                const actionResult = creep.withdraw(dropSite, RESOURCE_ENERGY);
 
-                if (creep.withdraw(dropSite, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    return creep.moveTo(dropSite, {
-                        visualizePathStyle: {
-                            stroke: '#ffffff'
-                        }
-                    });
-                }
-            }
-
-            if (creep.room.memory.creeps.couriers == 0) {
-                const resourceEnergy = creep.room.droppedResources();
-                const droppedResources = creep.pos.findClosestByPath(resourceEnergy.map(x => x.pos))
-
-                if (droppedResources) {
-                    const energyTarget = resourceEnergy.find(x => x.pos.x == droppedResources.x && x.pos.y == droppedResources.y)
-
-                    if (!_.isEmpty(energyTarget)) {
-                        let source = Game.getObjectById(energyTarget.id);
-
-                        if (creep.pickup(source) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(source, {
-                                visualizePathStyle: {
-                                    stroke: '#ffaa00'
-                                }
-                            });
-                        }
-
-                        return;
+                switch (actionResult) {
+                    case OK: {
+                        creep.memory.building = true;
+                        break;
+                    }
+                    case (ERR_NOT_IN_RANGE): {
+                        return creep.moveTo(dropSite, {
+                            visualizePathStyle: {
+                                stroke: '#3370ac'
+                            }
+                        });
                     }
                 }
             }

@@ -260,7 +260,7 @@ var infrastructureTasks = {
         const spawn = room.structures().spawn[0];
 
         if (room.structures().storage) {
-            const flags = spawn.room.lookAt(spawn.pos.x, spawn.pos.y + 3).filter(function (x) {
+            const flags = spawn.room.lookAt(spawn.pos.x, spawn.pos.y + 4).filter(function (x) {
                 return (x.type == 'flag');
             });
 
