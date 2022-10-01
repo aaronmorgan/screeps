@@ -174,15 +174,15 @@ module.exports.loop = function () {
             maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
-            maxUpgraderCreeps = Math.max(2, Math.floor(storedEnergy / 800)) + 2;
+            maxUpgraderCreeps = 2; //Math.max(2, Math.floor(storedEnergy / 800)) + 2;
 
             if (structures.link) {
                 maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
             }
 
-            if (maxBuilderCreeps > 0) {
-                maxUpgraderCreeps = 1;
-            }
+            // if (maxBuilderCreeps > 0) {
+            //     maxUpgraderCreeps = 1;
+            // }
 
             break;
         }
