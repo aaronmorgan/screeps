@@ -4,7 +4,6 @@ IMPROVEMENTS:
 12. Should the rcl.container simply be placed -30% away from the rcl, back towards the spawn?
 15. Spawn name should be stored in room memory.
 17. Don't build the RCL container if there's already a base container withing range. 10? 15? tiles.
-18. Determine the size of the Upgraders based on the distance of the RCL from the base. 
 
 */
 
@@ -36,6 +35,7 @@ module.exports.loop = function () {
 
     spawn.room.droppedResources();
     spawn.room.determineSourceAccessPoints();
+    spawn.room.getDistanceToRCL();
 
     infrastructureTasks.locateSpawnDumpLocation(spawn.room);
     if (!spawn.room.memory.creepBuildQueue)
@@ -174,15 +174,11 @@ module.exports.loop = function () {
             maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
-            maxUpgraderCreeps = 2; //Math.max(2, Math.floor(storedEnergy / 800)) + 2;
+            maxUpgraderCreeps = Math.max(1, Math.floor(spawn.room.memory.controller.path.length / 10));
 
             if (structures.link) {
                 maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
             }
-
-            // if (maxBuilderCreeps > 0) {
-            //     maxUpgraderCreeps = 1;
-            // }
 
             break;
         }

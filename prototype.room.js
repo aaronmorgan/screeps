@@ -185,6 +185,23 @@ module.exports = function () {
             return accessPoints;
         },
 
+        Room.prototype.getDistanceToRCL = function() {
+            if (this.memory.controller) {
+                return;
+            }
+
+            let spawn = this.structures().spawn[0];
+
+            const path = spawn.pos.findPathTo(spawn.room.controller.pos, {
+                ignoreDestructibleStructures: true,
+                ignoreCreeps: true
+            });
+            
+            this.memory.controller = {
+                path: path
+            };
+        }
+
         /**
          * Garbage Collect - set used variables to undefined
          */
