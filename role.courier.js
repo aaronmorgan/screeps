@@ -2,6 +2,8 @@ const {
     role
 } = require('game.constants');
 
+const sourceBoundaryDistance = 3;
+
 require('prototype.creep')();
 
 let creepFactory = require('tasks.build.creeps');
@@ -56,23 +58,26 @@ var roleCourier = {
         if (creepFillPercentage == 0 && creep.memory.harvesting == false) {
             const source = Game.getObjectById(creep.memory.sourceId);
 
-            if (!creep.pos.inRangeTo(source, 3)) {
-                var moveResult = creep.moveTo(source, {
-                    visualizePathStyle: {
-                        stroke: '#ffaa00'
-                    }
-                });
-            } else {
-                // Target source is within range so switch to harvesting mode.
-                creep.memory.harvesting = true;
-            }
+            var path = creep.pos.findPathTo(source.pos);
+            path = path.slice(0, path.length - sourceBoundaryDistance);
 
-            return;
+            const moveResult = creep.moveByPath(path);
+
+            switch (moveResult) {
+                case OK: {
+                    creep.memory.harvesting = true;
+                    break;
+                }
+                case ERR_NOT_IN_RANGE: {
+                    return;
+                }
+                default: return;
+            }
         }
 
         // We've moved to our source now look for resources within it's preferring collection point.
         if (creepFillPercentage < 100 && creep.memory.harvesting == true) {
-            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.sourceId, 2);
+            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.sourceId, sourceBoundaryDistance);
 
             if (droppedResources) {
                 const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
@@ -88,11 +93,7 @@ var roleCourier = {
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
-                            const moveResult = creep.moveTo(source, {
-                                visualizePathStyle: {
-                                    stroke: '#ffaa00'
-                                }
-                            });
+                            creep.moveByPath(creep.pos.findPathTo(source.pos));
                             break;
                         }
                         case ERR_FULL: {

@@ -39,7 +39,7 @@ module.exports = function () {
             targets.push(Game.spawns['Spawn1']);
         }
         if (targets.length == 0) {
-            // Only refil the Tower if the fill percentage is < 20%.
+            // Only refill the Tower if the fill percentage is < 20%.
             targets = _.filter(this.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
         }
         if (targets.length == 0) {

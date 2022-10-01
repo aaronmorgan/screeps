@@ -138,6 +138,8 @@ module.exports = function () {
                 return;
             }
 
+            let spawn = this.structures().spawn[0];
+
             let sources = [];
             let accessPoints = 0;
 
@@ -147,13 +149,14 @@ module.exports = function () {
 
                 sources.push({
                     id: source.id,
-                    accessPoints: accessibleFields
+                    accessPoints: accessibleFields,
+                    pathFromSpawn: spawn.pos.findPathTo(source.pos)
                 });
 
                 accessPoints += accessibleFields;
             })
 
-            this.memory.sources = _.sortBy(sources, s => this.structures().spawn[0].pos.getRangeTo(s))
+            this.memory.sources = _.sortBy(sources, s => spawn.pos.getRangeTo(s))
             this.memory.maxSourceAccessPoints = accessPoints;
         },
 
