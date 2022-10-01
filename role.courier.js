@@ -46,8 +46,6 @@ var roleCourier = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-        creep.checkTicksToDie();
-        creep.checkTicksToLive();
 
         const creepFillPercentage = creep.CreepFillPercentage();
         if (creepFillPercentage > 0) {
@@ -59,6 +57,11 @@ var roleCourier = {
             const source = Game.getObjectById(creep.memory.sourceId);
 
             var path = creep.pos.findPathTo(source.pos);
+
+            if (creep.ticksToLive < (path.length * 2)) {
+                creep.dropResourcesAndDie();
+            }
+
             path = path.slice(0, path.length - sourceBoundaryDistance);
 
             const moveResult = creep.moveByPath(path);
@@ -68,10 +71,10 @@ var roleCourier = {
                     creep.memory.harvesting = true;
                     break;
                 }
-                case ERR_NOT_IN_RANGE: {
+                case ERR_NOT_IN_RANGE:
                     return;
-                }
-                default: return;
+                default:
+                    return;
             }
         }
 
