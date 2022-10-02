@@ -22,7 +22,7 @@ var infrastructureTasks = {
                     });
 
                     if (path) {
-                        for (let index = 0; index < path.length - 1; index++) {
+                        for (let index = 0; index < path.length - 2; index++) {
                             const pos = path[index];
                             spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
                         }
