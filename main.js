@@ -78,6 +78,13 @@ module.exports.loop = function () {
             storedEnergy += x.store.energy;
         });
     }
+
+    if (structures.extensions) {
+        structures.extensions.forEach(function (x) {
+            storedEnergy += x.store.energy;
+        });
+    }
+
     if (structures.storage) {
         structures.storage.forEach(function (x) {
             storedEnergy += x.store.energy;
