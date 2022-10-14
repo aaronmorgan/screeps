@@ -6,6 +6,14 @@ require('prototype.creep')();
 
 let creepFactory = require('tasks.build.creeps');
 
+const ROLES = {
+    Undefined: 0,
+    WithdrawFromLink: 1,
+    TransferToStorage: 2,
+    WithdrawFromStorage: 3,
+    Transfer: 4
+};
+
 var roleLinkBaseHarvester = {
 
     tryBuild: function (spawn, energyCapacityAvailable) {
@@ -26,7 +34,7 @@ var roleLinkBaseHarvester = {
             return creepFactory.create(spawn, role.LINK_BASE_HARVESTER, bodyType, {
                 role: role.LINK_BASE_HARVESTER,
                 harvesting: false,
-                taskId: 0
+                taskId: ROLES.Undefined
             });
         }
     },
@@ -59,17 +67,18 @@ var roleLinkBaseHarvester = {
         }
 
         if (creepFillPercentage === 0) {
-            creep.memory.taskId = 1;
+            creep.memory.taskId = ROLES.WithdrawFromLink;
         }
 
         const targets2 = this.findEnergyTransferTargets(creep.room);
 
-        if (creep.room.memory.baseLinkId) {
 
-            if (creep.memory.taskId == 1) {
+        if (creep.memory.taskId == ROLES.WithdrawFromLink) {
+            // Check there is a link, if not simply move to task 3, unloading Storage.
+            if (creep.room.memory.baseLinkId) {
                 var baseLink = Game.getObjectById(creep.room.memory.baseLinkId.id);
 
-                if (baseLink.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+                if (baseLink && baseLink.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
                     const withdrawResult = creep.withdraw(baseLink, RESOURCE_ENERGY);
 
                     switch (withdrawResult) {
@@ -81,7 +90,7 @@ var roleLinkBaseHarvester = {
                         }
                         case OK:
                         case ERR_FULL: {
-                            creep.memory.taskId = 2;
+                            creep.memory.taskId = ROLES.TransferToStorage;
                             break;
                         }
                         default: {
@@ -90,105 +99,103 @@ var roleLinkBaseHarvester = {
                         }
                     }
                 } else {
-                    creep.memory.taskId = 3;
+                    creep.memory.taskId = ROLES.WithdrawFromStorage;
                 }
+            } else {
+                creep.memory.taskId = ROLES.WithdrawFromStorage;
             }
+        }
 
-            // Transfer creep energy into the Storage structure.
-            if (creep.memory.taskId == 2) {
-                let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+        // Transfer creep energy into the Storage structure.
+        if (creep.memory.taskId == ROLES.TransferToStorage) {
+            let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
 
-                if (targets.length > 0) {
-                    const target = creep.pos.findClosestByPath(targets)
-                    const transferResult = creep.transfer(target, RESOURCE_ENERGY);
+            if (targets.length > 0) {
+                const target = creep.pos.findClosestByPath(targets)
+                const transferResult = creep.transfer(target, RESOURCE_ENERGY);
 
-                    switch (transferResult) {
-                        case OK: {
-                            creep.memory.taskId = 1;
-                            return;
-                        }
-                        case ERR_NOT_ENOUGH_RESOURCES: {
-                            creep.memory.taskId = 1;
-                            return;
-                        }
-                        case ERR_NOT_IN_RANGE: {
-                            creep.moveTo(target, {
-                                visualizePathStyle: {
-                                    stroke: '#ffffff'
-                                }
-                            });
-                            return;
-                        }
-                        default: {
-                            console.log('⚠️ Uncaught transferResult: ', transferResult)
-                            return;
-                        }
+                switch (transferResult) {
+                    case OK: {
+                        creep.memory.taskId = ROLES.WithdrawFromLink;
+                        return;
+                    }
+                    case ERR_NOT_ENOUGH_RESOURCES: {
+                        creep.memory.taskId = ROLES.WithdrawFromLink;
+                        return;
+                    }
+                    case ERR_NOT_IN_RANGE: {
+                        creep.moveTo(target, {
+                            visualizePathStyle: {
+                                stroke: '#ffffff'
+                            }
+                        });
+                        return;
+                    }
+                    default: {
+                        console.log('⚠️ Uncaught transferResult: ', transferResult)
+                        return;
                     }
                 }
             }
+        }
 
-            if (targets2.length === 0) {
-                creep.memory.taskId = 1;
+        if (targets2.length === 0) {
+            creep.memory.taskId = ROLES.WithdrawFromLink;
 
-                return;
-            }
+            return;
+        }
 
 
-            if (creep.memory.taskId == 3) {
+        if (creep.memory.taskId == ROLES.WithdrawFromStorage) {
 
-                let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
-                if (targets.length > 0) {
-                    // if (creep.memory.harvesting == false) {
+            let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+            if (targets.length > 0) {
+                const target = creep.pos.findClosestByPath(targets)
+                const transferResult = creep.withdraw(target, RESOURCE_ENERGY);
 
-                    if (targets.length > 0) {
-                        const target = creep.pos.findClosestByPath(targets)
-                        const transferResult = creep.withdraw(target, RESOURCE_ENERGY);
-
-                        switch (transferResult) {
-                            case ERR_NOT_IN_RANGE: {
-                                creep.moveTo(target, {
-                                    visualizePathStyle: {
-                                        stroke: '#ffffff'
-                                    }
-                                });
-                                return;
+                switch (transferResult) {
+                    case ERR_NOT_IN_RANGE: {
+                        creep.moveTo(target, {
+                            visualizePathStyle: {
+                                stroke: '#ffffff'
                             }
-                            // The Storage may be empty, if so revert to base state, emptying Link into Storage.
-                            case ERR_NOT_ENOUGH_RESOURCES: {
-                                creep.memory.taskId = 1;
-                                return;
-                            }
-                            case OK: {
-                                creep.memory.taskId = 4;
-                                return;
-                            }
-                        }
+                        });
+                        return;
+                    }
+                    // The Storage may be empty, if so revert to base state, emptying Link into Storage.
+                    case ERR_NOT_ENOUGH_RESOURCES: {
+                        creep.memory.taskId = ROLES.WithdrawFromLink;
+                        return;
+                    }
+                    case OK: {
+                        creep.memory.taskId = ROLES.Transfer;
+                        return;
                     }
                 }
             }
+        }
 
-            if (creep.memory.taskId == 4) {
-                if (targets2.length > 0) {
-                    const target = creep.pos.findClosestByPath(targets2)
-                    const transferResult = creep.transfer(target, RESOURCE_ENERGY);
+        if (creep.memory.taskId == ROLES.Transfer) {
+            if (targets2.length > 0) {
+                const target = creep.pos.findClosestByPath(targets2)
+                const transferResult = creep.transfer(target, RESOURCE_ENERGY);
 
-                    switch (transferResult) {
-                        case OK: {
-                            // Don't reset or change the taskId, we may have more energy to transfer.
-                            break;
-                        }
-                        case ERR_NOT_IN_RANGE: {
-                            creep.moveTo(target, {
-                                visualizePathStyle: {
-                                    stroke: '#ffffff'
-                                }
-                            });
-                            return;
-                        }
-                        default: {
-                            console.log('⚠️ Uncaught transferResult: ', transferResult)
-                            return;
-                        }
+                switch (transferResult) {
+                    case OK: {
+                        // Don't reset or change the taskId, we may have more energy to transfer.
+                        break;
+                    }
+                    case ERR_NOT_IN_RANGE: {
+                        creep.moveTo(target, {
+                            visualizePathStyle: {
+                                stroke: '#ffffff'
+                            }
+                        });
+                        return;
+                    }
+                    default: {
+                        console.log('⚠️ Uncaught transferResult: ', transferResult)
+                        return;
                     }
                 }
             }
