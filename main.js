@@ -225,7 +225,7 @@ module.exports.loop = function () {
             // to also source energy without having to compete with numerous harvester creeps.
             maxDropMinerCreeps = spawn.room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0)) > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = (spawn.room.memory.creeps.dropminers > 0 && spawn.room.memory.creeps.couriers > 0) ? 0 : 2 - spawn.room.memory.creeps.harvesters; // maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
-            maxCourierCreeps = spawn.room.memory.sources.length - (structures.link.length - 1);
+            maxCourierCreeps = spawn.room.memory.sources.length - (structures.link && structures.link.length - 1);
 
             maxUpgraderCreeps = 4;
             maxGopherCreeps = 1;
