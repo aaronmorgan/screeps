@@ -120,6 +120,10 @@ var roleUpgrader = {
                         });
                     }
                 }
+            } else {
+                // There are not energy pickup targets so to avoid the creeps gathering around the
+                // Spawn and blocking access to/from it move them away a little.
+                creep.moveTo(Game.spawns['Spawn1'].pos.x - 2, Game.spawns['Spawn1'].pos.y)
             }
         }
     }
