@@ -52,24 +52,6 @@ module.exports.loop = function () {
 
     creepFactory.validateCache(spawn.room);
 
-    if (structures.tower) {
-        structures.tower.forEach(tower => {
-            let hostiles = spawn.room.find(FIND_HOSTILE_CREEPS);
-
-            if (hostiles.length) {
-                console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
-                tower.attack(hostiles[0]);
-            } else {
-                let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < structure.hitsMax
-                });
-                if (closestDamagedStructure) {
-                    tower.repair(closestDamagedStructure);
-                }
-            }
-        });
-    }
-
     let storedEnergy = 0;
 
     if (structures.container) {
@@ -87,6 +69,24 @@ module.exports.loop = function () {
     if (structures.storage) {
         structures.storage.forEach(function (x) {
             storedEnergy += x.store.energy;
+        });
+    }
+
+    if (structures.tower) {
+        structures.tower.forEach(tower => {
+            let hostiles = spawn.room.find(FIND_HOSTILE_CREEPS);
+
+            if (hostiles.length) {
+                console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
+                tower.attack(hostiles[0]);
+            } else if (storedEnergy > 300) {
+                let closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => structure.hits < structure.hitsMax
+                });
+                if (closestDamagedStructure) {
+                    tower.repair(closestDamagedStructure);
+                }
+            }
         });
     }
 
