@@ -42,6 +42,11 @@ var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
+        // Harvesters can get in the way of dropminers, if we have the necessary replacement creeps, die early.
+        if (creep.room.memory.creeps.dropminers > 0 && creep.room.memory.creeps.couriers > 0) {
+            creep.dropResourcesAndDie();
+        }
+
         creep.checkTicksToDie();
         creep.checkTicksToLive();
 
