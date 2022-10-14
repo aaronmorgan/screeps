@@ -223,15 +223,16 @@ module.exports.loop = function () {
             // Set only one harvester per source and with a courier act like dropminers. 
             // At this time before we start producing lots of energy then there'll be room for builders/upgraders
             // to also source energy without having to compete with numerous harvester creeps.
-            maxDropMinerCreeps = spawn.room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0)) > 0 ? spawn.room.memory.sources.length : 0;
-            maxHarvesterCreeps = (spawn.room.memory.creeps.dropminers > 0 && spawn.room.memory.creeps.couriers > 0) ? 0 : 2 - spawn.room.memory.creeps.harvesters; // maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
-            maxCourierCreeps = spawn.room.memory.sources.length - (structures.link && structures.link.length - 1);
+            maxDropMinerCreeps = spawn.room.memory.sources.length;
+            maxHarvesterCreeps = (spawn.room.memory.creeps.dropminers > 0 && spawn.room.memory.creeps.couriers > 0) ? 0 : spawn.room.memory.sources.length; // maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
+            maxCourierCreeps = spawn.room.memory.sources.length - (_.isEmpty(structures.link) ? 0 : structures.link.length - 1);
 
-            maxUpgraderCreeps = 4;
+            maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800) + 3);
+
             maxGopherCreeps = 1;
 
-            if (structures.link) {
-                maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
+            if (structures.link || structures.storage) {
+                maxLinkBaseHarvesters = 1;
             }
 
             // if (maxBuilderCreeps > 0) {
