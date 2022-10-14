@@ -51,10 +51,10 @@ module.exports = function () {
             targets = _.filter(this.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
         }
         if (targets.length == 0) {
-            targets = _.filter(this.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+            targets = _.filter(this.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
         }
         if (targets.length == 0) {
-            targets = _.filter(this.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+            targets = _.filter(this.room.structures().container, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
         }
 
         if (targets.length > 0) {
