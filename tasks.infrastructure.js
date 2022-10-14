@@ -8,7 +8,7 @@ var infrastructureTasks = {
 
         for (let i = 0; i < jobs.length; i++) {
             if (jobs[i].built === true) {
-                continue;
+                //continue;
                 // Need a mechanism to determine if structures need rebuilding.
             }
 
@@ -151,6 +151,7 @@ var infrastructureTasks = {
 
                             specialSite = true;
                         } else {
+                            source.linkId = linkStructure.id;
                             return;
                         }
                     });
