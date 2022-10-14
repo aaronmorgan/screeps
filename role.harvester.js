@@ -82,12 +82,35 @@ var roleHarvester = {
                         creep.memory.sourceId = sourceId;
                     }
                 }
-
             } else if (harvestResult == OK) {
-                creep.memory.isHarvesting = creep.store.getFreeCapacity() != 0;
-                if (!creep.memory.isHarvesting && creep.room.memory.creeps.couriers > 0) {
-                    for (const resourceType in creep.carry) {
-                        creep.drop(resourceType);
+                const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+                    filter: {
+                        structureType: STRUCTURE_LINK
+                    }
+                })[0];
+
+                if (linkStructure) {
+                    creep.memory.linkId = linkStructure.id;
+
+                    const transferResult = creep.transfer(linkStructure, RESOURCE_ENERGY);
+
+                    switch (transferResult) {
+                        case (ERR_NOT_IN_RANGE): {
+                            creep.moveTo(linkStructure, {
+                                visualizePathStyle: {
+                                    stroke: '#ffffff'
+                                }
+                            });
+                            break;
+                        }
+                    }
+                } else {
+
+                    creep.memory.isHarvesting = creep.store.getFreeCapacity() != 0;
+                    if (!creep.memory.isHarvesting && creep.room.memory.creeps.couriers > 0) {
+                        for (const resourceType in creep.carry) {
+                            creep.drop(resourceType);
+                        }
                     }
                 }
             }

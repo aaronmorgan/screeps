@@ -21,7 +21,6 @@ const roleBuilder = require('role.builder');
 const roleDropMiner = require('role.dropminer');
 const roleGopher = require('role.gopher');
 const roleLinkBaseHarvester = require('role.link.base.harvester');
-const roleLinkSourceHarvester = require('role.link.source.harvester');
 
 let infrastructureTasks = require('tasks.infrastructure');
 let creepFactory = require('tasks.build.creeps');
@@ -91,26 +90,29 @@ module.exports.loop = function () {
         });
     }
 
-    spawn.room.memory.sources.forEach(function (source) {
-        if (source.linkId) {
-            const sourceLink = Game.getObjectById(source.linkId);
+    // Guard against the RCL dropping to a level less than where Link structures are supported.
+    if (spawn.room.controller.level >= 5) {
 
-            sourceLink.transferEnergy(structures.link[0]);
+        // Locate the Link structure closest to the Spawn, this 'should' be the base Link.
+        if (!spawn.room.memory.baseLinkId) {
+            spawn.room.memory.baseLinkId = {
+                id: spawn.pos.findClosestByPath(structures.link).id
+            }
         }
-    });
 
-    if (structures.link) {
-        // var target = spawn.pos.findClosestByPath(structures.link)
+        // Foreach room source, check if it has a Link, and if so transfer to the first Link
+        // structure in the array, which is the first build; the 'base' Link station.
+        spawn.room.memory.sources.forEach(function (source) {
+            if (source.linkId) {
+                const sourceLink = Game.getObjectById(source.linkId);
 
-        // spawn.room.memory.storageStructure = {
-        //     id: target.id
-        // }
+                if (sourceLink.store.getUsedCapacity === 0) {
+                    return;
+                }
 
-        // var storage = spawn.pos.findClosestByPath(structures.storage)
-
-
-        // const transferResult = target.transferEnergy(storage, RESOURCE_ENERGY);
-        // console.log('storage transfer result', transferResult)
+                const transferResult = sourceLink.transferEnergy(structures.link[0]);
+            }
+        });
     }
 
     let energyCapacityAvailable = spawn.room.energyCapacityAvailable;
@@ -122,7 +124,6 @@ module.exports.loop = function () {
     const upgraders = spawn.room.creeps().upgraders || [];
     const gophers = spawn.room.creeps().gophers || [];
     const linkBaseHarvesters = spawn.room.creeps().linkBaseHarvesters || [];
-    const linkSourceHarvesters = spawn.room.creeps().roleLinkSourceHarvesters || [];
 
     spawn.room.memory.creeps = {
         harvesters: harvesters.length,
@@ -131,8 +132,7 @@ module.exports.loop = function () {
         builders: builders.length,
         upgraders: upgraders.length,
         gophers: gophers.length,
-        linkBaseHarvesters: linkBaseHarvesters.length,
-        roleLinkSourceHarvesters: roleLinkSourceHarvester.length
+        linkBaseHarvesters: linkBaseHarvesters.length
     };
 
     let maxBuilderCreeps = 1;
@@ -142,7 +142,6 @@ module.exports.loop = function () {
     let maxUpgraderCreeps = 2;
     let maxGopherCreeps = 0;
     let maxLinkBaseHarvesters = 0;
-    let maxLinkSourceHarvesters = 0;
 
     // Emergency catch all to reset the queue should we end up without any energy gathering screeps.
     if (harvesters.length <= 2 && dropminers.length == 0 && !_.isEmpty(spawn.room.memory.creepBuildQueue.queue)) {
@@ -166,7 +165,7 @@ module.exports.loop = function () {
             spawn.room.memory.game.phase = 1;
             // Goal is to quickly get to RCL 2 by creating two Upgraders.
             // Builders are extra and in preparation for RCL 2 construction projects.
-            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 1 : 0;
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
             maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
@@ -177,11 +176,12 @@ module.exports.loop = function () {
             spawn.room.memory.game.phase = 2;
 
             // May need to increase builder ceiling from 3 to 4.
-            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 1 : 0;
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
             maxDropMinerCreeps = couriers.length > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
-            maxUpgraderCreeps = Math.max(1, Math.floor(spawn.room.memory.controller.path.length / 10));
+            //maxUpgraderCreeps = Math.max(1, Math.floor(spawn.room.memory.controller.path.length / 10)) + 1;
+            maxUpgraderCreeps = Math.max(2, Math.floor(storedEnergy / 800));
 
             if (structures.link) {
                 maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
@@ -193,20 +193,19 @@ module.exports.loop = function () {
             spawn.room.memory.game.phase = 3;
 
             // May need to increase builder ceiling from 3 to 4.
-            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 1 : 0;
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
             // Set only one harvester per source and with a courier act like dropminers. 
             // At this time before we start producing lots of energy then there'll be room for builders/upgraders
             // to also source energy without having to compete with numerous harvester creeps.
-            maxDropMinerCreeps = (upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? spawn.room.memory.sources.length : 0;
+            maxDropMinerCreeps = spawn.room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? spawn.room.memory.sources.length : 0;
             maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
-            maxCourierCreeps = linkSourceHarvesters.length > 0 ? 0 : Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
+            maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
 
             maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
-            maxGopherCreeps = linkSourceHarvesters.length > 0 ? 0 : 2;
+            maxGopherCreeps = 2; //linkSourceHarvesters.length > 0 ? 0 : 2;
 
             if (structures.link) {
                 maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
-                maxLinkSourceHarvesters = structures.link.length > 2 ? structures.link.length - 1 : 0;
             }
 
             if (maxBuilderCreeps > 0) {
@@ -220,25 +219,24 @@ module.exports.loop = function () {
             spawn.room.memory.game.phase = 999;
 
             // May need to increase builder ceiling from 3 to 4.
-            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 1 : 0;
+            maxBuilderCreeps = spawn.room.constructionSites().length > 0 ? 2 : 0;
             // Set only one harvester per source and with a courier act like dropminers. 
             // At this time before we start producing lots of energy then there'll be room for builders/upgraders
             // to also source energy without having to compete with numerous harvester creeps.
-            maxDropMinerCreeps = (upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? spawn.room.memory.sources.length : 0;
-            maxHarvesterCreeps = maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
-            maxCourierCreeps = linkSourceHarvesters.length > 0 ? 0 : Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
+            maxDropMinerCreeps = spawn.room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0)) > 0 ? spawn.room.memory.sources.length : 0;
+            maxHarvesterCreeps = (spawn.room.memory.creeps.dropminers > 0 && spawn.room.memory.creeps.couriers > 0) ? 0 : 2 - spawn.room.memory.creeps.harvesters; // maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
+            maxCourierCreeps = spawn.room.memory.sources.length - (structures.link.length - 1);
 
             maxUpgraderCreeps = 4;
-            maxGopherCreeps = linkSourceHarvesters.length > 0 ? 0 : 2;
+            maxGopherCreeps = 1;
 
             if (structures.link) {
                 maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
-                maxLinkSourceHarvesters = structures.link.length > 2 ? structures.link.length - 1 : 0;
             }
 
-            if (maxBuilderCreeps > 0) {
-                maxUpgraderCreeps = 1;
-            }
+            // if (maxBuilderCreeps > 0) {
+            //     maxUpgraderCreeps = 1;
+            // }
         }
     }
 
@@ -249,7 +247,6 @@ module.exports.loop = function () {
     spawn.room.memory.maxUpgraderCreeps = maxUpgraderCreeps;
     spawn.room.memory.maxGopherCreeps = maxGopherCreeps;
     spawn.room.memory.maxLinkBaseHarvesters = maxLinkBaseHarvesters;
-    spawn.room.memory.maxLinkSourceHarvesters = maxLinkSourceHarvesters;
 
     const sufficientBuilders = builders.length >= maxBuilderCreeps; // Should also include harvesters?
     const sufficientCouriers = couriers.length >= maxCourierCreeps;
@@ -258,7 +255,6 @@ module.exports.loop = function () {
     const sufficientUpgraders = upgraders.length >= maxUpgraderCreeps;
     const sufficientGophers = gophers.length >= maxGopherCreeps;
     const sufficientLinkBaseHarvesters = linkBaseHarvesters.length >= maxLinkBaseHarvesters;
-    const sufficientLinkSourceHarvesters = linkSourceHarvesters.length >= maxLinkSourceHarvesters;
 
     // Summary of actual vs target numbers.
     console.log('  Game Phase: ' + spawn.room.memory.game.phase);
@@ -269,7 +265,6 @@ module.exports.loop = function () {
     console.log('  Upgraders: ' + upgraders.length + '/' + maxUpgraderCreeps + ' ' + (sufficientUpgraders ? '✔️' : '❌'));
     console.log('  Gophers: ' + gophers.length + '/' + maxGopherCreeps + ' ' + (sufficientGophers ? '✔️' : '❌'));
     console.log('  LinkBaseHarvesters: ' + linkBaseHarvesters.length + '/' + maxLinkBaseHarvesters + ' ' + (sufficientLinkBaseHarvesters ? '✔️' : '❌'));
-    console.log('  LinkSourceHarvesters: ' + linkSourceHarvesters.length + '/' + maxLinkSourceHarvesters + ' ' + (sufficientLinkSourceHarvesters ? '✔️' : '❌'));
 
     if (Game.time % 50 == 0) {
         console.log('⚠️ INFO: Checking for deleted creeps...');
@@ -304,19 +299,25 @@ module.exports.loop = function () {
         if (creep.memory.role == role.LINK_BASE_HARVESTER) {
             roleLinkBaseHarvester.run(creep);
         }
-        if (creep.memory.role == role.LINK_SOURCE_HARVESTER) {
-            roleLinkSourceHarvester.run(creep);
-        }
     });
 
+    //spawn.room.memory.creepBuildQueue.queue.pop(); // Clear build queue.
+
     if (spawn.spawning === null && spawn.room.memory.creepBuildQueue.queue.length == 0) {
-        if (harvesters.length == 0 && dropminers.length == 0) {
+        //if ((harvesters.length == 0 && dropminers.length == 0) || structures.storage) {
+        if ((harvesters.length === 0 && dropminers.length === 0) ||
+            (structures.storage && linkBaseHarvesters.length === 0)) {
             energyCapacityAvailable = spawn.room.energyAvailable;
+            console.log('⚠️ INFO: Limited energy available, downsizing build allowence to', energyCapacityAvailable)
         }
 
         // HARVESTERS
         if (!sufficientHarvesters) {
             roleHarvester.tryBuild(spawn, energyCapacityAvailable);
+        }
+        // LINK BASE HARVESTERS
+        if (!sufficientLinkBaseHarvesters) {
+            roleLinkBaseHarvester.tryBuild(spawn, energyCapacityAvailable);
         }
         // COURIERS
         if (!sufficientCouriers) {
@@ -330,21 +331,13 @@ module.exports.loop = function () {
         if (!sufficientDropMiners) {
             roleDropMiner.tryBuild(spawn, energyCapacityAvailable);
         }
-        // LINK BASE HARVESTERS
-        if (!sufficientLinkBaseHarvesters) {
-            roleLinkBaseHarvester.tryBuild(spawn, energyCapacityAvailable);
-        }
-        // LINK SOURCE HARVESTERS
-        if (!sufficientLinkSourceHarvesters) {
-            roleLinkSourceHarvester.tryBuild(spawn, energyCapacityAvailable);
+        // BUILDERS
+        if (!sufficientBuilders) {
+            roleBuilder.tryBuild(spawn, energyCapacityAvailable);
         }
         // UPGRADERS
         if (!sufficientUpgraders) {
             roleUpgrader.tryBuild(spawn, energyCapacityAvailable);
-        }
-        // BUILDERS
-        if (!sufficientBuilders) {
-            roleBuilder.tryBuild(spawn, energyCapacityAvailable);
         }
     } else {
         if (spawn.spawning) {

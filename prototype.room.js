@@ -36,8 +36,7 @@ module.exports = function () {
                 builders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.BUILDER),
                 upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER),
                 gophers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.GOPHER),
-                linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER),
-                roleLinkSourceHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_SOURCE_HARVESTER)
+                linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER)
             }
         }
 
