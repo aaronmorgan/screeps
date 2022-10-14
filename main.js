@@ -305,8 +305,8 @@ module.exports.loop = function () {
     //spawn.room.memory.creepBuildQueue.queue.pop(); // Clear build queue.
 
     if (spawn.spawning === null && spawn.room.memory.creepBuildQueue.queue.length == 0) {
-        //if ((harvesters.length == 0 && dropminers.length == 0) || structures.storage) {
         if ((harvesters.length === 0 && dropminers.length === 0) ||
+            (dropminers.length > 0 && (couriers.length === 0 || gophers.length === 0)) ||
             (structures.storage && linkBaseHarvesters.length === 0)) {
             energyCapacityAvailable = spawn.room.energyAvailable;
             console.log('⚠️ INFO: Limited energy available, downsizing build allowence to', energyCapacityAvailable)
