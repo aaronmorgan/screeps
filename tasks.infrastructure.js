@@ -7,8 +7,9 @@ var infrastructureTasks = {
     processJobs: function (spawn, jobs) {
 
         for (let i = 0; i < jobs.length; i++) {
-            if (jobs[i].built) {
-                //    continue;
+            if (jobs[i].built === true) {
+                continue;
+                // Need a mechanism to determine if structures need rebuilding.
             }
 
             let job = jobs[i];
@@ -57,7 +58,8 @@ var infrastructureTasks = {
                             job = {
                                 type: STRUCTURE_ROAD,
                                 x: path[0].x,
-                                y: path[0].y
+                                y: path[0].y,
+                                built: false
                             };
 
                             specialSite = true;
@@ -138,7 +140,7 @@ var infrastructureTasks = {
                             }
                         })[0];
 
-                        if (_.isEmpty(linkStructure)) {
+                        if (!linkStructure || _.isEmpty(linkStructure)) {
                             const pos = path[path.length - 3];
 
                             job = {
@@ -149,8 +151,7 @@ var infrastructureTasks = {
 
                             specialSite = true;
                         } else {
-                            source.linkId = linkStructure.id;
-                            job = undefined;
+                            return;
                         }
                     });
 
@@ -185,7 +186,9 @@ var infrastructureTasks = {
             //   break;
             //     }
 
-            if (!job) continue;
+            if (!job) {
+                continue;
+            }
 
             let x = spawn.pos.x + job.x;
             let y = spawn.pos.y + job.y;
@@ -207,7 +210,6 @@ var infrastructureTasks = {
                 (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
 
                 let result = spawn.room.createConstructionSite(x, y, job.type);
-
                 switch (result) {
                     case OK: {
                         jobs[i].built = true;
@@ -222,15 +224,15 @@ var infrastructureTasks = {
                 }
             } else {
                 let tile = tileObjects[0];
-
                 if (tile.type == 'constructionSite') {
                     continue;
                 }
-                //  console.log('tile', JSON.stringify(tile));
+
                 if (!tile.structure) {
                     console.log('⛔ Error: ' + JSON.stringify(tile));
 
                     // Try the next templated job...
+                    job.built = true;
                     continue;
                 }
 
