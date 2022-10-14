@@ -61,8 +61,32 @@ var roleDropMiner = {
     /** @param {Creep} creep **/
     run: function (creep) {
         const source = Game.getObjectById(creep.memory.sourceId);
+        const harvestResult = creep.harvest(source);
 
-        if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+        const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+            filter: {
+                structureType: STRUCTURE_LINK
+            }
+        })[0];
+
+        if (linkStructure) {
+            creep.memory.linkId = linkStructure.id;
+
+            const transferResult = creep.transfer(linkStructure, RESOURCE_ENERGY);
+
+            switch (transferResult) {
+                case (ERR_NOT_IN_RANGE): {
+                    creep.moveTo(linkStructure, {
+                        visualizePathStyle: {
+                            stroke: '#ffffff'
+                        }
+                    });
+                    break;
+                }
+            }
+        }
+
+        if (harvestResult == ERR_NOT_IN_RANGE) {
             creep.moveTo(source, {
                 visualizePathStyle: {
                     stroke: '#ffaa00'
