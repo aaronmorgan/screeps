@@ -92,9 +92,8 @@ module.exports.loop = function () {
 
     // Guard against the RCL dropping to a level less than where Link structures are supported.
     if (spawn.room.controller.level >= 5) {
-
         // Locate the Link structure closest to the Spawn, this 'should' be the base Link.
-        if (!spawn.room.memory.baseLinkId) {
+        if (!_.isEmpty(structures.link) && !spawn.room.memory.baseLinkId) {
             spawn.room.memory.baseLinkId = {
                 id: spawn.pos.findClosestByPath(structures.link).id
             }
