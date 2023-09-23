@@ -19,12 +19,13 @@ module.exports.EXIT_CODE = {
     module.exports.role = {
         BUILDER: 'Builder',
         COURIER: 'Courier',
+        DEFENDER: 'Defender',
         DROPMINER: 'DropMiner',
         GOPHER: 'Gopher',
         HARVESTER: 'Harvester',
-        UPGRADER: 'Upgrader',
         LINK_BASE_HARVESTER: 'LinkBase',
-        LINK_SOURCE_HARVESTER: 'LinkSource'
+        LINK_SOURCE_HARVESTER: 'LinkSource',
+        UPGRADER: 'Upgrader'
     },
 
     module.exports.global = {

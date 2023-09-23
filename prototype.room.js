@@ -30,13 +30,14 @@ module.exports = function () {
     Room.prototype.creeps = function () {
         if (!this._creeps || _.isEmpty(this._creeps)) {
             this._creeps = {
-                harvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HARVESTER),
-                couriers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.COURIER),
-                dropminers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.DROPMINER),
                 builders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.BUILDER),
-                upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER),
+                couriers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.COURIER),
+                defenders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.DEFENDER),
+                dropminers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.DROPMINER),
                 gophers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.GOPHER),
-                linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER)
+                harvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HARVESTER),
+                linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER),
+                upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER)
             }
         }
 
