@@ -185,7 +185,7 @@ module.exports = function () {
             return accessPoints;
         },
 
-        Room.prototype.getDistanceToRCL = function() {
+        Room.prototype.getDistanceToRCL = function () {
             if (this.memory.controller) {
                 return;
             }
@@ -196,16 +196,16 @@ module.exports = function () {
                 ignoreDestructibleStructures: true,
                 ignoreCreeps: true
             });
-            
+
             this.memory.controller = {
                 path: path
             };
         }
 
-        /**
-         * Garbage Collect - set used variables to undefined
-         */
-        Room.prototype.gc =
+    /**
+     * Garbage Collect - set used variables to undefined
+     */
+    Room.prototype.gc =
         function () {
             this._creeps = undefined;
             this._myCreeps = undefined;

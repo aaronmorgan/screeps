@@ -11,18 +11,18 @@ var roleBuilder = {
     tryBuild: function (spawn, energyCapacityAvailable) {
         let bodyType = [];
 
-        if (energyCapacityAvailable >= 900) {
+        if (energyCapacityAvailable >= 850) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY,
-                MOVE, MOVE, MOVE
+                MOVE, MOVE
             ];
-        } else if (energyCapacityAvailable >= 400) {
-            bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         } else if (energyCapacityAvailable >= 350) {
-            bodyType = [WORK, CARRY, CARRY, CARRY, MOVE, MOVE];
+            bodyType = [WORK, WORK, CARRY, CARRY, MOVE];
+        } else if (energyCapacityAvailable >= 300) {
+            bodyType = [WORK, CARRY, CARRY, CARRY, MOVE];
         } else {
-            bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
+            bodyType = [WORK, CARRY, CARRY, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {

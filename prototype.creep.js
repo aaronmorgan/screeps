@@ -24,11 +24,7 @@ module.exports = function () {
 
     Creep.prototype.dropResourcesAndDie = function () {
         for (const resourceType in this.carry) {
-            console.log(
-                "💀 TTD Creep: " +
-                    this.name +
-                    ", dropping resource: " +
-                    resourceType
+            console.log("💀 TTD Creep: " + this.name + ", dropping resource: " + resourceType
             );
             this.drop(resourceType);
         }
@@ -57,10 +53,7 @@ module.exports = function () {
                 this.room.structures().tower,
                 (structure) =>
                     Math.round(
-                        (structure.store.getUsedCapacity(RESOURCE_ENERGY) /
-                            structure.store.getCapacity(RESOURCE_ENERGY)) *
-                            100
-                    ) < 80
+                        (structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY)) * 100) < 80
             );
         }
         if (targets.length == 0) {
@@ -94,7 +87,7 @@ module.exports = function () {
             const transferResult = this.transfer(target, RESOURCE_ENERGY);
 
             switch (transferResult) {
-                case ERR_INVALID_TARGET: 
+                case ERR_INVALID_TARGET:
                 case ERR_NOT_IN_RANGE: {
                     const moveResult = this.moveTo(target, {
                         visualizePathStyle: {
@@ -114,8 +107,7 @@ module.exports = function () {
     };
 
     Creep.prototype.CreepFillPercentage = function () {
-        return Math.round(
-            (this.store.getUsedCapacity() / this.store.getCapacity()) * 100
+        return Math.round((this.store.getUsedCapacity() / this.store.getCapacity()) * 100
         );
     };
 };
