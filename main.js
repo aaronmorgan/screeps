@@ -73,11 +73,7 @@ module.exports.loop = function () {
             let hostiles = spawn.room.find(FIND_HOSTILE_CREEPS);
 
             if (hostiles.length) {
-                console.log(
-                    "DEFENCE: Attacking hostile from '" +
-                    hostiles[0].owner.username +
-                    "'"
-                );
+                console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
                 tower.attack(hostiles[0]);
             } else if (storedEnergy > 300) {
                 let closestDamagedStructure = tower.pos.findClosestByRange(
@@ -144,8 +140,7 @@ module.exports.loop = function () {
 
     let maxBuilderCreeps = 1;
     let maxCourierCreeps = 0;
-    let maxDefenderCreeps =
-        structures.tower === undefined ? 3 : 0; // If we have any towers we don't need defender creeps.
+    let maxDefenderCreeps = structures.tower === undefined ? 2 : 0; // If we have any towers we don't need defender creeps.
     let maxDropMinerCreeps = 0;
     let maxGopherCreeps = 0;
     let maxHarvesterCreeps = 2;

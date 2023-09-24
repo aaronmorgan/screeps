@@ -60,10 +60,10 @@ var roleDefender = {
         } else {
             const area = spawn.room.lookForAtArea(
                 LOOK_TERRAIN,
-                spawn.pos.y - 10,
-                spawn.pos.x - 10,
-                spawn.pos.y + 10,
-                spawn.pos.x + 10,
+                spawn.pos.y - 15,
+                spawn.pos.x - 15,
+                spawn.pos.y + 15,
+                spawn.pos.x + 15,
                 true
             );
 
