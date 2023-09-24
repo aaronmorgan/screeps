@@ -12,10 +12,8 @@ var roleDefender = {
             bodyType = [RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE];
         } else if (energyCapacityAvailable >= 350) {
             bodyType = [RANGED_ATTACK, RANGED_ATTACK, MOVE];
-        } else if (energyCapacityAvailable >= 250) {
-            bodyType = [RANGED_ATTACK, MOVE, MOVE];
         } else {
-            bodyType = [RANGED_ATTACK, MOVE];
+            bodyType = [RANGED_ATTACK, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
