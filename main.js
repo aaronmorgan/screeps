@@ -75,8 +75,8 @@ module.exports.loop = function () {
             if (hostiles.length) {
                 console.log(
                     "DEFENCE: Attacking hostile from '" +
-                        hostiles[0].owner.username +
-                        "'"
+                    hostiles[0].owner.username +
+                    "'"
                 );
                 tower.attack(hostiles[0]);
             } else if (storedEnergy > 300) {
@@ -145,7 +145,7 @@ module.exports.loop = function () {
     let maxBuilderCreeps = 1;
     let maxCourierCreeps = 0;
     let maxDefenderCreeps =
-        structures.tower === undefined ? spawn.room.controller.level + 1 : 0; // If we have any towers we don't need defender creeps.
+        structures.tower === undefined ? 3 : 0; // If we have any towers we don't need defender creeps.
     let maxDropMinerCreeps = 0;
     let maxGopherCreeps = 0;
     let maxHarvesterCreeps = 2;
@@ -253,7 +253,7 @@ module.exports.loop = function () {
             maxDropMinerCreeps = spawn.room.memory.sources.length;
             maxHarvesterCreeps =
                 spawn.room.memory.creeps.dropminers > 0 &&
-                spawn.room.memory.creeps.couriers > 0
+                    spawn.room.memory.creeps.couriers > 0
                     ? 0
                     : spawn.room.memory.sources.length; // maxDropMinerCreeps == 0 ? spawn.room.memory.sources.length : 0;
             maxCourierCreeps =
@@ -295,70 +295,14 @@ module.exports.loop = function () {
 
     // Summary of actual vs target numbers.
     console.log("  Game Phase: " + spawn.room.memory.game.phase);
-    console.log(
-        "  Builders: " +
-            builders.length +
-            "/" +
-            maxBuilderCreeps +
-            " " +
-            (sufficientBuilders ? "✔️" : "❌")
-    );
-    console.log(
-        "  Couriers: " +
-            couriers.length +
-            "/" +
-            maxCourierCreeps +
-            " " +
-            (sufficientCouriers ? "✔️" : "❌")
-    );
-    console.log(
-        "  Defenders: " +
-            defenders.length +
-            "/" +
-            maxDefenderCreeps +
-            " " +
-            (sufficientDefenders ? "✔️" : "❌")
-    );
-    console.log(
-        "  Drop Miners: " +
-            dropminers.length +
-            "/" +
-            maxDropMinerCreeps +
-            " " +
-            (sufficientDropMiners ? "✔️" : "❌")
-    );
-    console.log(
-        "  Gophers: " +
-            gophers.length +
-            "/" +
-            maxGopherCreeps +
-            " " +
-            (sufficientGophers ? "✔️" : "❌")
-    );
-    console.log(
-        "  Harvesters: " +
-            harvesters.length +
-            "/" +
-            maxHarvesterCreeps +
-            " " +
-            (sufficientHarvesters ? "✔️" : "❌")
-    );
-    console.log(
-        "  LinkBaseHarvesters: " +
-            linkBaseHarvesters.length +
-            "/" +
-            maxLinkBaseHarvesters +
-            " " +
-            (sufficientLinkBaseHarvesters ? "✔️" : "❌")
-    );
-    console.log(
-        "  Upgraders: " +
-            upgraders.length +
-            "/" +
-            maxUpgraderCreeps +
-            " " +
-            (sufficientUpgraders ? "✔️" : "❌")
-    );
+    console.log("  Builders: " + builders.length + "/" + maxBuilderCreeps + " " + (sufficientBuilders ? "✔️" : "❌"));
+    console.log("  Couriers: " + couriers.length + "/" + maxCourierCreeps + " " + (sufficientCouriers ? "✔️" : "❌"));
+    console.log("  Defenders: " + defenders.length + "/" + maxDefenderCreeps + " " + (sufficientDefenders ? "✔️" : "❌"));
+    console.log("  Drop Miners: " + dropminers.length + "/" + maxDropMinerCreeps + " " + (sufficientDropMiners ? "✔️" : "❌"));
+    console.log("  Gophers: " + gophers.length + "/" + maxGopherCreeps + " " + (sufficientGophers ? "✔️" : "❌"));
+    console.log("  Harvesters: " + harvesters.length + "/" + maxHarvesterCreeps + " " + (sufficientHarvesters ? "✔️" : "❌"));
+    console.log("  LinkBaseHarvesters: " + linkBaseHarvesters.length + "/" + maxLinkBaseHarvesters + " " + (sufficientLinkBaseHarvesters ? "✔️" : "❌"));
+    console.log("  Upgraders: " + upgraders.length + "/" + maxUpgraderCreeps + " " + (sufficientUpgraders ? "✔️" : "❌"));
 
     if (Game.time % 50 == 0) {
         console.log("⚠️ INFO: Checking for deleted creeps...");
@@ -379,7 +323,7 @@ module.exports.loop = function () {
             roleHarvester.run(creep);
         }
         if (creep.memory.role == role.DEFENDER) {
-            roleDefender.run(creep, spawn.room);
+            roleDefender.run(creep, spawn);
         }
         if (creep.memory.role == role.DROPMINER) {
             roleDropMiner.run(creep);
