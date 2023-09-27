@@ -1,11 +1,7 @@
-const {
-    EXIT_CODE
-} = require('game.constants');
+const { EXIT_CODE } = require("game.constants");
 
 var infrastructureTasks = {
-
-    processJobs: function (spawn, jobs) {
-
+    processJobs: function (spawn, rclLevel, jobs) {
         for (let i = 0; i < jobs.length; i++) {
             if (jobs[i].built === true) {
                 //continue;
@@ -15,23 +11,77 @@ var infrastructureTasks = {
             let job = jobs[i];
             let specialSite = false;
 
-            switch (job.type) {
-                case 'road.to.controller': {
-                    const path = spawn.pos.findPathTo(spawn.room.controller.pos, {
-                        ignoreDestructibleStructures: true,
-                        ignoreCreeps: true
-                    });
+            const jobType = job.type;
+
+            switch (jobType) {
+                // case "extension":
+                // case "container": {
+                //     console.log(jobType)
+                    
+                //     const area = spawn.room.lookForAtArea(
+                //         LOOK_TERRAIN,
+                //         spawn.pos.y - rclLevel + 2,
+                //         spawn.pos.x - rclLevel + 2,
+                //         spawn.pos.y + rclLevel + 2,
+                //         spawn.pos.x + rclLevel + 2,
+                //         true
+                //     );
+
+                //     for (let index = Math.floor(Math.random()*area.length); index < area.length; index++) {
+                //         const element = area[index];
+
+                //         if (element.x == (spawn.pos.x || spawn.pos.x + 1 || spawn.pos.x -1) &&
+                //         element.y == (spawn.pos.y || spawn.pos.y + 1 || spawn.pos.y -1)) continue;
+
+                //         if (element.terrain !== "plain") {
+                //             continue;
+                //         }
+                        
+                //         var z = spawn.room.lookForAt(
+                //             LOOK_STRUCTURES,
+                //             element.x,
+                //             element.y
+                //         );
+
+                //         if (z.length == 0) {
+                //             console.log(jobType)
+
+                //             job = {
+                //                 type: jobType,
+                //                 x: area[index].x,
+                //                 y: area[index].y,
+                //             };
+
+                //             specialSite = true;
+                //             break;
+                //         }
+                //     }
+
+                //     break;
+                // }
+                case "road.to.controller": {
+                    const path = spawn.pos.findPathTo(
+                        spawn.room.controller.pos,
+                        {
+                            ignoreDestructibleStructures: true,
+                            ignoreCreeps: true,
+                        }
+                    );
 
                     if (path) {
                         for (let index = 0; index < path.length - 2; index++) {
                             const pos = path[index];
-                            spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+                            spawn.room.createConstructionSite(
+                                pos.x,
+                                pos.y,
+                                STRUCTURE_ROAD
+                            );
                         }
 
                         job = {
                             type: STRUCTURE_ROAD,
                             x: path[0].x,
-                            y: path[0].y
+                            y: path[0].y,
                         };
 
                         specialSite = true;
@@ -39,27 +89,35 @@ var infrastructureTasks = {
 
                     break;
                 }
-                case 'road.to.source': {
-                    spawn.room.memory.sources.forEach(obj => {
+                case "road.to.source": {
+                    spawn.room.memory.sources.forEach((obj) => {
                         const source = Game.getObjectById(obj.id);
 
                         const path = spawn.pos.findPathTo(source.pos, {
                             ignoreDestructibleStructures: true,
-                            ignoreCreeps: true
+                            ignoreCreeps: true,
                         });
 
                         if (path) {
-                            for (let index = 0; index < path.length - 3; index++) {
+                            for (
+                                let index = 0;
+                                index < path.length - 3;
+                                index++
+                            ) {
                                 const pos = path[index];
 
-                                spawn.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+                                spawn.room.createConstructionSite(
+                                    pos.x,
+                                    pos.y,
+                                    STRUCTURE_ROAD
+                                );
                             }
 
                             job = {
                                 type: STRUCTURE_ROAD,
                                 x: path[0].x,
                                 y: path[0].y,
-                                built: false
+                                built: false,
                             };
 
                             specialSite = true;
@@ -76,7 +134,7 @@ var infrastructureTasks = {
                 //     });
 
                 //     // Far enough away for Upgraders to have it at their backs while working
-                //     // but not so close that it gets in the way or too far that they have to 
+                //     // but not so close that it gets in the way or too far that they have to
                 //     // travel unnecessarily.
                 //     if (path) {
                 //         let pos = undefined;
@@ -127,17 +185,22 @@ var infrastructureTasks = {
                 //     break;
                 // }
                 // Iterate all Source locations and find the first without a Link structure.
-                case 'source.link': {
-                    spawn.room.memory.sources.forEach(source => {
-                        const path = spawn.pos.findPathTo(Game.getObjectById(source.id).pos, {
-                            ignoreDestructibleStructures: true,
-                            ignoreCreeps: true
-                        });
-
-                        const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
-                            filter: {
-                                structureType: STRUCTURE_LINK
+                case "source.link": {
+                    spawn.room.memory.sources.forEach((source) => {
+                        const path = spawn.pos.findPathTo(
+                            Game.getObjectById(source.id).pos,
+                            {
+                                ignoreDestructibleStructures: true,
+                                ignoreCreeps: true,
                             }
+                        );
+
+                        const linkStructure = Game.getObjectById(
+                            source.id
+                        ).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+                            filter: {
+                                structureType: STRUCTURE_LINK,
+                            },
                         })[0];
 
                         if (!linkStructure || _.isEmpty(linkStructure)) {
@@ -146,7 +209,7 @@ var infrastructureTasks = {
                             job = {
                                 type: STRUCTURE_LINK,
                                 x: pos.x,
-                                y: pos.y
+                                y: pos.y,
                             };
 
                             specialSite = true;
@@ -158,7 +221,6 @@ var infrastructureTasks = {
 
                     break;
                 }
-
             }
 
             // if (currentRCLLevel >= 3) {
@@ -201,15 +263,18 @@ var infrastructureTasks = {
 
             const tileObjects = spawn.room.lookAt(x, y).filter(function (x) {
                 return (
-                    x.type != 'resource' &&
-                    x.type != 'energy' &&
-                    x.type != 'ruin' &&
-                    x.type != 'creep');
+                    x.type != "resource" &&
+                    x.type != "energy" &&
+                    x.type != "ruin" &&
+                    x.type != "creep"
+                );
             });
 
-            if (tileObjects.length < 3 &&
-                (tileObjects[0].type == 'terrain' && tileObjects[0].terrain != 'wall')) {
-
+            if (
+                tileObjects.length < 3 &&
+                tileObjects[0].type == "terrain" &&
+                tileObjects[0].terrain != "wall"
+            ) {
                 let result = spawn.room.createConstructionSite(x, y, job.type);
                 switch (result) {
                     case OK: {
@@ -219,18 +284,27 @@ var infrastructureTasks = {
                         return;
                     }
                     default: {
-                        console.log('⛔ Error: calling createConstructionSite, ' + EXIT_CODE[result] + ', job=', JSON.stringify(job) + ', x=' + job.x + ', y=' + job.y);
+                        console.log(
+                            "⛔ Error: calling createConstructionSite, " +
+                                EXIT_CODE[result] +
+                                ", job=",
+                            JSON.stringify(job) +
+                                ", x=" +
+                                job.x +
+                                ", y=" +
+                                job.y
+                        );
                         return;
                     }
                 }
             } else {
                 let tile = tileObjects[0];
-                if (tile.type == 'constructionSite') {
+                if (tile.type == "constructionSite") {
                     continue;
                 }
 
                 if (!tile.structure) {
-                    console.log('⛔ Error: ' + JSON.stringify(tile));
+                    console.log("⛔ Error: " + JSON.stringify(tile));
 
                     // Try the next templated job...
                     job.built = true;
@@ -238,7 +312,16 @@ var infrastructureTasks = {
                 }
 
                 if (tile.structure.structureType != job.type) {
-                    console.log('⚠️ WARNING: Cannot build ' + job.type + ', position x: ' + tile.structure.pos.x + ', y: ' + tile.structure.pos.y + ', is already allocated with a ' + tile.structure.structureType);
+                    console.log(
+                        "⚠️ WARNING: Cannot build " +
+                            job.type +
+                            ", position x: " +
+                            tile.structure.pos.x +
+                            ", y: " +
+                            tile.structure.pos.y +
+                            ", is already allocated with a " +
+                            tile.structure.structureType
+                    );
                 }
             }
         }
@@ -247,6 +330,8 @@ var infrastructureTasks = {
     // Doesn't use a traditional queue or any cache but instead looks at current construction site objects
     // to determine whether to continue or not.
     buildLinks: function (room) {
+        if (!room.structures().spawn) return;
+        
         // Only enqueue one construction site at a time.
         if (room.constructionSites().length > 0) {
             return;
@@ -255,17 +340,26 @@ var infrastructureTasks = {
         const spawn = room.structures().spawn[0];
 
         for (let j = 0; j <= room.controller.level; j++) {
-            this.processJobs(spawn, room.memory.jobs.jobs['RCL_' + j].jobs);
+            // break if a job is queued.
+            this.processJobs(
+                spawn,
+                room.controller.level,
+                room.memory.jobs.jobs["RCL_" + j].jobs
+            );
         }
     },
 
     locateSpawnDumpLocation: function (room) {
+        if (!room.structures().spawn || room.structures().container) return;
+
         const spawn = room.structures().spawn[0];
 
         if (room.structures().storage) {
-            const flags = spawn.room.lookAt(spawn.pos.x, spawn.pos.y + 4).filter(function (x) {
-                return (x.type == 'flag');
-            });
+            const flags = spawn.room
+                .lookAt(spawn.pos.x, spawn.pos.y + 4)
+                .filter(function (x) {
+                    return x.type == "flag";
+                });
 
             if (_.isEmpty(flags)) return;
 
@@ -273,9 +367,10 @@ var infrastructureTasks = {
 
             return;
         }
-
-        new RoomPosition(spawn.pos.x, spawn.pos.y + 4, room.name).createFlag(spawn.name + '_DUMP')
+        new RoomPosition(spawn.pos.x, spawn.pos.y + 4, room.name).createFlag(
+            spawn.name + "_DUMP"
+        );
     }
-}
+};
 
 module.exports = infrastructureTasks;
