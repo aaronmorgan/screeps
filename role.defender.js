@@ -20,13 +20,13 @@ var roleDefender = {
     },
 
     /** @param {Creep} creep **/
-    run: function (creep, spawn) {
-        var hostiles = spawn.room.find(FIND_HOSTILE_CREEPS);
+    run: function (creep) {
+        var hostiles = creep.room.find(FIND_HOSTILE_CREEPS);
         if (hostiles.length > 0) {
             creep.memory.sentry = false;
 
             var username = hostiles[0].owner.username;
-            Game.notify(`User ${username} spotted in room ${spawn.room.name}`);
+            Game.notify(`User ${username} spotted in room ${creep.room.name}`);
 
             const enemyTarget = creep.pos.findClosestByPath(hostiles);
             var moveResult = creep.moveTo(enemyTarget, {
@@ -54,12 +54,12 @@ var roleDefender = {
                 creep.memory.inPosition = false;
             }
         } else {
-            const area = spawn.room.lookForAtArea(
+            const area = creep.room.lookForAtArea(
                 LOOK_TERRAIN,
-                spawn.pos.y - 15,
-                spawn.pos.x - 15,
-                spawn.pos.y + 15,
-                spawn.pos.x + 15,
+                creep.pos.y - 15,
+                creep.pos.x - 15,
+                creep.pos.y + 15,
+                creep.pos.x + 15,
                 true
             );
 

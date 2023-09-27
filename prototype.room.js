@@ -16,11 +16,14 @@ module.exports = function () {
             // Calculate the distance from the spawn to controller and store it once. It's used as a base to calculate number of 
             // required Upgraders. i.e. the further away the controller is the more Upgraders required.
             // Should be moved to a 'run once' function.
-            if (!this.memory._distanceToRCL || Number.isNaN(this.memory._distanceToRCL) || this.memory._distanceToRCL % 1 !== 0) {
-                this.memory._distanceToRCL = this.structures().spawn[0].pos.findPathTo(this.controller.pos, {
-                    maxOps: 1000,
-                    ignoreDestructibleStructures: true
-                }).length;
+
+            if (this.structures().spawn) {
+                if (!this.memory._distanceToRCL || Number.isNaN(this.memory._distanceToRCL) || this.memory._distanceToRCL % 1 !== 0) {
+                    this.memory._distanceToRCL = this.structures().spawn[0].pos.findPathTo(this.controller.pos, {
+                        maxOps: 1000,
+                        ignoreDestructibleStructures: true
+                    }).length;
+                }
             }
         }
 
@@ -37,6 +40,7 @@ module.exports = function () {
                 gophers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.GOPHER),
                 harvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HARVESTER),
                 linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER),
+                roamingHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.ROAMING_HARVESTER),
                 upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER)
             }
         }
@@ -138,8 +142,6 @@ module.exports = function () {
                 return;
             }
 
-            let spawn = this.structures().spawn[0];
-
             let sources = [];
             let accessPoints = 0;
 
@@ -149,14 +151,17 @@ module.exports = function () {
 
                 sources.push({
                     id: source.id,
-                    accessPoints: accessibleFields,
-                    pathFromSpawn: spawn.pos.findPathTo(source.pos)
+                    accessPoints: accessibleFields
                 });
 
                 accessPoints += accessibleFields;
             })
 
-            this.memory.sources = _.sortBy(sources, s => spawn.pos.getRangeTo(s))
+            if (this.structures().spawn) {
+                let spawn = this.structures().spawn[0];
+                this.memory.sources = _.sortBy(sources, s => spawn.pos.getRangeTo(s))
+            }
+
             this.memory.maxSourceAccessPoints = accessPoints;
         },
 
@@ -186,7 +191,7 @@ module.exports = function () {
         },
 
         Room.prototype.getDistanceToRCL = function () {
-            if (this.memory.controller) {
+            if (this.memory.controller || !this.structures().spawn) {
                 return;
             }
 

@@ -84,6 +84,12 @@ module.exports = function () {
                 target = this.pos.findClosestByRange(targets);
             }
 
+            // No available targets in this room; just move to the first one we have.
+            if (target == null) {
+                //target = targets[0];
+                targets = [];
+            }
+
             const transferResult = this.transfer(target, RESOURCE_ENERGY);
 
             switch (transferResult) {
@@ -97,9 +103,6 @@ module.exports = function () {
 
                     break;
                 }
-            }
-
-            if (transferResult == ERR_NOT_IN_RANGE) {
             }
         }
 

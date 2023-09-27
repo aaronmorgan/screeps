@@ -70,8 +70,6 @@ var creepFactory = {
             return;
         }
 
-        //console.log('INFO: Spawning new ' + job.name + ' name=\'' + name + '\', body=[' + job.body + '], memory=' + JSON.stringify(job.memory), +', cost=' + bodyCost);
-
         const result = p_spawn.spawnCreep(nextQueuedJob.body, name, {
             memory: nextQueuedJob.memory
         });
@@ -79,7 +77,7 @@ var creepFactory = {
         if (result != OK) {
             console.log('⛔ Error: Failed to spawn new creep, error=' + EXIT_CODE[result]);
             return;
-        }
+        } 
 
         p_spawn.room.memory.creepBuildQueue.queue.shift();
     },

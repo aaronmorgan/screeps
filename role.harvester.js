@@ -127,26 +127,6 @@ var roleHarvester = {
 
             const targets = creep.findEnergyTransferTarget();
 
-            // if (targets.length > 0) {
-            //     const target = creep.pos.findClosestByPath(targets)
-            //     creep.memory.isHarvesting = false;
-
-            //     const transferResult = creep.transfer(target, RESOURCE_ENERGY);
-            //     if (transferResult == ERR_NOT_IN_RANGE) {
-            //         creep.moveTo(target, {
-            //             visualizePathStyle: {
-            //                 stroke: '#ffffff'
-            //             }
-            //         });
-            //     } else if (transferResult == ERR_NOT_ENOUGH_ENERGY) {
-            //         creep.memory.isHarvesting = true;
-            //     } else if (transferResult == OK && creep.store.getUsedCapacity() == 0) {
-            //         creep.memory.isHarvesting = true;
-            //     }
-
-            //     return;
-            // }
-
             if (targets.length == 0) {
                 var target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
