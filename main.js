@@ -27,8 +27,11 @@ module.exports.loop = function () {
         room.droppedResources();
         room.getDistanceToRCL();
 
-        if (!room.memory) {
+        if (room.memory.isInit == undefined || !room.memory.isInit) {
+            console.log('Instantiating room memory...')
+
             room.memory = {
+                isInit: true,
                 jobs: require("tasks.infrastructure.jobs"),
                 hasSpawn: spawn ? true : false,
                 isFarm: !spawn ? true : false,
@@ -46,6 +49,7 @@ module.exports.loop = function () {
             }
         }
 
+        console.log(room.memory.rooms)
 
         creepFactory.validateCache(room);
 
@@ -126,7 +130,7 @@ module.exports.loop = function () {
         const gophers = room.creeps().gophers || [];
         const harvesters = room.creeps().harvesters || [];
         const linkBaseHarvesters = room.creeps().linkBaseHarvesters || [];
-       // const roamingHarvesters = room.memory.roamingHarvesters;
+        // const roamingHarvesters = room.memory.roamingHarvesters;
         const upgraders = room.creeps().upgraders || [];
 
         // if (spawn) {
@@ -143,7 +147,7 @@ module.exports.loop = function () {
             gophers: gophers.length,
             harvesters: harvesters.length,
             linkBaseHarvesters: linkBaseHarvesters.length,
-            roamingHarvesters: room.memory.roamingHarvesters.length,
+            roamingHarvesters: room.memory.roamingHarvesters ? room.memory.roamingHarvesters.length : 0,
             upgraders: upgraders.length
         };
 
@@ -314,25 +318,25 @@ module.exports.loop = function () {
             }
         }
 
-  
+
         //room.memory.roamingHarvesters = []
         console.log('memory', JSON.stringify(room.memory.roamingHarvesters))
 
-//         for (var i in room.memory.roamingHarvesters) {
-//             const roamingCreep = Game.getObjectById(i);
-//             console.log('roamingCream', JSON.stringify(roamingCreep))
-//             console.log(!Game.creeps[roamingCreep])
+        //         for (var i in room.memory.roamingHarvesters) {
+        //             const roamingCreep = Game.getObjectById(i);
+        //             console.log('roamingCream', JSON.stringify(roamingCreep))
+        //             console.log(!Game.creeps[roamingCreep])
 
-//             if (!Game.creeps[roamingCreep]) {
-                
-// //                delete room.memory.roamingHarvesters[i];
-//             } else {
-//                 console.log(room.memory.roamingHarvesters.filter((x) => x == roamingCreep.id))
+        //             if (!Game.creeps[roamingCreep]) {
 
-//             }
-//         }
+        // //                delete room.memory.roamingHarvesters[i];
+        //             } else {
+        //                 console.log(room.memory.roamingHarvesters.filter((x) => x == roamingCreep.id))
 
-              // room.memory.roamingHarvesters = room.memory.roamingHarvesters.filter(element => {
+        //             }
+        //         }
+
+        // room.memory.roamingHarvesters = room.memory.roamingHarvesters.filter(element => {
         //     return element !== null;
         // });
 

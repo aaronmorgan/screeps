@@ -25,22 +25,22 @@ var roleRoamingHarvester = {
 
         var exit = roomExits[1];
 
-        if (exit && !Memory.rooms[exit].isMapped) {
+        if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
             targetRoom = exit;
         } else {
             exit = roomExits[3];
 
-            if (exit && !Memory.rooms[exit].isMapped) {
+            if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
                 targetRoom = exit;
             } else {
                 exit = roomExits[5];
 
-                if (exit && !Memory.rooms[exit].isMapped) {
+                if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
                     targetRoom = exit;
                 } else {
                     exit = roomExits[7];
 
-                    if (exit && !Memory.rooms[exit].isMapped) {
+                    if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
                         targetRoom = exit;
                     }
                 }

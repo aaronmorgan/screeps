@@ -17,7 +17,7 @@ var infrastructureTasks = {
                 // case "extension":
                 // case "container": {
                 //     console.log(jobType)
-                    
+
                 //     const area = spawn.room.lookForAtArea(
                 //         LOOK_TERRAIN,
                 //         spawn.pos.y - rclLevel + 2,
@@ -36,7 +36,7 @@ var infrastructureTasks = {
                 //         if (element.terrain !== "plain") {
                 //             continue;
                 //         }
-                        
+
                 //         var z = spawn.room.lookForAt(
                 //             LOOK_STRUCTURES,
                 //             element.x,
@@ -286,13 +286,13 @@ var infrastructureTasks = {
                     default: {
                         console.log(
                             "⛔ Error: calling createConstructionSite, " +
-                                EXIT_CODE[result] +
-                                ", job=",
+                            EXIT_CODE[result] +
+                            ", job=",
                             JSON.stringify(job) +
-                                ", x=" +
-                                job.x +
-                                ", y=" +
-                                job.y
+                            ", x=" +
+                            job.x +
+                            ", y=" +
+                            job.y
                         );
                         return;
                     }
@@ -314,13 +314,13 @@ var infrastructureTasks = {
                 if (tile.structure.structureType != job.type) {
                     console.log(
                         "⚠️ WARNING: Cannot build " +
-                            job.type +
-                            ", position x: " +
-                            tile.structure.pos.x +
-                            ", y: " +
-                            tile.structure.pos.y +
-                            ", is already allocated with a " +
-                            tile.structure.structureType
+                        job.type +
+                        ", position x: " +
+                        tile.structure.pos.x +
+                        ", y: " +
+                        tile.structure.pos.y +
+                        ", is already allocated with a " +
+                        tile.structure.structureType
                     );
                 }
             }
@@ -331,7 +331,7 @@ var infrastructureTasks = {
     // to determine whether to continue or not.
     buildLinks: function (room) {
         if (!room.structures().spawn) return;
-        
+
         // Only enqueue one construction site at a time.
         if (room.constructionSites().length > 0) {
             return;
@@ -340,6 +340,8 @@ var infrastructureTasks = {
         const spawn = room.structures().spawn[0];
 
         for (let j = 0; j <= room.controller.level; j++) {
+            if (!room.memory.jobs) continue;
+
             // break if a job is queued.
             this.processJobs(
                 spawn,
