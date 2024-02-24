@@ -153,7 +153,7 @@ module.exports.loop = function () {
 
         let maxBuilderCreeps = 1;
         let maxCourierCreeps = 0;
-        let maxDefenderCreeps = structures.tower === undefined ? 2 : 0; // If we have any towers we don't need defender creeps.
+        let maxDefenderCreeps = structures.tower === undefined && !room.controller.safeMode ? 2 : 0; // If we have any towers we don't need defender creeps.
         let maxDropMinerCreeps = 0;
         let maxGopherCreeps = 0;
         let maxHarvesterCreeps = 2;
