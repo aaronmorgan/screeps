@@ -201,7 +201,7 @@ module.exports.loop = function () {
                 maxHarvesterCreeps = dropminers.length > 0 == 0 ? room.memory.sources.length : 0;
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
                 //maxUpgraderCreeps = Math.max(1, Math.floor(room.memory.controller.path.length / 10)) + 1;
-                maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800));
+                maxUpgraderCreeps = Math.max(2, Math.floor(storedEnergy / 800));
                 maxRoamingHarversterCreeps = 4;
                 maxGopherCreeps = 1;
 
@@ -223,7 +223,7 @@ module.exports.loop = function () {
                 maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
 
-                maxUpgraderCreeps = Math.max(4, Math.floor(storedEnergy / 800)) + 3;
+                maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
                 maxRoamingHarversterCreeps = 4;
                 maxGopherCreeps = 2; //linkSourceHarvesters.length > 0 ? 0 : 2;
 
