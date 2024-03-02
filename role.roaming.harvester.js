@@ -8,7 +8,9 @@ var roleRoamingHarvester = {
     tryBuild: function (spawn, energyCapacityAvailable) {
         let bodyType = [];
 
-        if (energyCapacityAvailable >= 1500) {
+        if (energyCapacityAvailable < 1500) {
+            bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        } else if (energyCapacityAvailable >= 1500) {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyCapacityAvailable >= 1450) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
@@ -25,35 +27,39 @@ var roleRoamingHarvester = {
 
         var exit = roomExits[1];
 
-        if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
+        if (exit && (!Memory.rooms[exit] || !Memory.rooms[exit].isMapped)) {
             targetRoom = exit;
         } else {
             exit = roomExits[3];
 
-            if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
+            if (exit && (!Memory.rooms[exit] || !Memory.rooms[exit].isMapped)) {
                 targetRoom = exit;
             } else {
                 exit = roomExits[5];
 
-                if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
+                if (exit && (!Memory.rooms[exit] || !Memory.rooms[exit].isMapped)) {
                     targetRoom = exit;
                 } else {
                     exit = roomExits[7];
 
-                    if (exit && !Memory.rooms[exit] || !Memory.rooms[exit].isMapped) {
+                    if (exit && (!Memory.rooms[exit] || !Memory.rooms[exit].isMapped)) {
                         targetRoom = exit;
                     }
                 }
             }
 
             if (!exit) { targetRoom = roomExits[1] }
+        }
 
+        if (targetRoom) {
             return creepFactory.create(spawn, role.ROAMING_HARVESTER, bodyType, {
                 role: role.ROAMING_HARVESTER,
                 spawnRoom: spawn.room.name,
                 targetRoomName: targetRoom,
                 isHarvesting: true
             });
+        } else {
+            console.log('⛔ Error: Failing to create new Roaming Harvester, not targetRoom');
         }
     },
 
@@ -161,7 +167,8 @@ var roleRoamingHarvester = {
             } else {
                 target = Game.spawns['Spawn1'];
             }
-            if (targets.length === 0) {
+
+            if (!target && targets.length === 0) {
                 target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
             }
 
