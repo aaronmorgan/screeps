@@ -101,27 +101,28 @@ module.exports = function () {
         return this._sources;
     };
 
-
+    // Returns the first source id that isn't already used by one of the supplied creeps.
     Room.prototype.selectAvailableSource =
         function (creeps) {
             if (creeps.length == 0) {
                 return this.sources();
             }
 
-            return sources = _.filter(this.memory.sources, (s) => {
-                for (let i = 0; i < creeps.length; i++) {
-                    if (creeps[i].memory.sourceId != s.id) {
-                        return true;
-                    }
+            var alreadyUsedIds = creeps.map(x=> x.memory.sourceId);
+
+            for (const source of this.memory.sources) {
+                var id = alreadyUsedIds.find((x) => x === source.id);
+
+                if (!id) {
+                    return [source];
                 }
-            });
+            }
         };
 
     // Attempt to locate all Link structures near to Source objects that don't have a creep already assigned.
     Room.prototype.selectAvailableSourceLink =
         function (creeps) {
             if (!creeps || creeps.length == 0) {
-                console.log(44)
                 return this.sources();
             }
 
