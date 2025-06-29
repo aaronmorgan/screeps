@@ -35,6 +35,7 @@ module.exports.loop = function () {
                 jobs: require("tasks.infrastructure.jobs"),
                 hasSpawn: spawn ? true : false,
                 isFarm: !spawn ? true : false,
+                exits: Game.map.describeExits(spawn.room.name),
                 roamingHarvesters: []
             };
             room.determineSourceAccessPoints();
@@ -48,8 +49,6 @@ module.exports.loop = function () {
                 };
             }
         }
-
-        console.log(room.memory.rooms)
 
         creepFactory.validateCache(room);
 
@@ -158,7 +157,7 @@ module.exports.loop = function () {
         let maxGopherCreeps = 0;
         let maxHarvesterCreeps = 2;
         let maxLinkBaseHarvesters = 0;
-        let maxRoamingHarversterCreeps = 1
+        let maxRoamingHarversterCreeps = room.memory.exits ? 1 : 0;
         let maxUpgraderCreeps = 2;
 
         // Emergency catch all to reset the queue should we end up without any energy gathering screeps.
@@ -186,7 +185,7 @@ module.exports.loop = function () {
                 maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
                 maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
-                maxRoamingHarversterCreeps = 4;
+                maxRoamingHarversterCreeps = room.memory.exits ? 4 : 0;
                 maxUpgraderCreeps = 2;
                 maxGopherCreeps = 1;
 
@@ -202,7 +201,7 @@ module.exports.loop = function () {
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
                 //maxUpgraderCreeps = Math.max(1, Math.floor(room.memory.controller.path.length / 10)) + 1;
                 maxUpgraderCreeps = Math.max(2, Math.floor(storedEnergy / 800));
-                maxRoamingHarversterCreeps = 4;
+                maxRoamingHarversterCreeps = room.memory.exits ? 4 : 0;
                 maxGopherCreeps = 1;
 
                 if (structures.link) {
@@ -224,7 +223,7 @@ module.exports.loop = function () {
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
 
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
-                maxRoamingHarversterCreeps = 4;
+                maxRoamingHarversterCreeps = room.memory.exits ? 4 : 0;
                 maxGopherCreeps = 2; //linkSourceHarvesters.length > 0 ? 0 : 2;
 
                 if (structures.link) {
@@ -254,7 +253,7 @@ module.exports.loop = function () {
                 maxCourierCreeps = room.memory.sources.length - (_.isEmpty(structures.link) ? 0 : structures.link.length - 1);
 
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800) + 3);
-                maxRoamingHarversterCreeps = 4;
+                maxRoamingHarversterCreeps = room.memory.exits ? 4 : 0;
                 maxGopherCreeps = 1;
 
                 if (structures.link || structures.storage) {
@@ -317,10 +316,6 @@ module.exports.loop = function () {
                 });
             }
         }
-
-
-        //room.memory.roamingHarvesters = []
-        console.log('memory', JSON.stringify(room.memory.roamingHarvesters))
 
         //         for (var i in room.memory.roamingHarvesters) {
         //             const roamingCreep = Game.getObjectById(i);

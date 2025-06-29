@@ -1,5 +1,16 @@
 // ICONS ⛔ ⚠️ ⛏️ 🔨 ⛏️ ⚒️ 🛠️ 🔧 ⚙️ ➖ ❌ 💀 🛡️ 🔌
 
+module.exports.BODYPART_COST = {
+    "move": 50,
+    "work": 100,
+    "attack": 80,
+    "carry": 50,
+    "heal": 250,
+    "ranged_attack": 150,
+    "tough": 10,
+    "claim": 600
+},
+
 module.exports.EXIT_CODE = {
     '0': 'OK',
     '-1': 'ERR_NOT_OWNER',

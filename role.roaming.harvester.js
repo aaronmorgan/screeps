@@ -6,6 +6,12 @@ let creepFactory = require("tasks.build.creeps");
 
 var roleRoamingHarvester = {
     tryBuild: function (spawn, energyCapacityAvailable) {
+        // TODO Do this once and store it on the room.
+        const roomExits = Game.map.describeExits(spawn.room.name);
+        if (!roomExits) {
+            return;
+        }
+
         let bodyType = [];
 
         if (energyCapacityAvailable < 1500) {
@@ -22,10 +28,9 @@ var roleRoamingHarvester = {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
         }
 
-        const roomExits = Game.map.describeExits(spawn.room.name);
         var targetRoom = undefined;
 
-        var exit = roomExits[1];
+        var exit = roomExits ? roomExits[1] : undefined;
 
         if (exit && (!Memory.rooms[exit] || !Memory.rooms[exit].isMapped)) {
             targetRoom = exit;
