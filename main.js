@@ -41,6 +41,7 @@ module.exports.loop = function () {
         }
 
         infrastructureTasks.locateSpawnDumpLocation(room);
+
         if (!room.memory.creepBuildQueue) {
             if (!room.memory.game) {
                 room.memory.game = {
@@ -48,8 +49,6 @@ module.exports.loop = function () {
                 };
             }
         }
-
-        console.log(room.memory.rooms)
 
         creepFactory.validateCache(room);
 
@@ -320,7 +319,7 @@ module.exports.loop = function () {
 
 
         //room.memory.roamingHarvesters = []
-        console.log('memory', JSON.stringify(room.memory.roamingHarvesters))
+
 
         //         for (var i in room.memory.roamingHarvesters) {
         //             const roamingCreep = Game.getObjectById(i);
@@ -360,16 +359,13 @@ module.exports.loop = function () {
 
         if (spawn) {
             if (spawn.spawning === null &&
-                room.memory.creepBuildQueue.queue.length == 0
-            ) {
+                room.memory.creepBuildQueue.queue.length == 0) {
                 if (
                     (harvesters.length === 0 && dropminers.length === 0) ||
                     (dropminers.length > 0 && (couriers.length === 0 || gophers.length === 0)) ||
                     (structures.storage && linkBaseHarvesters.length === 0)
                 ) {
-                    energyCapacityAvailable = room.energyAvailable;
-                    console.log("⚠️ INFO: Limited energy available, downsizing build allowence to", energyCapacityAvailable
-                    );
+                    console.log("⚠️ INFO: Limited energy available, downsizing build allowence to", energyCapacityAvailable);
                 }
 
                 // HARVESTERS

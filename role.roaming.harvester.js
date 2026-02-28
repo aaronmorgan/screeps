@@ -8,9 +8,7 @@ var roleRoamingHarvester = {
     tryBuild: function (spawn, energyCapacityAvailable) {
         let bodyType = [];
 
-        if (energyCapacityAvailable < 1500) {
-            bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-        } else if (energyCapacityAvailable >= 1500) {
+        if (energyCapacityAvailable >= 1500) {
             bodyType = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else if (energyCapacityAvailable >= 1450) {
             bodyType = [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
@@ -19,7 +17,7 @@ var roleRoamingHarvester = {
         } else if (energyCapacityAvailable >= 1350) {
             bodyType = [WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
         } else {
-            bodyType = [WORK, CARRY, CARRY, MOVE, MOVE];
+            bodyType = [WORK, CARRY, CARRY, MOVE, MOVE]; // 300
         }
 
         const roomExits = Game.map.describeExits(spawn.room.name);

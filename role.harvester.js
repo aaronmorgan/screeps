@@ -51,6 +51,7 @@ var roleHarvester = {
         creep.checkTicksToLive();
 
         const creepFillPercentage = creep.CreepFillPercentage();
+
         if (creepFillPercentage > 0) {
             creep.say('⛏️ ' + creepFillPercentage + '%')
         }
@@ -101,12 +102,13 @@ var roleHarvester = {
                                     stroke: '#ffffff'
                                 }
                             });
+
                             break;
                         }
                     }
                 } else {
-
                     creep.memory.isHarvesting = creep.store.getFreeCapacity() != 0;
+
                     if (!creep.memory.isHarvesting && creep.room.memory.creeps.couriers > 0) {
                         for (const resourceType in creep.carry) {
                             creep.drop(resourceType);
@@ -122,6 +124,7 @@ var roleHarvester = {
                 }
 
                 creep.memory.isHarvesting = true;
+
                 return;
             }
 

@@ -24,8 +24,8 @@ module.exports = function () {
 
     Creep.prototype.dropResourcesAndDie = function () {
         for (const resourceType in this.carry) {
-            console.log("💀 TTD Creep: " + this.name + ", dropping resource: " + resourceType
-            );
+            console.log("💀 TTD Creep: " + this.name + ", dropping resource: " + resourceType);
+
             this.drop(resourceType);
         }
 
@@ -38,6 +38,7 @@ module.exports = function () {
         if (Game.spawns["Spawn1"].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
             targets.push(Game.spawns["Spawn1"]);
         }
+
         if (targets.length == 0) {
             targets = _.filter(
                 this.room.structures().storage,
@@ -45,6 +46,7 @@ module.exports = function () {
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             );
         }
+
         // It gets into a state where the Tower is consuming more energy than can be supplied, creating a feedback loop
         // where creeps die and structures decay.
         if (targets.length == 0 && this.room.creeps().dropminers.length > 1) {
@@ -56,6 +58,7 @@ module.exports = function () {
                         (structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY)) * 100) < 80
             );
         }
+
         if (targets.length == 0) {
             targets = _.filter(
                 this.room.structures().extension,
@@ -63,6 +66,7 @@ module.exports = function () {
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             );
         }
+
         if (targets.length == 0) {
             targets = _.filter(
                 this.room.structures().storage,
@@ -70,6 +74,7 @@ module.exports = function () {
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             );
         }
+
         if (targets.length == 0) {
             targets = _.filter(
                 this.room.structures().container,
