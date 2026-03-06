@@ -60,10 +60,11 @@ var infrastructureTasks = {
                 //     break;
                 // }
                 case "road.to.controller": {
+                    console.log('road.to.controller')
                     const path = spawn.pos.findPathTo(
                         spawn.room.controller.pos,
                         {
-                            ignoreDestructibleStructures: true,
+                            ignoreDestructibleStructures: false,
                             ignoreCreeps: true,
                         }
                     );
@@ -90,11 +91,12 @@ var infrastructureTasks = {
                     break;
                 }
                 case "road.to.source": {
+                    console.log('road.to.source')
                     spawn.room.memory.sources.forEach((obj) => {
                         const source = Game.getObjectById(obj.id);
 
                         const path = spawn.pos.findPathTo(source.pos, {
-                            ignoreDestructibleStructures: true,
+                            ignoreDestructibleStructures: false,
                             ignoreCreeps: true,
                         });
 
@@ -184,36 +186,83 @@ var infrastructureTasks = {
 
                 //     break;
                 // }
+
+                // Locate the Storage structure and put a Link nearby.
+                case "storage.link": {
+                    const storage = spawn.room.storage;
+                    if (storage) {
+                        const linkStructure = Game.getObjectById(
+                            storage.id
+                        ).pos.findInRange(FIND_MY_STRUCTURES, 5, {
+                            filter: {
+                                structureType: STRUCTURE_LINK,
+                            },
+                        })[0];
+
+                        if (!linkStructure) {
+                            // Look around the Storage structure position for free Terrain tiles to build on.
+                            for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, 1], [1, -1]]) {
+                                const tileObjects = spawn.room.lookAt(storage.pos.x + dr, storage.pos.y + dc);
+                                const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
+
+                                if (terrain.length > 0) {
+                                    job = {
+                                        type: STRUCTURE_LINK,
+                                        x: storage.pos.x + dr,
+                                        y: storage.pos.y + dc,
+                                    };
+
+                                    specialSite = true;
+
+                                    break;
+                                }
+                            }
+                        } else {
+                            console.log('found existing link structure near the storage')
+                        }
+                    }
+
+                    break;
+                }
                 // Iterate all Source locations and find the first without a Link structure.
                 case "source.link": {
                     spawn.room.memory.sources.forEach((source) => {
-                        const path = spawn.pos.findPathTo(
-                            Game.getObjectById(source.id).pos,
-                            {
-                                ignoreDestructibleStructures: true,
-                                ignoreCreeps: true,
-                            }
-                        );
+                        // Determine how far to place the Link from this Source, if it as only one access point we need 
+                        // to move back a little.
+                        const distanceToPlaceLink = source.accessPoints = 1 ? 2 : Math.max(source.accessPoints, 2);
 
                         const linkStructure = Game.getObjectById(
                             source.id
-                        ).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+                        ).pos.findInRange(FIND_MY_STRUCTURES, distanceToPlaceLink, {
                             filter: {
                                 structureType: STRUCTURE_LINK,
                             },
                         })[0];
 
                         if (!linkStructure || _.isEmpty(linkStructure)) {
-                            const pos = path[path.length - 3];
+                          const pos = Game.getObjectById(source.id).pos;
 
-                            job = {
-                                type: STRUCTURE_LINK,
-                                x: pos.x,
-                                y: pos.y,
-                            };
+                            // Look around the current position for free Terrain tiles to build on.
+                            for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, 1], [1, -1]]) {
+                                const tileObjects = spawn.room.lookAt(pos.x + dr, pos.y + dc);
+                                const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
 
-                            specialSite = true;
+                                if (terrain.terrain === "plain") {
+                                    console.log(4)
+                                    job = {
+                                        type: STRUCTURE_LINK,
+                                        x: pos.x + dr,
+                                        y: pos.y + dc,
+                                    };
+
+                                    console.log(JSON.stringify(job))
+                                    specialSite = true;
+
+                                    break;
+                                }
+                            }
                         } else {
+                            console.log('sdfsf')
                             source.linkId = linkStructure.id;
                             return;
                         }
@@ -304,10 +353,19 @@ var infrastructureTasks = {
                 }
 
                 if (!tile.structure) {
-                    console.log("⛔ Error: " + JSON.stringify(tile));
+                    // Check if the reason we cannot build is the spawn dump flag is here. 
+                    // TODO Remove the spawn dump flag when we get container storage.
+                    if (tile.type === 'flag' && tile.flag.name.endsWith('_DUMP')) {
+                        if (Game.flags[tile.flag.name]) {
+                            Game.flags[tile.flag.name].remove();
+                        }
+                    } else {
+                        console.log("⛔ Error: tile.structure is falsy tile=" + JSON.stringify(tile));
 
-                    // Try the next templated job...
-                    job.built = true;
+                        // Try the next templated job...
+                        job.built = true;
+                    }
+
                     continue;
                 }
 
@@ -320,8 +378,11 @@ var infrastructureTasks = {
                         ", y: " +
                         tile.structure.pos.y +
                         ", is already allocated with a " +
-                        tile.structure.structureType
-                    );
+                        tile.structure.structureType);
+
+                    if (tile.structure.structureType === STRUCTURE_ROAD) {
+                        tile.structure.destroy();
+                    }
                 }
             }
         }
@@ -330,7 +391,9 @@ var infrastructureTasks = {
     // Doesn't use a traditional queue or any cache but instead looks at current construction site objects
     // to determine whether to continue or not.
     buildLinks: function (room) {
-        if (!room.structures().spawn) return;
+        if (!room.structures().spawn) {
+            return;
+        }
 
         // Only enqueue one construction site at a time.
         if (room.constructionSites().length > 0) {
@@ -340,7 +403,12 @@ var infrastructureTasks = {
         const spawn = room.structures().spawn[0];
 
         for (let j = 0; j <= room.controller.level; j++) {
-            if (!room.memory.jobs) continue;
+            if (!room.memory.jobs) {
+                continue;
+            }
+
+            // console.log(1)
+            // room.memory.jobs.jobs["RCL_" + j].jobs.push({ type: "road.to.source", x: 0, y: 0 });
 
             // break if a job is queued.
             this.processJobs(
