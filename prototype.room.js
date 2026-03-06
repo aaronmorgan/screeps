@@ -110,7 +110,7 @@ module.exports = function () {
 
             return sources = _.filter(this.memory.sources, (s) => {
                 for (let i = 0; i < creeps.length; i++) {
-                    if (creeps[i].memory.sourceId != s.id) {
+                    if (creeps[i].memory.source.id != s.id) {
                         return true;
                     }
                 }
@@ -121,7 +121,6 @@ module.exports = function () {
     Room.prototype.selectAvailableSourceLink =
         function (creeps) {
             if (!creeps || creeps.length == 0) {
-                console.log(44)
                 return this.sources();
             }
 
@@ -162,14 +161,13 @@ module.exports = function () {
                 this.memory.sources = _.sortBy(sources, s => spawn.pos.getRangeTo(s))
             }
 
-            this.memory.maxSourceAccessPoints = accessPoints;
+            this.memory.sources = sources;
         },
 
         Room.prototype.determineRCLAccessPoints = function () {
             const rcl = this.controller;
 
             const fields = this.lookForAtArea(LOOK_TERRAIN, rcl.pos.y - 1, rcl.pos.x - 1, rcl.pos.y + 1, rcl.pos.x + 1, true);
-            //console.log('fields', JSON.stringify(fields));
 
             const accessibleFields = 9 - _.countBy(fields, "terrain").wall;
 

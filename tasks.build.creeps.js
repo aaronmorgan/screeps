@@ -19,10 +19,10 @@ var creepFactory = {
     create: function (p_spawn, p_role, p_body, p_memory) {
         this.enqueueBuildJob(
             p_spawn, {
-                body: p_body,
-                name: p_role,
-                memory: p_memory
-            });
+            body: p_body,
+            name: p_role,
+            memory: p_memory
+        });
 
         return OK;
     },
@@ -77,7 +77,7 @@ var creepFactory = {
         if (result != OK) {
             console.log('⛔ Error: Failed to spawn new creep, error=' + EXIT_CODE[result]);
             return;
-        } 
+        }
 
         p_spawn.room.memory.creepBuildQueue.queue.shift();
     },
@@ -102,10 +102,26 @@ var creepFactory = {
         }
     },
 
-    logBuildQueueDetails: function (p_room, p_job) {
+    logBuildQueueDetails: function (room, currentBuildJob) {
         console.log(
-            '  Build Queue: ' + p_room.memory.creepBuildQueue.queue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH +
-            ' (' + p_job.name + '|' + this.bodyCost(p_job.body) + ')');
+            '   - Build Queue: ' + room.memory.creepBuildQueue.queue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH +
+            ' (' + currentBuildJob.name + '|' + this.bodyCost(currentBuildJob.body) + ')');
+
+        const spawns = room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_SPAWN }
+        });
+
+        const jobBodyCost = this.bodyCost(currentBuildJob.body);
+
+        if (jobBodyCost > spawns[0].energy && spawns[0].energy === spawns[0].energyCapacity) {
+            console.log(`  Clearing build queue, current job exceeds available energy, ${jobBodyCost}/${spawns[0].energy}`);
+
+            room.memory.creepBuildQueue = {
+                queue: []
+            }
+
+            return;
+        }
     },
 
     showSpawningCreepInfo: function (p_room, p_spawn) {
@@ -121,9 +137,9 @@ var creepFactory = {
                 '🛠️' + spawningCreep.memory.role,
                 p_spawn.pos.x + 1,
                 p_spawn.pos.y, {
-                    align: 'left',
-                    opacity: 0.8
-                });
+                align: 'left',
+                opacity: 0.8
+            });
         }
     },
 

@@ -25,15 +25,15 @@ var roleHarvester = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            const targetSourceId = spawn.room.selectAvailableSource(spawn.room.creeps().harvesters)[0].id;
+            const targetSource = spawn.room.selectAvailableSource(spawn.room.creeps().harvesters)[0];
 
-            if (!targetSourceId) {
+            if (!targetSource) {
                 console.log('ERROR: Attempting to create ' + role.HARVESTER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
                 return creepFactory.create(spawn, role.HARVESTER, bodyType, {
                     role: role.HARVESTER,
-                    sourceId: targetSourceId,
+                    source: targetSource,
                     isHarvesting: true
                 });
             }
@@ -51,6 +51,7 @@ var roleHarvester = {
         creep.checkTicksToLive();
 
         const creepFillPercentage = creep.CreepFillPercentage();
+
         if (creepFillPercentage > 0) {
             creep.say('⛏️ ' + creepFillPercentage + '%')
         }
@@ -61,11 +62,12 @@ var roleHarvester = {
                 return;
             }
 
-            const source = Game.getObjectById(creep.memory.sourceId);
-
+            const source = Game.getObjectById(creep.memory.source.id);
             const harvestResult = creep.harvest(source);
 
-            if (harvestResult == ERR_NOT_IN_RANGE) {
+            if (harvestResult === ERR_INVALID_TARGET) {
+                console.log('⛔ Error: INVALID_TARGET attempting to locate nearest source, source=' + JSON.stringify(source));
+            } else if (harvestResult === ERR_NOT_IN_RANGE) {
                 const moveResult = creep.moveTo(source, {
                     visualizePathStyle: {
                         stroke: '#ffaa00'
@@ -76,10 +78,10 @@ var roleHarvester = {
                     const sources = creep.room.selectAvailableSource(creep.room.creeps().harvesters);
 
                     if (!_.isEmpty(sources)) {
-                        const sourceId = sources[0].id;
+                        const source = sources[0].id;
 
-                        console.log('INFO: Attempting set new target source, id=' + sourceId);
-                        creep.memory.sourceId = sourceId;
+                        console.log('INFO: Attempting set new target source, id=' + source.id);
+                        creep.memory.source = source;
                     }
                 }
             } else if (harvestResult == OK) {
@@ -101,12 +103,13 @@ var roleHarvester = {
                                     stroke: '#ffffff'
                                 }
                             });
+
                             break;
                         }
                     }
                 } else {
-
                     creep.memory.isHarvesting = creep.store.getFreeCapacity() != 0;
+
                     if (!creep.memory.isHarvesting && creep.room.memory.creeps.couriers > 0) {
                         for (const resourceType in creep.carry) {
                             creep.drop(resourceType);
@@ -122,6 +125,7 @@ var roleHarvester = {
                 }
 
                 creep.memory.isHarvesting = true;
+
                 return;
             }
 
