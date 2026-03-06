@@ -29,15 +29,15 @@ var roleCourier = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            const targetSourceId = spawn.room.selectAvailableSource(spawn.room.creeps().couriers)[0].id;
+            const targetSource = spawn.room.selectAvailableSource(spawn.room.creeps().couriers)[0];
 
-            if (!targetSourceId) {
+            if (!targetSource) {
                 console.log('ERROR: Attempting to create ' + role.COURIER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
                 return creepFactory.create(spawn, role.COURIER, bodyType, {
                     role: role.COURIER,
-                    sourceId: targetSourceId,
+                    source: targetSource,
                     harvesting: false
                 });
             }
@@ -48,15 +48,15 @@ var roleCourier = {
     run: function (creep) {
 
         const creepFillPercentage = creep.CreepFillPercentage();
+
         if (creepFillPercentage > 0) {
             creep.say('🚚 ' + creepFillPercentage + '%');
         }
 
         // Creep has no energy so we need to move to our source.
-        if (creepFillPercentage == 0 && creep.memory.harvesting == false) {
-            const source = Game.getObjectById(creep.memory.sourceId);
+        if (creepFillPercentage === 0 && !creep.memory.harvesting) {
 
-            var path = creep.pos.findPathTo(source.pos);
+            var path = creep.pos.findPathTo(creep.memory.source.pos);
 
             if (creep.ticksToLive < (path.length * 2)) {
                 creep.dropResourcesAndDie();
@@ -79,8 +79,8 @@ var roleCourier = {
         }
 
         // We've moved to our source now look for resources within it's preferring collection point.
-        if (creepFillPercentage < 100 && creep.memory.harvesting == true) {
-            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.sourceId, sourceBoundaryDistance);
+        if (creepFillPercentage < 100 && creep.memory.harvesting) {
+            const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.source.id, sourceBoundaryDistance);
 
             if (droppedResources) {
                 const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
@@ -107,11 +107,11 @@ var roleCourier = {
             }
         }
 
-        if (creepFillPercentage == 100 || creep.memory.harvesting == false) {
+        if (creepFillPercentage === 100 || !creep.memory.harvesting) {
+
             creep.memory.harvesting = false;
 
             const targets = creep.findEnergyTransferTarget();
-
 
             // Head home so we're close to base when energy slots open up.
             if (targets.length == 0) {

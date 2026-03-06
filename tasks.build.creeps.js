@@ -104,7 +104,7 @@ var creepFactory = {
 
     logBuildQueueDetails: function (room, currentBuildJob) {
         console.log(
-            '  Build Queue: ' + room.memory.creepBuildQueue.queue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH +
+            '   - Build Queue: ' + room.memory.creepBuildQueue.queue.length + '/' + global.MAX_CREEP_BUILD_QUEUE_LENGTH +
             ' (' + currentBuildJob.name + '|' + this.bodyCost(currentBuildJob.body) + ')');
 
         const spawns = room.find(FIND_MY_STRUCTURES, {

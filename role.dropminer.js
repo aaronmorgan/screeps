@@ -10,10 +10,9 @@ let creepFactory = require('tasks.build.creeps');
 var roleDropMiner = {
 
     tryBuild: function (p_spawn, p_energyCapacityAvailable) {
-        const targetSourceId = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().dropminers)[0].id;
-        const source = Game.getObjectById(targetSourceId);
+        const targetSource = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().dropminers)[0];
 
-        const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+        const linkStructure = Game.getObjectById(targetSource.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
             filter: {
                 structureType: STRUCTURE_LINK
             }
@@ -46,13 +45,13 @@ var roleDropMiner = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            if (!targetSourceId) {
+            if (!targetSource) {
                 console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
                 return creepFactory.create(p_spawn, role.DROPMINER, bodyType, {
                     role: role.DROPMINER,
-                    sourceId: targetSourceId
+                    source: targetSource
                 });
             }
         }
@@ -60,7 +59,7 @@ var roleDropMiner = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-        const source = Game.getObjectById(creep.memory.sourceId);
+        const source = Game.getObjectById(creep.memory.source.id);
         const harvestResult = creep.harvest(source);
 
         const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
