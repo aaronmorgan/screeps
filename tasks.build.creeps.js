@@ -95,9 +95,7 @@ var creepFactory = {
 
         this.logBuildQueueDetails(p_room, nextQueuedJob);
 
-        var buildCost = this.bodyCost(nextQueuedJob.body);
-
-        if (buildCost > p_room.energyCapacityAvailable) {
+        if (this.bodyCost(nextQueuedJob.body) > p_room.energyCapacityAvailable) {
             p_room.memory.creepBuildQueue.queue.shift();
         }
     },

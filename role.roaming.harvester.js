@@ -21,9 +21,9 @@ var roleRoamingHarvester = {
         }
 
         const roomExits = Game.map.describeExits(spawn.room.name);
-        var targetRoom = undefined;
+        let targetRoom = undefined;
 
-        var exit = roomExits[1];
+        let exit = roomExits[1];
 
         if (exit && (!Memory.rooms[exit] || !Memory.rooms[exit].isMapped)) {
             targetRoom = exit;

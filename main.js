@@ -1,3 +1,5 @@
+// 1. Check the Dropminer's Link before building a second one. If the sources are both close together both Dropminers might share the same Link structure.
+
 require("prototype.room")();
 
 const { role, global } = require("game.constants");
@@ -9,7 +11,7 @@ const roleDropMiner = require("role.dropminer");
 const roleGopher = require("role.gopher");
 const roleHarvester = require("role.harvester");
 const roleLinkBaseHarvester = require("role.link.base.harvester");
-const roleRoamingHarvester = require("role.roaming.harvester");
+//const roleRoamingHarvester = require("role.roaming.harvester");
 const roleUpgrader = require("role.upgrader");
 
 let infrastructureTasks = require("tasks.infrastructure");
@@ -297,15 +299,31 @@ module.exports.loop = function () {
 
         // Summary of actual vs target numbers.
         if (spawn) {
-            console.log("  Builders: " + builders.length + "/" + maxBuilderCreeps + " " + (sufficientBuilders ? "✔️" : "❌"));
-            console.log("  Couriers: " + couriers.length + "/" + maxCourierCreeps + " " + (sufficientCouriers ? "✔️" : "❌"));
-            console.log("  Defenders: " + defenders.length + "/" + maxDefenderCreeps + " " + (sufficientDefenders ? "✔️" : "❌"));
-            console.log("  Drop Miners: " + dropminers.length + "/" + maxDropMinerCreeps + " " + (sufficientDropMiners ? "✔️" : "❌"));
-            console.log("  Gophers: " + gophers.length + "/" + maxGopherCreeps + " " + (sufficientGophers ? "✔️" : "❌"));
-            console.log("  Harvesters: " + harvesters.length + "/" + maxHarvesterCreeps + " " + (sufficientHarvesters ? "✔️" : "❌"));
-            console.log("  LinkBaseHarvesters: " + linkBaseHarvesters.length + "/" + maxLinkBaseHarvesters + " " + (sufficientLinkBaseHarvesters ? "✔️" : "❌"));
+            if (maxBuilderCreeps > 0) {
+                console.log("  Builders: " + builders.length + "/" + maxBuilderCreeps + " " + (sufficientBuilders ? "✔️" : "❌"));
+            }
+            if (maxCourierCreeps > 0) {
+                console.log("  Couriers: " + couriers.length + "/" + maxCourierCreeps + " " + (sufficientCouriers ? "✔️" : "❌"));
+            }
+            if (maxDefenderCreeps > 0) {
+                console.log("  Defenders: " + defenders.length + "/" + maxDefenderCreeps + " " + (sufficientDefenders ? "✔️" : "❌"));
+            }
+            if (maxDropMinerCreeps > 0) {
+                console.log("  Drop Miners: " + dropminers.length + "/" + maxDropMinerCreeps + " " + (sufficientDropMiners ? "✔️" : "❌"));
+            }
+            if (maxGopherCreeps > 0) {
+                console.log("  Gophers: " + gophers.length + "/" + maxGopherCreeps + " " + (sufficientGophers ? "✔️" : "❌"));
+            }
+            if (maxHarvesterCreeps > 0) {
+                console.log("  Harvesters: " + harvesters.length + "/" + maxHarvesterCreeps + " " + (sufficientHarvesters ? "✔️" : "❌"));
+            }
+            if (maxLinkBaseHarvesters > 0) {
+                console.log("  LinkBaseHarvesters: " + linkBaseHarvesters.length + "/" + maxLinkBaseHarvesters + " " + (sufficientLinkBaseHarvesters ? "✔️" : "❌"));
+            }
             //console.log("  Roaming Harvesters: " + room.memory.roamingHarvesters.length + "/" + maxRoamingHarversterCreeps + " " + (sufficientRoamingHarvesters ? "✔️" : "❌"));
-            console.log("  Upgraders: " + upgraders.length + "/" + maxUpgraderCreeps + " " + (sufficientUpgraders ? "✔️" : "❌"));
+            if (maxUpgraderCreeps > 0) {
+                console.log("  Upgraders: " + upgraders.length + "/" + maxUpgraderCreeps + " " + (sufficientUpgraders ? "✔️" : "❌"));
+            }
 
             if (Game.time % 50 == 0) {
                 console.log("⚠️ INFO: Checking for deleted creeps...");
