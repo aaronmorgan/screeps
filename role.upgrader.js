@@ -74,7 +74,7 @@ var roleUpgrader = {
             const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
             if (target) {
-                var xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
+                const xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
 
                 if (!_.isEmpty(xyTileEnergy)) {
                     const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
