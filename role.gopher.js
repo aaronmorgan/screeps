@@ -129,6 +129,8 @@ var roleGopher = {
                 // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
                 creep.moveTo(target, { range: 2 });
 
+                // This is where we might suicide the creep, if say we have Dropminers and Couriers, but how to know?
+
                 if (!creep.pos.isEqualTo(target)) {
 
                     const moveToResult = creep.moveTo(target, {

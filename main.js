@@ -221,7 +221,7 @@ module.exports.loop = function () {
                 }
 
                 // May need to increase builder ceiling from 3 to 4.
-                maxBuilderCreeps = 1;// room.constructionSites().length > 0 ? 2 : 0;
+                maxBuilderCreeps = room.constructionSites().length > 0 ? 2 : 0;
                 // maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
                 maxDropMinerCreeps = (structures.link !== undefined && couriers.length > 0) ? 0 : dropMinersCount;
                 maxHarvesterCreeps = dropminers.length > 0 == 0 ? room.memory.sources.length : 0;
