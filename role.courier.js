@@ -2,7 +2,7 @@ const {
     role
 } = require('game.constants');
 
-const sourceBoundaryDistance = 3;
+const sourceBoundaryDistance = 5;
 
 require('prototype.creep')();
 
@@ -10,7 +10,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleCourier = {
 
-    tryBuild: function (spawn, energyCapacityAvailable) {
+    tryBuild: function (room, energyCapacityAvailable) {
         let bodyType = [];
         if (energyCapacityAvailable >= 600) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
@@ -29,13 +29,13 @@ var roleCourier = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            const targetSource = spawn.room.selectAvailableSource(spawn.room.creeps().couriers)[0];
+            const targetSource = room.selectAvailableSource(room.creeps().couriers)[0];
 
             if (!targetSource) {
                 console.log('ERROR: Attempting to create ' + role.COURIER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
-                return creepFactory.create(spawn, role.COURIER, bodyType, {
+                return creepFactory.create(room, role.COURIER, bodyType, {
                     role: role.COURIER,
                     source: targetSource,
                     harvesting: false
@@ -83,39 +83,49 @@ var roleCourier = {
             const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.source.id, sourceBoundaryDistance);
 
             if (droppedResources) {
-                const energyTarget = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
+                const resources = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
 
-                if (!_.isEmpty(energyTarget)) {
-                    let source = Game.getObjectById(energyTarget.id);
-
-                    const pickupResult = creep.pickup(source);
+                if (!_.isEmpty(resources)) {
+                    const resource = Game.getObjectById(resources.id);
+                    const pickupResult = creep.pickup(resource);
 
                     switch (pickupResult) {
                         case OK: {
-                            creep.memory.harvesting = false;
+                            //creep.memory.harvesting = false;
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
-                            creep.moveByPath(creep.pos.findPathTo(source.pos));
+                            //  creep.moveByPath(creep.pos.findPathTo(resource.pos));
+                            const moveToResult = creep.moveTo(resource, {
+                                visualizePathStyle: {
+                                    stroke: '#ffffff'
+                                }
+                            })
+
                             break;
                         }
                         case ERR_FULL: {
                             creep.memory.harvesting = false;
                         }
                     }
+                } else {
+                    // Cannot see any dropped resources in range, cancel harvesting state.
+                    creep.memory.harvesting = false;
                 }
+            } else {
+                console.log(34)
+                creep.memory.harvesting = false;
             }
         }
 
-        if (creepFillPercentage === 100 || !creep.memory.harvesting) {
-
+        if (creepFillPercentage > 85 || !creep.memory.harvesting) {
             creep.memory.harvesting = false;
 
             const targets = creep.findEnergyTransferTarget();
 
             // Head home so we're close to base when energy slots open up.
             if (targets.length == 0) {
-                const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
+                const target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
 
                 creep.moveTo(target);
 
@@ -132,6 +142,9 @@ var roleCourier = {
                     // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
                     // to pickup.
                     creep.dropResources();
+
+                    // Move off the target so we don't block other creeps if this one has no current job.
+                    creep.moveTo(target, { range: 1 })
                     return;
                 }
             }

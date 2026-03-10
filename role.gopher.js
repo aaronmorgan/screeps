@@ -8,7 +8,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleGopher = {
 
-    tryBuild: function (spawn, energyCapacityAvailable) {
+    tryBuild: function (room, energyCapacityAvailable) {
         let bodyType = [];
         if (energyCapacityAvailable >= 600) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
@@ -27,7 +27,7 @@ var roleGopher = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(spawn, role.GOPHER, bodyType, {
+            return creepFactory.create(room, role.GOPHER, bodyType, {
                 role: role.GOPHER,
                 harvesting: false,
                 targetedDroppedEnergy: undefined
@@ -59,7 +59,7 @@ var roleGopher = {
         }
 
         // Creep has no energy so we need to move to our source.
-        if (creepFillPercentage == 0 && creep.memory.harvesting == false) {
+        if (creepFillPercentage === 0 && !creep.memory.harvesting) {
             const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
             if (!energyTarget) {
@@ -81,9 +81,11 @@ var roleGopher = {
             }
 
             return;
+        } else if (creepFillPercentage === 100) {
+            creep.memory.harvesting = false;
         }
 
-        if (creepFillPercentage < 100 && creep.memory.harvesting == true) {
+        if (creepFillPercentage < 100 && creep.memory.harvesting) {
             const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
             if (!energyTarget) {
@@ -114,17 +116,18 @@ var roleGopher = {
             }
         }
 
-        if (creepFillPercentage == 100 || creep.memory.harvesting == false) {
+        if (!creep.memory.harvesting) {
             creep.memory.harvesting = false;
 
             const targets = creep.findEnergyTransferTarget();
-            
-            // Head home so we're close to base when energy slots open up.
-            if (targets.length == 0) {
-                //const target = Game.spawns['Spawn1'];
-                const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
 
-                creep.moveTo(target);
+            // Head home so we're close to base when energy slots open up.
+            if (targets.length === 0) {
+                //const target = Game.spawns['Spawn1'];
+                const target = Game.flags[creep.room.name + '_DUMP'];
+
+                // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
+                creep.moveTo(target, { range: 2 });
 
                 if (!creep.pos.isEqualTo(target)) {
 
@@ -139,8 +142,15 @@ var roleGopher = {
                     // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
                     // to pickup.
                     creep.dropResources();
+                    creep.memory.harvesting = false;
+
+                    // Move off the target so we don't block other creeps if this one has no current job.
+                    creep.moveTo(target, { range: 2 });
                     return;
                 }
+            } else {
+                creep.moveTo(Game.flags[creep.room.name + '_DUMP'], { range: 2 });
+                creep.memory.harvesting = false;
             }
 
             creep.say('🚄 ' + creepFillPercentage + '%');

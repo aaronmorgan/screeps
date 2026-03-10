@@ -16,9 +16,9 @@ const {
 
 var creepFactory = {
 
-    create: function (p_spawn, p_role, p_body, p_memory) {
+    create: function (room, p_role, p_body, p_memory) {
         this.enqueueBuildJob(
-            p_spawn, {
+            room, {
             body: p_body,
             name: p_role,
             memory: p_memory
@@ -27,16 +27,16 @@ var creepFactory = {
         return OK;
     },
 
-    validateCache: function (p_room) {
-        if (!p_room.memory.creepBuildQueue) {
-            this.clearBuildQueue(p_room);
+    validateCache: function (room) {
+        if (!room.memory.creepBuildQueue) {
+            this.clearBuildQueue(room);
         }
     },
 
-    enqueueBuildJob: function (p_spawn, p_buildJob) {
-        this.validateCache(p_spawn.room);
+    enqueueBuildJob: function (room, p_buildJob) {
+        this.validateCache(room);
 
-        if (p_spawn.room.memory.creepBuildQueue.queue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
+        if (room.memory.creepBuildQueue.queue.length >= global.MAX_CREEP_BUILD_QUEUE_LENGTH) {
             return;
         }
 
@@ -46,7 +46,7 @@ var creepFactory = {
         //     return;
         // }
 
-        p_spawn.room.memory.creepBuildQueue.queue.push(p_buildJob);
+        room.memory.creepBuildQueue.queue.push(p_buildJob);
         //console.log('INFO: New creep build job added, ' + p_room.memory.creepBuildQueue.queue.length + ' jobs queued');
     },
 

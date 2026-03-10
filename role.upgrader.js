@@ -8,16 +8,16 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleUpgrader = {
 
-    tryBuild: function (spawn, energyCapacityAvailable) {
+    tryBuild: function (room, energyCapacityAvailable) {
         let bodyType = [];
 
-        if (spawn.room.storage && energyCapacityAvailable >= 1750) {
+        if (room.storage && energyCapacityAvailable >= 1750) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE, MOVE
             ];
-        } else if (spawn.room.storage && energyCapacityAvailable >= 1000) {
+        } else if (room.storage && energyCapacityAvailable >= 1000) {
             bodyType = [
                 WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY,
@@ -42,7 +42,7 @@ var roleUpgrader = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(spawn, role.UPGRADER, bodyType, {
+            return creepFactory.create(room, role.UPGRADER, bodyType, {
                 role: role.UPGRADER,
                 upgrading: false
             });
@@ -71,7 +71,7 @@ var roleUpgrader = {
             }
         } else {
             // Look for dropped energy at the spawn dump site first.
-            const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
+            const target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
 
             if (target) {
                 const xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
@@ -97,8 +97,8 @@ var roleUpgrader = {
             // Then look for energy in the normal storage locations...
             const targets = _.filter(creep.room.structures().all, (structure) => {
                 return (
-                        structure.structureType == STRUCTURE_CONTAINER ||
-                        structure.structureType == STRUCTURE_STORAGE) &&
+                    structure.structureType == STRUCTURE_CONTAINER ||
+                    structure.structureType == STRUCTURE_STORAGE) &&
                     structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
             });
 

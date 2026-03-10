@@ -16,7 +16,7 @@ const ROLES = {
 
 var roleLinkBaseHarvester = {
 
-    tryBuild: function (spawn, energyCapacityAvailable) {
+    tryBuild: function (room, energyCapacityAvailable) {
         let bodyType = [];
         if (energyCapacityAvailable >= 500) {
             bodyType = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
@@ -31,7 +31,7 @@ var roleLinkBaseHarvester = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(spawn, role.LINK_BASE_HARVESTER, bodyType, {
+            return creepFactory.create(room, role.LINK_BASE_HARVESTER, bodyType, {
                 role: role.LINK_BASE_HARVESTER,
                 harvesting: false,
                 taskId: ROLES.Undefined
