@@ -8,7 +8,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleBuilder = {
 
-    tryBuild: function (spawn, energyCapacityAvailable) {
+    tryBuild: function (room, energyCapacityAvailable) {
         let bodyType = [];
 
         if (energyCapacityAvailable >= 850) {
@@ -26,7 +26,7 @@ var roleBuilder = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            return creepFactory.create(spawn, role.BUILDER, bodyType, {
+            return creepFactory.create(room, role.BUILDER, bodyType, {
                 role: role.BUILDER,
                 building: true,
                 ticksWithoutWork: 0
@@ -90,7 +90,7 @@ var roleBuilder = {
             }
         } else {
             // Look for dropped energy at the spawn dump site first.
-            const target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
+            const target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
 
             if (target) {
                 var xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);

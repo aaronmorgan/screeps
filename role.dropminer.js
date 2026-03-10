@@ -9,10 +9,54 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleDropMiner = {
 
-    tryBuild: function (p_spawn, p_energyCapacityAvailable) {
-        const targetSource = p_spawn.room.selectAvailableSource(p_spawn.room.creeps().dropminers)[0];
+    tryBuild: function (room, energyCapacityAvailable) {
+        const dropMiners = room.creeps().dropminers
 
-        const linkStructure = Game.getObjectById(targetSource.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+        let sourceIdWithFewestMiners = undefined;
+
+        if (dropMiners.length > 0) {
+            var minersForRoom = dropMiners.filter(miner => miner.room.name === room.name);
+
+            // Seed with all sources at 0 so unoccupied sources are included.
+            const roomSources = room.find(FIND_SOURCES);
+            const initialCounts = roomSources.reduce((acc, source) => {
+                acc[source.id] = 0;
+                return acc;
+            }, {});
+
+            // Count miners per source, starting from the seeded zero-counts.
+            const sourceIdsWithMinerCount = minersForRoom.reduce((acc, miner) => {
+                acc[miner.memory.source.id] = (acc[miner.memory.source.id] || 0) + 1;
+                return acc;
+            }, initialCounts);
+
+            // Build a lookup of accessPoints by source id to use later so we don't over
+            // allocate creeps per access point.
+            const accessPointsById = room.memory.sources.reduce((acc, source) => {
+                acc[source.id] = source.accessPoints;
+                return acc;
+            }, {});
+
+            // Exclude sources that have no remaining access points
+            const availableSources = Object.entries(sourceIdsWithMinerCount)
+                .filter(([id, count]) => count < (accessPointsById[id] || Infinity));
+
+            if (availableSources.length === 0) {
+                sourceIdWithFewestMiners = null; // No available sources
+            } else {
+                const leastCommonMinedId = availableSources.reduce(
+                    (min, entry) => entry[1] < min[1] ? entry : min
+                )[0];
+
+                sourceIdWithFewestMiners = Game.getObjectById(leastCommonMinedId);
+            }
+        }
+
+        if (!sourceIdWithFewestMiners) {
+            sourceIdWithFewestMiners = room.selectAvailableSource()[0];
+        }
+
+        const linkStructure = sourceIdWithFewestMiners.pos.findInRange(FIND_MY_STRUCTURES, 3, {
             filter: {
                 structureType: STRUCTURE_LINK
             }
@@ -27,31 +71,31 @@ var roleDropMiner = {
 
         let bodyType = [];
 
-        if (p_energyCapacityAvailable >= 700) {
+        if (energyCapacityAvailable >= 700) {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, lastPart];
-            p_spawn.room.memory.minersPerSource = 1;
-        } else if (p_energyCapacityAvailable >= 600) {
+            room.memory.minersPerSource = 1;
+        } else if (energyCapacityAvailable >= 600) {
             bodyType = [WORK, WORK, WORK, WORK, WORK, MOVE, lastPart]; // 5 WORK parts mine exactly 3000 energy every 300 ticks.
-            p_spawn.room.memory.minersPerSource = 1;
-        } else if (p_energyCapacityAvailable >= 400) {
+            room.memory.minersPerSource = 1;
+        } else if (energyCapacityAvailable >= 400) {
             bodyType = [WORK, WORK, WORK, MOVE, lastPart];
-            p_spawn.room.memory.minersPerSource = 2;
-        } else if (p_energyCapacityAvailable >= 350) {
+            room.memory.minersPerSource = 2;
+        } else if (energyCapacityAvailable >= 350) {
             bodyType = [WORK, WORK, WORK, lastPart];
-            p_spawn.room.memory.minersPerSource = 2;
+            room.memory.minersPerSource = 2;
         } else {
             bodyType = [WORK, WORK, MOVE, lastPart];
-            p_spawn.room.memory.minersPerSource = 2;
+            room.memory.minersPerSource = 2;
         }
 
         if (!_.isEmpty(bodyType)) {
-            if (!targetSource) {
+            if (!sourceIdWithFewestMiners) {
                 console.log('ERROR: Attempting to create ' + role.DROPMINER + ' with an assigned source');
                 return EXIT_CODE.ERR_INVALID_TARGET;
             } else {
-                return creepFactory.create(p_spawn, role.DROPMINER, bodyType, {
+                return creepFactory.create(room, role.DROPMINER, bodyType, {
                     role: role.DROPMINER,
-                    source: targetSource
+                    source: sourceIdWithFewestMiners
                 });
             }
         }
@@ -60,6 +104,10 @@ var roleDropMiner = {
     /** @param {Creep} creep **/
     run: function (creep) {
         const source = Game.getObjectById(creep.memory.source.id);
+
+        if (!creep.memory.source) {
+            creep.memory.source = source;
+        }
         const harvestResult = creep.harvest(source);
 
         const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {

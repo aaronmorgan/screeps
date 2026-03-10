@@ -104,7 +104,7 @@ module.exports = function () {
 
     Room.prototype.selectAvailableSource =
         function (creeps) {
-            if (creeps.length == 0) {
+            if (!creeps || creeps.length === 0) {
                 return this.sources();
             }
 

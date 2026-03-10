@@ -270,7 +270,7 @@ var roleRoamingHarvester = {
             }
 
             if (!target && targets.length === 0) {
-                target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
+                target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
             }
 
             if (!creep.pos.isEqualTo(target)) {
