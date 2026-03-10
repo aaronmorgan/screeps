@@ -9,7 +9,7 @@ let creepFactory = require('tasks.build.creeps');
 
 var roleHarvester = {
 
-    tryBuild: function (spawn, energyCapacityAvailable) {
+    tryBuild: function (room, energyCapacityAvailable) {
         let bodyType = [];
 
         if (energyCapacityAvailable >= 500) {
@@ -25,18 +25,57 @@ var roleHarvester = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            const targetSource = spawn.room.selectAvailableSource(spawn.room.creeps().harvesters)[0];
+            const harvesters = room.creeps().harvesters
 
-            if (!targetSource) {
-                console.log('ERROR: Attempting to create ' + role.HARVESTER + ' with an assigned source');
-                return EXIT_CODE.ERR_INVALID_TARGET;
-            } else {
-                return creepFactory.create(spawn, role.HARVESTER, bodyType, {
-                    role: role.HARVESTER,
-                    source: targetSource,
-                    isHarvesting: true
-                });
+            let sourceIdWithFewestMiners = undefined;
+
+            if (harvesters.length > 0) {
+                var harvestersForRoom = harvesters.filter(miner => miner.room.name === room.name);
+
+                // Seed with all sources at 0 so unoccupied sources are included.
+                const roomSources = room.find(FIND_SOURCES);
+                const initialCounts = roomSources.reduce((acc, source) => {
+                    acc[source.id] = 0;
+                    return acc;
+                }, {});
+
+                // Count miners per source, starting from the seeded zero-counts.
+                const sourceIdsWithMinerCount = harvestersForRoom.reduce((acc, miner) => {
+                    acc[miner.memory.source.id] = (acc[miner.memory.source.id] || 0) + 1;
+                    return acc;
+                }, initialCounts);
+
+                // Build a lookup of accessPoints by source id to use later so we don't over
+                // allocate creeps per access point.
+                const accessPointsById = room.memory.sources.reduce((acc, source) => {
+                    acc[source.id] = source.accessPoints;
+                    return acc;
+                }, {});
+
+                // Exclude sources that have no remaining access points
+                const availableSources = Object.entries(sourceIdsWithMinerCount)
+                    .filter(([id, count]) => count < (accessPointsById[id] || Infinity));
+
+                if (availableSources.length === 0) {
+                    sourceIdWithFewestMiners = null; // No available sources
+                } else {
+                    const leastCommonMinedId = availableSources.reduce(
+                        (min, entry) => entry[1] < min[1] ? entry : min
+                    )[0];
+
+                    sourceIdWithFewestMiners = Game.getObjectById(leastCommonMinedId);
+                }
             }
+
+            if (!sourceIdWithFewestMiners) {
+                sourceIdWithFewestMiners = room.selectAvailableSource()[0];
+            }
+
+            return creepFactory.create(room, role.HARVESTER, bodyType, {
+                role: role.HARVESTER,
+                source: sourceIdWithFewestMiners,
+                isHarvesting: true
+            });
         }
     },
 
@@ -132,7 +171,7 @@ var roleHarvester = {
             const targets = creep.findEnergyTransferTarget();
 
             if (targets.length == 0) {
-                var target = Game.flags[Game.spawns['Spawn1'].name + '_DUMP'];
+                var target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
 
                 if (!creep.pos.isEqualTo(target)) {
                     creep.moveTo(target, {
