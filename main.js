@@ -39,7 +39,7 @@ module.exports.loop = function () {
         room.droppedResources();
         room.getDistanceToRCL();
 
-        //room.memory.isInit = false;
+        // room.memory.isInit = false;
 
         if (room.memory.isInit === undefined || !room.memory.isInit) {
             console.log('Instantiating room memory...')
@@ -188,30 +188,42 @@ module.exports.loop = function () {
         // TODO Only do this mod n times, e.g. % 10.
         infrastructureTasks.buildLinks(room);
 
+        const totalAccessPoints = room.memory.sources.reduce((accumulator, sourceObj) => {
+            return accumulator + sourceObj.accessPoints;
+        }, 0);
+
         switch (room.controller.level) {
             case 0: {
                 break;
             }
             case 1: {
+
                 room.memory.game.phase = 1;
                 // Goal is to quickly get to RCL 2 by creating two Upgraders.
                 // Builders are extra and in preparation for RCL 2 construction projects.
                 maxBuilderCreeps = room.constructionSites().length > 0 ? 2 : 0;
                 maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
-                maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
+                maxHarvesterCreeps = maxDropMinerCreeps == 0 ? totalAccessPoints : 0;
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
                 maxRoamingHarversterCreeps = 4;
                 maxUpgraderCreeps = 2;
-                maxGopherCreeps = 1;
+                maxGopherCreeps = Math.max(1, Math.floor(harvesters.length / 2));
 
                 break;
             }
             case 2: {
                 room.memory.game.phase = 2;
 
+                let dropMinersCount = room.memory.sources.length;
+
+                if (2 * room.memory.sources.length < totalAccessPoints) {
+                    dropMinersCount = 2 * room.memory.sources.length;
+                }
+
                 // May need to increase builder ceiling from 3 to 4.
                 maxBuilderCreeps = 1;// room.constructionSites().length > 0 ? 2 : 0;
-                maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
+                // maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
+                maxDropMinerCreeps = (structures.link !== undefined && couriers.length > 0) ? 0 : dropMinersCount;
                 maxHarvesterCreeps = dropminers.length > 0 == 0 ? room.memory.sources.length : 0;
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
                 //maxUpgraderCreeps = Math.max(1, Math.floor(room.memory.controller.path.length / 10)) + 1;
@@ -400,39 +412,39 @@ module.exports.loop = function () {
 
                 // HARVESTERS
                 if (!sufficientHarvesters) {
-                    roleHarvester.tryBuild(spawn, energyAvailable);
+                    roleHarvester.tryBuild(room, energyAvailable);
                 }
                 // ROAMING HARVESTERS
                 // if (!sufficientRoamingHarvesters) {
-                //     roleRoamingHarvester.tryBuild(spawn, energyCapacityAvailable);
+                //     roleRoamingHarvester.tryBuild(room, energyCapacityAvailable);
                 // }
                 // GOPHERS
                 if (!sufficientGophers) {
-                    roleGopher.tryBuild(spawn, energyAvailable);
+                    roleGopher.tryBuild(room, energyAvailable);
                 }
                 // DEFENDERS
                 if (!sufficientDefenders) {
-                    roleDefender.tryBuild(spawn, energyAvailable);
+                    roleDefender.tryBuild(room, energyAvailable);
                 }
                 // LINK BASE HARVESTERS
                 if (!sufficientLinkBaseHarvesters) {
-                    roleLinkBaseHarvester.tryBuild(spawn, energyAvailable);
+                    roleLinkBaseHarvester.tryBuild(room, energyAvailable);
                 }
                 // COURIERS
                 if (!sufficientCouriers) {
-                    roleCourier.tryBuild(spawn, energyAvailable);
+                    roleCourier.tryBuild(room, energyAvailable);
                 }
                 // DROPMINERS
                 if (!sufficientDropMiners) {
-                    roleDropMiner.tryBuild(spawn, energyAvailable);
+                    roleDropMiner.tryBuild(room, energyAvailable);
                 }
                 // BUILDERS
                 if (!sufficientBuilders) {
-                    roleBuilder.tryBuild(spawn, energyAvailable);
+                    roleBuilder.tryBuild(room, energyAvailable);
                 }
                 // UPGRADERS
                 if (!sufficientUpgraders) {
-                    roleUpgrader.tryBuild(spawn, energyAvailable);
+                    roleUpgrader.tryBuild(room, energyAvailable);
                 }
             }
 
