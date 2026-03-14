@@ -6,6 +6,7 @@ module.exports.EXIT_CODE = {
     '-2': 'ERR_NO_PATH',
     '-3': 'ERR_NAME_EXISTS',
     '-4': 'ERR_BUSY',
+    '-5': 'ERR_NOT_FOUND',
     '-6': 'ERR_NOT_ENOUGH_ENERGY',
     '-7': 'ERR_INVALID_TARGET',
     '-8': 'ERR_FULL',

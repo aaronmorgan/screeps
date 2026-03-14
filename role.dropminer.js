@@ -103,14 +103,25 @@ var roleDropMiner = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-        const source = Game.getObjectById(creep.memory.source.id);
+        const harvestResult = creep.harvest(Game.getObjectById(creep.memory.source.id));
 
-        if (!creep.memory.source) {
-            creep.memory.source = source;
+        switch (harvestResult) {
+            case (ERR_NOT_IN_RANGE): {
+                const moveToResult = creep.moveTo(creep.memory.source.pos, {
+                    visualizePathStyle: {
+                        stroke: '#ffffff'
+                    }
+                });
+
+                if (moveToResult === ERR_NOT_IN_RANGE) {
+                    return;
+                }
+
+                break;
+            }
         }
-        const harvestResult = creep.harvest(source);
 
-        const linkStructure = Game.getObjectById(source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
+        const linkStructure = Game.getObjectById(creep.memory.source.id).pos.findInRange(FIND_MY_STRUCTURES, 3, {
             filter: {
                 structureType: STRUCTURE_LINK
             }
@@ -123,24 +134,33 @@ var roleDropMiner = {
 
             switch (transferResult) {
                 case (ERR_NOT_IN_RANGE): {
-                    creep.moveTo(linkStructure, {
+                    const moveToResult = creep.moveTo(linkStructure, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
                     });
+
+                    if (moveToResult !== OK) {
+                        return;
+                    };
+
                     break;
                 }
             }
         }
 
         if (harvestResult == ERR_NOT_IN_RANGE) {
-            creep.moveTo(source, {
+            const moveToResult = creep.moveTo(Game.getObjectById(creep.memory.source.id), {
                 visualizePathStyle: {
                     stroke: '#ffaa00'
                 }
             });
 
-            return creep.harvest(source);
+            if (moveToResult !== OK) {
+                return;
+            };
+
+            return creep.harvest(creep.memory.source);
         }
     }
 };
