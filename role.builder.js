@@ -44,11 +44,11 @@ var roleBuilder = {
             creep.say('🔨 ' + creepFillPercentage + '%')
         }
 
-        if (creep.memory.building && creep.carry.energy == 0) {
+        if (creep.memory.building && creep.carry.energy === 0) {
             creep.memory.building = false;
         }
 
-        if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
+        if (!creep.memory.building && creep.carry.energy === creep.carryCapacity) {
             creep.memory.building = true;
         }
 
@@ -56,7 +56,7 @@ var roleBuilder = {
             let targets = creep.room.constructionSites();
 
             // Attempt to resupply Spawn if there are no couriers.
-            if (creep.room.memory.creeps.harvesters == 0 && creep.room.memory.creeps.couriers == 0) {
+            if (creep.room.memory.creeps.harvesters === 0 && creep.room.memory.creeps.couriers === 0) {
                 if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                     targets.push(Game.spawns['Spawn1']);
                 }
@@ -70,9 +70,14 @@ var roleBuilder = {
                 });
 
                 const closestBuildingSite = creep.pos.findClosestByPath(targets);
+                const buildResult = creep.build(closestBuildingSite);
 
-                if (creep.build(closestBuildingSite) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(closestBuildingSite, {
+                if (buildResult === ERR_INVALID_TARGET) {
+                    if (creep.pos == closestBuildingSite.pos) {
+                        creep.moveTo(closestBuildingSite, { range: 3 })
+                    }
+                } else if (buildResult === ERR_NOT_IN_RANGE) {
+                    const moveToResult = creep.moveTo(closestBuildingSite, {
                         reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffffff'
@@ -90,12 +95,20 @@ var roleBuilder = {
             }
         } else {
             // Look for dropped energy at the spawn dump site first.
-            const target = Game.flags[creep.room.name + '_DUMP'];
+            const flag = Game.flags[creep.room.name + '_DUMP'];
 
-            if (target) {
-                var xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
+            if (flag) {
+                const distanceToLookAt = 2;
 
-                if (!_.isEmpty(xyTileEnergy)) {
+                var xyTileEnergy = creep.room.lookForAtArea(
+                    LOOK_ENERGY,
+                    flag.pos.y - distanceToLookAt,
+                    flag.pos.x - distanceToLookAt,
+                    flag.pos.y + distanceToLookAt,
+                    flag.pos.x + distanceToLookAt,
+                    true);
+
+                if (xyTileEnergy && xyTileEnergy.length > 0) {
                     const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
                     const pickupResult = creep.pickup(droppedEnergy);
 
@@ -110,14 +123,17 @@ var roleBuilder = {
                     creep.memory.building = true;
 
                     return;
+                } else {
+                    // No available energy.
+                    return;
                 }
             }
 
             // Then look for energy in the normal storage locations...
             let targets = _.filter(creep.room.structures().all, (structure) => {
                 return (structure.structureType == STRUCTURE_CONTAINER ||
-                        structure.structureType == STRUCTURE_STORAGE) &&
-                        structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+                    structure.structureType == STRUCTURE_STORAGE) &&
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
             });
 
             if (targets.length > 0) {
@@ -137,6 +153,8 @@ var roleBuilder = {
                         });
                     }
                 }
+            } else {
+                // We cannot find any targets, are we sitting on the flag preventing energy from being dropped?
             }
         }
     }
