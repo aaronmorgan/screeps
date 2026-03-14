@@ -3,14 +3,9 @@ const { EXIT_CODE } = require("game.constants");
 var infrastructureTasks = {
     processJobs: function (spawn, rclLevel, jobs) {
         for (let i = 0; i < jobs.length; i++) {
-            // if (jobs[i].built === true) {
-            //continue;
-            // Need a mechanism to determine if structures need rebuilding.
-
-            // TODO: Do we get this for free by checking our room override 'structures', which should stay 
-            // somewhat up to date with the structure count. If the job.count is not a match then we 
-            // requeue the job?
-            // }
+            if (jobs[i].built) {
+                continue;
+            }
 
             let job = jobs[i];
             let specialSite = false;
@@ -259,6 +254,7 @@ var infrastructureTasks = {
                 if (job.x > 49 || job.y > 49) {
                     job.x = 0;
                     job.y = 0;
+
                 }
             }
 
@@ -266,27 +262,43 @@ var infrastructureTasks = {
             let y = 0;
 
             // No set location is defined, so pick something.
-            if (job.x === 0 && job.y === 0) {
+            if (job.x === 0 && job.y === 0 && !job.built) {
                 let structures = [];
 
                 switch (job.type) {
                     case STRUCTURE_EXTENSION: {
-                        structures = spawn.room.structures().extensions;
+                        structures = spawn.room.find(FIND_STRUCTURES, {
+                            filter: { structureType: STRUCTURE_EXTENSION }
+                        });
+
                         break;
                     }
                     case STRUCTURE_CONTAINER: {
-                        structures = spawn.room.structures().containers;
+                        structures = spawn.room.find(FIND_STRUCTURES, {
+                            filter: { structureType: STRUCTURE_CONTAINER }
+                        });
+
                         break;
                     }
                     case STRUCTURE_TOWER: {
-                        structures = spawn.room.structures().towers;
+                        structures = spawn.room.find(FIND_STRUCTURES, {
+                            filter: { structureType: STRUCTURE_TOWER }
+                        });
+
                         break;
                     }
                 }
 
-                if (!structures || structures.length < job.count) {
+                if (structures.length >= job.count) {
+                    // Mark this job as done and iterate to the next in the RCL group.
+                    job.built = true;
+
+                    continue;
+                } else {
+                    // We haven't maxed out the job structure count yet, keep building.
+
                     // TODO: In time put the pos to build around on the job array, instead of passing spawn.pos each time.
-                    const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn);
+                    const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn.room);
 
                     // TODO: Potential here for the above checks to fail and not assign xy values to job.
                     x = xCoord;
@@ -314,7 +326,8 @@ var infrastructureTasks = {
             if (
                 tileObjects.length < 3 &&
                 tileObjects[0].type == "terrain" &&
-                tileObjects[0].terrain != "wall"
+                tileObjects[0].terrain != "wall" &&
+                tileObjects[0].terrain != "swamp"
             ) {
                 let result = spawn.room.createConstructionSite(x, y, job.type);
                 switch (result) {
@@ -339,7 +352,7 @@ var infrastructureTasks = {
                     }
                 }
             } else {
-                let tile = tileObjects[0];
+                const tile = tileObjects[0];
                 if (tile.type == "constructionSite") {
                     continue;
                 }
@@ -409,56 +422,82 @@ var infrastructureTasks = {
     },
 
     locateSpawnDumpLocation: function (room) {
-        if (!room.structures().spawn || room.structures().container) return;
+        if (!room.structures().spawn || room.structures().container) {
+            return;
+        }
 
         const spawn = room.structures().spawn[0];
 
+        // If we have a Storage structure remove the dump flag, it should no longer be required.
         if (room.structures().storage) {
-            const flags = spawn.room
-                .lookAt(spawn.pos.x, spawn.pos.y + 4)
-                .filter(function (x) {
-                    return x.type == "flag";
-                });
+            const roomFlag = Game.flags[room.name + '_DUMP'];
 
-            if (_.isEmpty(flags)) return;
-
-            Game.flags[flags[0].flag.name].remove();
+            if (roomFlag) {
+                Game.flags[roomFlag.name].remove();
+            }
 
             return;
         }
-        new RoomPosition(spawn.pos.x, spawn.pos.y + 4, room.name).createFlag(
-            spawn.name + "_DUMP"
-        );
+
+        // Cast around for a random location within 4 tiles of the spawn to site the Dump flag.
+        const [buildAtX, buildAtY] = this.determineBuildLocation(spawn.pos, { range: 3 }, room);
+
+        new RoomPosition(buildAtX, buildAtY, room.name).createFlag(room.name + "_DUMP");
     },
 
-    // Look around the Spawn position for free Terrain tiles to build on, increasing the range until we find a spot.
-    determineBuildLocation: function (pos, job, spawn) {
+    /** 
+     * Look around the Spawn position for free Terrain tiles to build on, increasing the range until we find a spot.
+     * 
+     * @param {any} pos The position we're going to build around.
+     * @param {any} job The job object we're trying to build, e.g. Extension.
+     * @param {any} room The room object we're building within.
+     */
+    determineBuildLocation: function (pos, job, room) {
         let range = job.range;
+        let directions = [];
+
+        const spawnAdjacentCoords = [-1, 0, 1];
+
+        for (let i = 0; i < 12; i++) {
+            // Find a random number between 3 and -1 and floor it, this will create a rante -1 to 1 giving us options of -1, 0 and 1 for the x y.
+            let x = Math.floor(Math.random() * 3 - 1)
+            let y = Math.floor(Math.random() * 3 - 1)
+
+            if (Math.random(100) % 2 === 0) {
+                x += range;
+            } else {
+                y += range;
+            }
+
+            // We don't want the structure to touch the spawn so ensure if there is a position adjacent to the spawn discard it.
+            if (spawnAdjacentCoords.includes(x) && spawnAdjacentCoords.includes(y)) {
+                i--;
+
+                continue;
+            }
+
+            directions.push([Math.ceil(range, x), Math.ceil(range, y)]);
+
+        }
 
         // Iterate around the point and if no site is available extend the range and repeat. No break condition, this shouldn't fail...
         while (true) {
-            // TODO: Maybe randomise this list of locations?
-            for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, 1], [1, -1]]) {
+            for (const [x, y] of directions) {
+                // Determine the row and column of the target site, adding range which is positive to a maybe negative number.
+                const buildAtX = pos.x + x;
+                const buildAtY = pos.y + y;
 
-                const rangeRow = dr < 0 ? Math.abs(job.range) : job.range;
-                const rangeCol = dc < 0 ? Math.abs(job.range) : job.range;
+                const tileObjects = room.lookAt(buildAtX, buildAtY);
 
-                const buildAtX = pos.x + dc + rangeCol;
-                const buildAtY = pos.y + dr + rangeRow;
+                const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
 
-                const tileObjects = spawn.room.lookAt(buildAtX, buildAtY);
-
-                if (tileObjects.length === 1) {
-                    const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
-
-                    if (terrain.terrain === "plain") {
-                        return [buildAtX, buildAtY];
-                    }
+                if (terrain && terrain.terrain === 'plain') {
+                    return [buildAtX, buildAtY];
                 }
             }
 
             // Increase the range to look further out for a build site.
-            range++;
+            range += 1;
         }
     }
 };
