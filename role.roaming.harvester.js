@@ -200,7 +200,6 @@ var roleRoamingHarvester = {
 
                         if (sourceRoom) {
                             // Find closest source to a specific position (e.g., center of that room)
-                            console.log('aaa', JSON.stringify(Game.rooms[sourceRoom]))
                             let room = Game.rooms[sourceRoom]
 
                             if (room) {
@@ -270,7 +269,7 @@ var roleRoamingHarvester = {
             }
 
             if (!target && targets.length === 0) {
-                target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
+                target = Game.flags[creep.room.name + '_DUMP'];
             }
 
             if (!creep.pos.isEqualTo(target)) {

@@ -81,8 +81,11 @@ var roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
+        // TODO: Disabled to see if keeping harvesters around until they naturally die off after dropminers are introduced
+        // speeds up resource collection significantly.
+
         // Harvesters can get in the way of dropminers, if we have the necessary replacement creeps, die early.
-        if (creep.room.memory.creeps.dropminers > 0 && creep.room.memory.creeps.couriers > 0) {
+        if (creep.room.memory.creeps.dropminers === creep.room.memory.maxDropMinerCreeps && creep.room.memory.creeps.couriers > 0) {
             creep.dropResourcesAndDie();
         }
 
@@ -171,7 +174,16 @@ var roleHarvester = {
             const targets = creep.findEnergyTransferTarget();
 
             if (targets.length == 0) {
-                var target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
+                var target = Game.flags[creep.room.name + '_DUMP'];
+
+                if (!target) {
+                    for (const resourceType in creep.store) {
+                        creep.drop(resourceType);
+                    }
+                    creep.memory.isHarvesting = true;
+
+                    return;
+                }
 
                 if (!creep.pos.isEqualTo(target)) {
                     creep.moveTo(target, {

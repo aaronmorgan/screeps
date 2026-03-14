@@ -90,7 +90,7 @@ var roleBuilder = {
             }
         } else {
             // Look for dropped energy at the spawn dump site first.
-            const target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
+            const target = Game.flags[creep.room.name + '_DUMP'];
 
             if (target) {
                 var xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
