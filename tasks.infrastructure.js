@@ -290,6 +290,13 @@ var infrastructureTasks = {
                     }
                 }
 
+                // If necessary mark this job as done and iterate to the next in the RCL group.
+                if (structures.length >= job.count) {
+                    job.built = true;
+
+                    continue;
+                }
+
                 // TODO: In time put the pos to build around on the job array, instead of passing spawn.pos each time.
                 const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn.room);
 
