@@ -2,7 +2,7 @@ const {
     role
 } = require('game.constants');
 
-const sourceBoundaryDistance = 5;
+const sourceBoundaryDistance = 2;
 
 require('prototype.creep')();
 
@@ -29,18 +29,57 @@ var roleCourier = {
         }
 
         if (!_.isEmpty(bodyType)) {
-            const targetSource = room.selectAvailableSource(room.creeps().couriers)[0];
+            const couriers = room.creeps().couriers;
 
-            if (!targetSource) {
-                console.log('ERROR: Attempting to create ' + role.COURIER + ' with an assigned source');
-                return EXIT_CODE.ERR_INVALID_TARGET;
-            } else {
-                return creepFactory.create(room, role.COURIER, bodyType, {
-                    role: role.COURIER,
-                    source: targetSource,
-                    harvesting: false
-                });
+            let sourceIdWithFewestCouriers = undefined;
+
+            if (couriers.length > 0) {
+                var couriersForRoom = couriers.filter(courier => courier.room.name === room.name);
+
+                // Seed with all sources at 0 so unoccupied sources are included.
+                const roomSources = room.find(FIND_SOURCES);
+                const initialCounts = roomSources.reduce((acc, source) => {
+                    acc[source.id] = 0;
+                    return acc;
+                }, {});
+
+                // Count couriers per source, starting from the seeded zero-counts.
+                const sourceIdsWithCourierCount = couriersForRoom.reduce((acc, courier) => {
+                    acc[courier.memory.source.id] = (acc[courier.memory.source.id] || 0) + 1;
+                    return acc;
+                }, initialCounts);
+
+                // Build a lookup of accessPoints by source id to use later so we don't over
+                // allocate creeps per access point.
+                const accessPointsById = room.memory.sources.reduce((acc, source) => {
+                    acc[source.id] = source.accessPoints;
+                    return acc;
+                }, {});
+
+                // Exclude sources that have no remaining access points
+                const availableSources = Object.entries(sourceIdsWithCourierCount)
+                    .filter(([id, count]) => count < (accessPointsById[id] || Infinity));
+
+                if (availableSources.length === 0) {
+                    sourceIdWithFewestCouriers = null; // No available sources
+                } else {
+                    const leastCommonSourceId = availableSources.reduce(
+                        (min, entry) => entry[1] < min[1] ? entry : min
+                    )[0];
+
+                    sourceIdWithFewestCouriers = Game.getObjectById(leastCommonSourceId);
+                }
             }
+
+            if (!sourceIdWithFewestCouriers) {
+                sourceIdWithFewestCouriers = room.selectAvailableSource()[0];
+            }
+
+            return creepFactory.create(room, role.COURIER, bodyType, {
+                role: role.COURIER,
+                source: sourceIdWithFewestCouriers,
+                harvesting: false
+            });
         }
     },
 
@@ -53,18 +92,23 @@ var roleCourier = {
             creep.say('🚚 ' + creepFillPercentage + '%');
         }
 
+        if (creepFillPercentage === 100) {
+            creep.memory.harvesting = false;
+        }
+
         // Creep has no energy so we need to move to our source.
         if (creepFillPercentage === 0 && !creep.memory.harvesting) {
-
             var path = creep.pos.findPathTo(creep.memory.source.pos);
 
             if (creep.ticksToLive < (path.length * 2)) {
                 creep.dropResourcesAndDie();
             }
 
-            path = path.slice(0, path.length - sourceBoundaryDistance);
-
-            const moveResult = creep.moveByPath(path);
+            const moveResult = creep.moveTo(Game.getObjectById(creep.memory.source.id), {
+                visualizePathStyle: {
+                    stroke: '#ffffff'
+                }
+            })
 
             switch (moveResult) {
                 case OK: {
@@ -72,31 +116,36 @@ var roleCourier = {
                     break;
                 }
                 case ERR_NOT_IN_RANGE:
-                    return;
+                case ERR_NOT_FOUND:
                 default:
                     return;
             }
+
+            return;
         }
 
         // We've moved to our source now look for resources within it's preferring collection point.
         if (creepFillPercentage < 100 && creep.memory.harvesting) {
+            // Don't look too far from the source so use sourceBoundryPosition to create a range to look within. 
+            // If this range is too large the creep might favor resources from another source and ignore it's primary target.
             const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.source.id, sourceBoundaryDistance);
 
-            if (droppedResources) {
+            if (droppedResources && droppedResources.length > 0) {
                 const resources = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
 
                 if (!_.isEmpty(resources)) {
-                    const resource = Game.getObjectById(resources.id);
-                    const pickupResult = creep.pickup(resource);
+                    const target = Game.getObjectById(resources.id);
+
+                    const pickupResult = creep.pickup(target);
 
                     switch (pickupResult) {
                         case OK: {
-                            //creep.memory.harvesting = false;
+                            creep.memory.harvesting = true;
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
                             //  creep.moveByPath(creep.pos.findPathTo(resource.pos));
-                            const moveToResult = creep.moveTo(resource, {
+                            const moveToResult = creep.moveTo(target, {
                                 visualizePathStyle: {
                                     stroke: '#ffffff'
                                 }
@@ -113,9 +162,10 @@ var roleCourier = {
                     creep.memory.harvesting = false;
                 }
             } else {
-                console.log(34)
                 creep.memory.harvesting = false;
             }
+
+            return;
         }
 
         if (creepFillPercentage > 85 || !creep.memory.harvesting) {
@@ -124,18 +174,21 @@ var roleCourier = {
             const targets = creep.findEnergyTransferTarget();
 
             // Head home so we're close to base when energy slots open up.
-            if (targets.length == 0) {
-                const target = Game.flags[Game.spawns['Spawn1'].room.name + '_DUMP'];
+            if (targets.length === 0) {
+                const target = Game.flags[creep.room.name + '_DUMP'];
 
                 creep.moveTo(target);
 
                 if (!creep.pos.isEqualTo(target)) {
-
                     const moveToResult = creep.moveTo(target, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
                     })
+
+                    // if (moveToResult === 0) {
+                    //     creep.dropResources();
+                    // }
 
                     return;
                 } else {
@@ -144,7 +197,7 @@ var roleCourier = {
                     creep.dropResources();
 
                     // Move off the target so we don't block other creeps if this one has no current job.
-                    creep.moveTo(target, { range: 1 })
+                    creep.moveTo(target, { range: 2 })
                     return;
                 }
             }
