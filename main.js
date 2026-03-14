@@ -39,9 +39,10 @@ module.exports.loop = function () {
         room.droppedResources();
         room.getDistanceToRCL();
 
-        // room.memory.isInit = false;
+        //room.memory.isInit = false;
 
-        if (room.memory.isInit === undefined || !room.memory.isInit) {
+        // Check the flag as well, just in case we spawn into a room we've already played before.
+        if (!room.memory.isInit || Game.flags[room.name + '_DUMP'] === undefined) {
             console.log('Instantiating room memory...')
 
             room.memory = {
@@ -53,9 +54,9 @@ module.exports.loop = function () {
             };
 
             room.determineSourceAccessPoints();
-        }
 
-        infrastructureTasks.locateSpawnDumpLocation(room);
+            infrastructureTasks.locateSpawnDumpLocation(room);
+        }
 
         if (!room.memory.creepBuildQueue) {
             if (!room.memory.game) {
@@ -63,6 +64,13 @@ module.exports.loop = function () {
                     phase: 1,
                 };
             }
+        }
+
+        const allStructures = room.find(FIND_RUINS, {
+        });
+
+        if (allStructures) {
+            //console.log(JSON.stringify(allStructures))
         }
 
         creepFactory.validateCache(room);
@@ -207,7 +215,7 @@ module.exports.loop = function () {
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
                 maxRoamingHarversterCreeps = 4;
                 maxUpgraderCreeps = 2;
-                maxGopherCreeps = Math.max(1, Math.floor(harvesters.length / 2));
+                maxGopherCreeps = 1;//Math.max(1, Math.floor(harvesters.length / 2));
 
                 break;
             }
@@ -287,6 +295,10 @@ module.exports.loop = function () {
                     maxLinkBaseHarvesters = 1;
                 }
             }
+        }
+
+        if (maxGopherCreeps === 0 && allStructures.length > 0) {
+            maxGopherCreeps = 1;
         }
 
         room.memory.maxBuilderCreeps = maxBuilderCreeps;
