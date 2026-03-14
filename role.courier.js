@@ -137,7 +137,6 @@ var roleCourier = {
 
                 if (resources) {
                     const target = Game.getObjectById(resources.energy.id);
-
                     const pickupResult = creep.pickup(target);
 
                     switch (pickupResult) {
@@ -170,15 +169,11 @@ var roleCourier = {
         }
 
         if (creepFillPercentage > 85 || !creep.memory.harvesting) {
-            creep.memory.harvesting = false;
-
             const targets = creep.findEnergyTransferTarget();
 
             // Head home so we're close to base when energy slots open up.
             if (targets.length === 0) {
                 const target = Game.flags[creep.room.name + '_DUMP'];
-
-                creep.moveTo(target);
 
                 if (!creep.pos.isEqualTo(target)) {
                     creep.moveTo(target, {
@@ -187,13 +182,8 @@ var roleCourier = {
                         }
                     })
                 } else {
-                    // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
-                    // to pickup.
+                    // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps to pickup.
                     creep.dropResources();
-
-                    // Move off the target so we don't block other creeps if this one has no current job.
-                    creep.moveTo(target, { range: 2 })
-                    return;
                 }
             }
         }
