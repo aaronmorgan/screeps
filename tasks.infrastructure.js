@@ -394,7 +394,7 @@ var infrastructureTasks = {
 
         // Only enqueue one construction site at a time.
         if (room.constructionSites().length > 0) {
-            //return;
+            return;
         }
 
         const spawn = room.structures().spawn[0];
