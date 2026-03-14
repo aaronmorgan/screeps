@@ -103,9 +103,9 @@ var roleDropMiner = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-        const harvestResult = creep.harvest(Game.getObjectById(creep.memory.source.id));
+        const targetSource = creep.harvest(Game.getObjectById(creep.memory.source.id));
 
-        switch (harvestResult) {
+        switch (targetSource) {
             case (ERR_NOT_IN_RANGE): {
                 const moveToResult = creep.moveTo(creep.memory.source.pos, {
                     visualizePathStyle: {
@@ -149,7 +149,7 @@ var roleDropMiner = {
             }
         }
 
-        if (harvestResult == ERR_NOT_IN_RANGE) {
+        if (targetSource == ERR_NOT_IN_RANGE) {
             const moveToResult = creep.moveTo(Game.getObjectById(creep.memory.source.id), {
                 visualizePathStyle: {
                     stroke: '#ffaa00'

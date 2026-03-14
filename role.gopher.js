@@ -58,8 +58,31 @@ var roleGopher = {
             };
         }
 
+        // If we're not full and there are ruins around, withdraw from those too.
+        if (creepFillPercentage < 100 && !creep.memory.harvesting) {
+            const ruin = creep.room.find(FIND_RUINS, { filter: x => x.store && x.store.energy > 0 })[0];
+
+            if (ruin) {
+                if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(ruin);
+
+                    return;
+                }
+            }
+        }
+
         // Creep has no energy so we need to move to our source.
         if (creepFillPercentage === 0 && !creep.memory.harvesting) {
+            const ruin = creep.pos.findClosestByRange(FIND_RUINS);
+
+            if (ruin) {
+                if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(ruin);
+
+                    return;
+                }
+            }
+
             const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
             if (!energyTarget) {
@@ -85,7 +108,25 @@ var roleGopher = {
             creep.memory.harvesting = false;
         }
 
+        if (creepFillPercentage === 100 && !creep.memory.harvesting) {
+            const target = Game.flags[creep.room.name + '_DUMP'];
+
+            // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
+            creep.moveTo(target, { range: 2 });
+
+        }
+
         if (creepFillPercentage < 100 && creep.memory.harvesting) {
+            const ruin = creep.pos.findClosestByRange(FIND_RUINS);
+            if (ruin) {
+                if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(ruin);
+
+                    return;
+                }
+            }
+            // TODO: Should the creep just hang around the flag/spawn and not venture further away?
+
             const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
             if (!energyTarget) {
@@ -116,44 +157,46 @@ var roleGopher = {
             }
         }
 
-        if (!creep.memory.harvesting) {
-            creep.memory.harvesting = false;
-
+        if (!creep.memory.harvesting && creepFillPercentage > 0) {
             const targets = creep.findEnergyTransferTarget();
 
             // Head home so we're close to base when energy slots open up.
+            let target = undefined;
+
             if (targets.length === 0) {
-                //const target = Game.spawns['Spawn1'];
-                const target = Game.flags[creep.room.name + '_DUMP'];
-
-                // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
-                creep.moveTo(target, { range: 2 });
-
-                // This is where we might suicide the creep, if say we have Dropminers and Couriers, but how to know?
-
-                if (!creep.pos.isEqualTo(target)) {
-
-                    const moveToResult = creep.moveTo(target, {
-                        visualizePathStyle: {
-                            stroke: '#ffffff'
-                        }
-                    })
-
-                    return;
-                } else {
-                    // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
-                    // to pickup.
-                    creep.dropResources();
-                    creep.memory.harvesting = false;
-
-                    // Move off the target so we don't block other creeps if this one has no current job.
-                    creep.moveTo(target, { range: 2 });
-                    return;
-                }
+                target = Game.flags[creep.room.name + '_DUMP'];
             } else {
-                creep.moveTo(Game.flags[creep.room.name + '_DUMP'], { range: 2 });
-                creep.memory.harvesting = false;
+                // Just select the first target in the collection.
+                target = targets[0];
             }
+
+            // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
+          //  creep.moveTo(target);
+
+            if (!creep.pos.isEqualTo(target)) {
+
+                const moveToResult = creep.moveTo(target, {
+                    visualizePathStyle: {
+                        stroke: '#ffffff'
+                    }
+                })
+
+                return;
+            } else {
+                // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
+                // to pickup.
+                creep.dropResources();
+                creep.memory.harvesting = false;
+
+                // Move off the target so we don't block other creeps if this one has no current job.
+                creep.moveTo(target);
+                return;
+            }
+
+            // } else {
+            //     creep.moveTo(Game.flags[creep.room.name + '_DUMP'], { range: 2 });
+            //     creep.memory.harvesting = false;
+            // }
 
             creep.say('🚄 ' + creepFillPercentage + '%');
         }
