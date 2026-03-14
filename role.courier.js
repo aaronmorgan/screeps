@@ -2,7 +2,7 @@ const {
     role
 } = require('game.constants');
 
-const sourceBoundaryDistance = 2;
+const sourceBoundaryDistance = 3;
 
 require('prototype.creep')();
 
@@ -131,10 +131,13 @@ var roleCourier = {
             const droppedResources = creep.room.droppedResourcesCloseToSource(creep.memory.source.id, sourceBoundaryDistance);
 
             if (droppedResources && droppedResources.length > 0) {
-                const resources = creep.pos.findClosestByPath(droppedResources.map(x => x.energy));
+                // Identify the largest dropped resource in the array of resources closest to us.
+                const resources = droppedResources.reduce((prev, current) => {
+                    return (prev.energy.amount > current.energy.amount) ? prev : current;
+                });
 
-                if (!_.isEmpty(resources)) {
-                    const target = Game.getObjectById(resources.id);
+                if (resources) {
+                    const target = Game.getObjectById(resources.energy.id);
 
                     const pickupResult = creep.pickup(target);
 
@@ -144,8 +147,7 @@ var roleCourier = {
                             break;
                         }
                         case ERR_NOT_IN_RANGE: {
-                            //  creep.moveByPath(creep.pos.findPathTo(resource.pos));
-                            const moveToResult = creep.moveTo(target, {
+                            creep.moveTo(target, {
                                 visualizePathStyle: {
                                     stroke: '#ffffff'
                                 }
@@ -180,17 +182,11 @@ var roleCourier = {
                 creep.moveTo(target);
 
                 if (!creep.pos.isEqualTo(target)) {
-                    const moveToResult = creep.moveTo(target, {
+                    creep.moveTo(target, {
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
                     })
-
-                    // if (moveToResult === 0) {
-                    //     creep.dropResources();
-                    // }
-
-                    return;
                 } else {
                     // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
                     // to pickup.

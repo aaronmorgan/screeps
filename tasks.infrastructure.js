@@ -4,6 +4,7 @@ var infrastructureTasks = {
     processJobs: function (spawn, rclLevel, jobs) {
         for (let i = 0; i < jobs.length; i++) {
             if (jobs[i].built) {
+                console.log(JSON.stringify(job))
                 continue;
             }
 
@@ -267,9 +268,12 @@ var infrastructureTasks = {
 
                 switch (job.type) {
                     case STRUCTURE_EXTENSION: {
+                        console.log('extensions')
                         structures = spawn.room.find(FIND_STRUCTURES, {
                             filter: { structureType: STRUCTURE_EXTENSION }
                         });
+
+                        console.log('extensions', JSON.stringify(structures))
 
                         break;
                     }
@@ -289,21 +293,21 @@ var infrastructureTasks = {
                     }
                 }
 
-                if (structures.length >= job.count) {
-                    // Mark this job as done and iterate to the next in the RCL group.
-                    job.built = true;
+                // if (structures.length >= job.count) {
+                //     // Mark this job as done and iterate to the next in the RCL group.
+                //     job.built = true;
 
-                    continue;
-                } else {
-                    // We haven't maxed out the job structure count yet, keep building.
+                //     continue;
+                // } else {
+                // We haven't maxed out the job structure count yet, keep building.
 
-                    // TODO: In time put the pos to build around on the job array, instead of passing spawn.pos each time.
-                    const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn.room);
+                // TODO: In time put the pos to build around on the job array, instead of passing spawn.pos each time.
+                const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn.room);
 
-                    // TODO: Potential here for the above checks to fail and not assign xy values to job.
-                    x = xCoord;
-                    y = yCoord;
-                }
+                // TODO: Potential here for the above checks to fail and not assign xy values to job.
+                x = xCoord;
+                y = yCoord;
+                //      }
             } else {
                 x = spawn.pos.x + job.x;
                 y = spawn.pos.y + job.y;
@@ -324,7 +328,7 @@ var infrastructureTasks = {
             });
 
             if (
-                tileObjects.length < 3 &&
+                tileObjects.length < 4 &&
                 tileObjects[0].type == "terrain" &&
                 tileObjects[0].terrain != "wall" &&
                 tileObjects[0].terrain != "swamp"
@@ -402,7 +406,7 @@ var infrastructureTasks = {
 
         // Only enqueue one construction site at a time.
         if (room.constructionSites().length > 0) {
-            return;
+            //      return;
         }
 
         const spawn = room.structures().spawn[0];
@@ -477,7 +481,6 @@ var infrastructureTasks = {
             }
 
             directions.push([Math.ceil(range, x), Math.ceil(range, y)]);
-
         }
 
         // Iterate around the point and if no site is available extend the range and repeat. No break condition, this shouldn't fail...
@@ -492,6 +495,8 @@ var infrastructureTasks = {
                 const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
 
                 if (terrain && terrain.terrain === 'plain') {
+                    console.log(buildAtX)
+                    console.log(buildAtY)
                     return [buildAtX, buildAtY];
                 }
             }
