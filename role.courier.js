@@ -85,7 +85,6 @@ var roleCourier = {
 
     /** @param {Creep} creep **/
     run: function (creep) {
-
         const creepFillPercentage = creep.CreepFillPercentage();
 
         if (creepFillPercentage > 0) {
