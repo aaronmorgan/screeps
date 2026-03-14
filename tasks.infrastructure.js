@@ -268,12 +268,9 @@ var infrastructureTasks = {
 
                 switch (job.type) {
                     case STRUCTURE_EXTENSION: {
-                        console.log('extensions')
                         structures = spawn.room.find(FIND_STRUCTURES, {
                             filter: { structureType: STRUCTURE_EXTENSION }
                         });
-
-                        console.log('extensions', JSON.stringify(structures))
 
                         break;
                     }
@@ -293,21 +290,12 @@ var infrastructureTasks = {
                     }
                 }
 
-                // if (structures.length >= job.count) {
-                //     // Mark this job as done and iterate to the next in the RCL group.
-                //     job.built = true;
-
-                //     continue;
-                // } else {
-                // We haven't maxed out the job structure count yet, keep building.
-
                 // TODO: In time put the pos to build around on the job array, instead of passing spawn.pos each time.
                 const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn.room);
 
                 // TODO: Potential here for the above checks to fail and not assign xy values to job.
                 x = xCoord;
                 y = yCoord;
-                //      }
             } else {
                 x = spawn.pos.x + job.x;
                 y = spawn.pos.y + job.y;
@@ -328,7 +316,7 @@ var infrastructureTasks = {
             });
 
             if (
-                tileObjects.length < 4 &&
+                tileObjects.length < 3 &&
                 tileObjects[0].type == "terrain" &&
                 tileObjects[0].terrain != "wall" &&
                 tileObjects[0].terrain != "swamp"
@@ -406,7 +394,7 @@ var infrastructureTasks = {
 
         // Only enqueue one construction site at a time.
         if (room.constructionSites().length > 0) {
-            //      return;
+            //return;
         }
 
         const spawn = room.structures().spawn[0];
@@ -480,8 +468,11 @@ var infrastructureTasks = {
                 continue;
             }
 
-            directions.push([Math.ceil(range, x), Math.ceil(range, y)]);
+            // directions.push([Math.ceil(range, x), Math.ceil(range, y)]);
+            directions.push([x, y]);
         }
+
+        directions = this.shuffleArray(directions);
 
         // Iterate around the point and if no site is available extend the range and repeat. No break condition, this shouldn't fail...
         while (true) {
@@ -494,17 +485,32 @@ var infrastructureTasks = {
 
                 const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
 
-                if (terrain && terrain.terrain === 'plain') {
-                    console.log(buildAtX)
-                    console.log(buildAtY)
-                    return [buildAtX, buildAtY];
+                const existingStructure = tileObjects.some(obj => {
+                    if (obj.type === 'structure') {
+                        return true;
+                    }
+                });
+
+                if (!existingStructure) {
+                    if (terrain && terrain.terrain === 'plain') {
+                        return [buildAtX, buildAtY];
+                    }
                 }
             }
 
             // Increase the range to look further out for a build site.
             range += 1;
         }
+    },
+
+    shuffleArray: function (array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     }
+
 };
 
 module.exports = infrastructureTasks;

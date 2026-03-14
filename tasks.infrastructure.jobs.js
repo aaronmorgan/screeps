@@ -11,14 +11,13 @@ module.exports.jobs = {
     RCL_2: {
         jobs: [
             { type: STRUCTURE_EXTENSION, count: 2, range: 2, x: 0, y: 0 },
-            // First mass storage Container.
-            { type: STRUCTURE_CONTAINER, count: 1, range: 2, x: 0, y: 0 },
-            { type: STRUCTURE_EXTENSION, count: 2 + 3, range: 2, x: 0, y: 0 }, // Increment the count by the previous 'max' value + any new structures we want. Clumsy, need better solution.
             // Main roading infrastructure around the spawn point.
             { type: "road.to.source", x: 0, y: 0 },
             { type: "road.to.controller", x: 0, y: 0 },
-            // Second mass storage Container.
-            { type: STRUCTURE_CONTAINER, count: 1 + 1, range: 4, x: 0, y: 0 }
+            // First mass storage Container.
+            { type: STRUCTURE_EXTENSION, count: 2 + 3, range: 2, x: 0, y: 0 }, // Increment the count by the previous 'max' value + any new structures we want. Clumsy, need better solution.
+            // Mass storage Containers.
+            { type: STRUCTURE_CONTAINER, count: 2, range: 2, x: 0, y: 0 },
         ]
     },
     RCL_3: {
