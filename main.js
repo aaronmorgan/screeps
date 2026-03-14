@@ -431,9 +431,9 @@ module.exports.loop = function () {
                 //     roleRoamingHarvester.tryBuild(room, energyCapacityAvailable);
                 // }
                 // GOPHERS
-                if (!sufficientGophers) {
-                    roleGopher.tryBuild(room, energyAvailable);
-                }
+                // if (!sufficientGophers) {
+                //     roleGopher.tryBuild(room, energyAvailable);
+                // }
                 // DEFENDERS
                 if (!sufficientDefenders) {
                     roleDefender.tryBuild(room, energyAvailable);
