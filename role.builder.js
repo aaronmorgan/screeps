@@ -164,6 +164,26 @@ var roleBuilder = {
                 }
             } else {
                 // We cannot find any targets, are we sitting on the flag preventing energy from being dropped?
+                if (creep.pos.x === flag.pos.x && creep.pos.y === flag.pos.y) {
+
+                    // Locate a random tile around our current position and attempt to move there.
+                    const area = creep.room.lookForAtArea(
+                        LOOK_TERRAIN,
+                        creep.pos.y - 10,
+                        creep.pos.x - 10,
+                        creep.pos.y + 10,
+                        creep.pos.x + 10,
+                        true
+                    );
+
+                    var moveResult = creep.moveTo(area, {
+                        reusePath: 10
+                    });
+
+                    if (moveResult !== OK) {
+                        console.log('⚠️ Builder cannot move off Flag position, error: ', moveResult)
+                    }
+                }
             }
         }
     }
