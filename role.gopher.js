@@ -41,8 +41,9 @@ var roleGopher = {
         creep.checkTicksToLive();
 
         const creepFillPercentage = creep.CreepFillPercentage();
+        creep.say('🛵 ' + creepFillPercentage + '%');
 
-        if (_.isEmpty(creep.memory.targetedDroppedEnergy)) {
+        if (!creep.memory.targetedDroppedEnergy) {
             // Identify the lowest dropped energy
             const droppedEnergy = creep.room.droppedResources();
             const randomIndex = [Math.floor((Math.random() * droppedEnergy.length))];
@@ -64,7 +65,9 @@ var roleGopher = {
 
             if (ruin) {
                 if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(ruin);
+                    creep.moveTo(ruin, {
+                        reusePath: 10
+                    });
 
                     return;
                 }
@@ -77,7 +80,9 @@ var roleGopher = {
 
             if (ruin) {
                 if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(ruin);
+                    creep.moveTo(ruin, {
+                        reusePath: 10,
+                    });
 
                     return;
                 }
@@ -85,6 +90,7 @@ var roleGopher = {
 
             const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
+            // Gopher has no work.
             if (!energyTarget) {
                 creep.memory.targetedDroppedEnergy = undefined;
                 return;
@@ -92,6 +98,7 @@ var roleGopher = {
 
             if (creep.pos && !creep.pos.inRangeTo(energyTarget, 2)) {
                 var moveResult = creep.moveTo(energyTarget, {
+                    reusePath: 10,
                     visualizePathStyle: {
                         stroke: '#ffaa00'
                     }
@@ -112,7 +119,9 @@ var roleGopher = {
             const target = Game.flags[creep.room.name + '_DUMP'];
 
             // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
-            creep.moveTo(target, { range: 2 });
+            creep.moveTo(target, {
+                reusePath: 10
+            });
 
         }
 
@@ -120,7 +129,9 @@ var roleGopher = {
             const ruin = creep.pos.findClosestByRange(FIND_RUINS);
             if (ruin) {
                 if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(ruin);
+                    creep.moveTo(ruin, {
+                        reusePath: 10
+                    });
 
                     return;
                 }
@@ -144,6 +155,7 @@ var roleGopher = {
                 }
                 case ERR_NOT_IN_RANGE: {
                     const moveResult = creep.moveTo(energyTarget, {
+                        reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffaa00'
                         }
@@ -170,12 +182,10 @@ var roleGopher = {
                 target = targets[0];
             }
 
-            // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
-          //  creep.moveTo(target);
-
             if (!creep.pos.isEqualTo(target)) {
 
-                const moveToResult = creep.moveTo(target, {
+                creep.moveTo(target, {
+                    reusePath: 10,
                     visualizePathStyle: {
                         stroke: '#ffffff'
                     }
@@ -189,16 +199,20 @@ var roleGopher = {
                 creep.memory.harvesting = false;
 
                 // Move off the target so we don't block other creeps if this one has no current job.
-                creep.moveTo(target);
+                const x = Math.floor(Math.random() * 9) - 1; // -4, 0, or 4
+                const y = Math.floor(Math.random() * 9) - 1;
+
+                // Move the creep off the dump flag. It'll only actually work for one tick if there are other dropped
+                // resources for it to pick up. If there aren't it should move the creep far enough away to get out of
+                // the way of other creeps.
+                creep.say('🛵 ' + x + ',' + y);
+
+                creep.moveTo(creep.pos.x + x, creep.pos.y + y, {
+                    reusePath: 10
+                });
+
                 return;
             }
-
-            // } else {
-            //     creep.moveTo(Game.flags[creep.room.name + '_DUMP'], { range: 2 });
-            //     creep.memory.harvesting = false;
-            // }
-
-            creep.say('🚄 ' + creepFillPercentage + '%');
         }
     }
 };

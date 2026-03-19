@@ -109,6 +109,10 @@ var creepFactory = {
             filter: { structureType: STRUCTURE_SPAWN }
         });
 
+        if (!spawns || spawns.length === 0) {
+            return;
+        };
+
         const jobBodyCost = this.bodyCost(currentBuildJob.body);
 
         if (jobBodyCost > spawns[0].energy && spawns[0].energy === spawns[0].energyCapacity) {

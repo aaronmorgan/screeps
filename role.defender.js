@@ -30,6 +30,7 @@ var roleDefender = {
 
             const enemyTarget = creep.pos.findClosestByPath(hostiles);
             var moveResult = creep.moveTo(enemyTarget, {
+                reusePath: 10,
                 visualizePathStyle: {
                     stroke: '#ffaa00'
                 }
@@ -42,13 +43,19 @@ var roleDefender = {
 
         // Locate a random tile centered around the Spawn and move there and wait in sentry mode.
         if (creep.memory.sentry && !creep.memory.inPosition) {
+            if (creep.memory.sentryPos.x < 0 || creep.memory.sentryPos.y < 0) {
+                creep.memory.sentry = null;
+            }
             const moveResult = creep.moveTo(creep.memory.sentryPos.x, creep.memory.sentryPos.y, {
+                reusePath: 10,
                 visualizePathStyle: {
                     stroke: '#ffaa00'
                 }
             });
 
-            if (moveResult == OK) {
+            // TODO: If sentryPos isn't accessible recalcule a new position.
+
+            if (!creep.pos.x === creep.memory.sentryPos.x && creep.pos.y === creep.memory.sentryPos.y) {
                 creep.memory.inPosition = true;
             } else {
                 creep.memory.inPosition = false;
@@ -56,10 +63,10 @@ var roleDefender = {
         } else {
             const area = creep.room.lookForAtArea(
                 LOOK_TERRAIN,
-                creep.pos.y - 15,
-                creep.pos.x - 15,
-                creep.pos.y + 15,
-                creep.pos.x + 15,
+                creep.pos.y - 10,
+                creep.pos.x - 10,
+                creep.pos.y + 10,
+                creep.pos.x + 10,
                 true
             );
 

@@ -70,14 +70,24 @@ var roleBuilder = {
                 });
 
                 const closestBuildingSite = creep.pos.findClosestByPath(targets);
+
+                // While there might be building sites if they're blocked by other creeps there may be no path.
+                // Return and give the other creeps time to move.
+                if (!closestBuildingSite) {
+                    return;
+                }
+
                 const buildResult = creep.build(closestBuildingSite);
 
                 if (buildResult === ERR_INVALID_TARGET) {
                     if (creep.pos == closestBuildingSite.pos) {
-                        creep.moveTo(closestBuildingSite, { range: 3 })
+                        creep.moveTo(closestBuildingSite, {
+                            reusePath: 10,
+                            range: 3
+                        })
                     }
                 } else if (buildResult === ERR_NOT_IN_RANGE) {
-                    const moveToResult = creep.moveTo(closestBuildingSite, {
+                    creep.moveTo(closestBuildingSite, {
                         reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffffff'
@@ -114,6 +124,7 @@ var roleBuilder = {
 
                     if (pickupResult == ERR_NOT_IN_RANGE) {
                         creep.moveTo(droppedEnergy, {
+                            reusePath: 10,
                             visualizePathStyle: {
                                 stroke: '#ffaa00'
                             }
@@ -122,9 +133,6 @@ var roleBuilder = {
 
                     creep.memory.building = true;
 
-                    return;
-                } else {
-                    // No available energy.
                     return;
                 }
             }
@@ -147,6 +155,7 @@ var roleBuilder = {
                     }
                     case (ERR_NOT_IN_RANGE): {
                         return creep.moveTo(dropSite, {
+                            reusePath: 10,
                             visualizePathStyle: {
                                 stroke: '#3370ac'
                             }

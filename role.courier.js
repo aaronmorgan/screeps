@@ -104,6 +104,7 @@ var roleCourier = {
             }
 
             const moveResult = creep.moveTo(Game.getObjectById(creep.memory.source.id), {
+                reusePath: 10,
                 visualizePathStyle: {
                     stroke: '#ffffff'
                 }
@@ -146,6 +147,7 @@ var roleCourier = {
                         }
                         case ERR_NOT_IN_RANGE: {
                             creep.moveTo(target, {
+                                reusePath: 10,
                                 visualizePathStyle: {
                                     stroke: '#ffffff'
                                 }
@@ -177,6 +179,7 @@ var roleCourier = {
 
                 if (!creep.pos.isEqualTo(target)) {
                     creep.moveTo(target, {
+                        reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }

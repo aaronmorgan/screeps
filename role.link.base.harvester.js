@@ -84,7 +84,10 @@ var roleLinkBaseHarvester = {
                     switch (withdrawResult) {
                         case ERR_NOT_IN_RANGE: {
                             if (withdrawResult == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(baseLink);
+                                creep.moveTo(baseLink, {
+                                    reusePath: 10,
+                                });
+
                                 return;
                             }
                         }
@@ -125,6 +128,7 @@ var roleLinkBaseHarvester = {
                     }
                     case ERR_NOT_IN_RANGE: {
                         creep.moveTo(target, {
+                            reusePath: 10,
                             visualizePathStyle: {
                                 stroke: '#ffffff'
                             }
@@ -156,6 +160,7 @@ var roleLinkBaseHarvester = {
                 switch (transferResult) {
                     case ERR_NOT_IN_RANGE: {
                         creep.moveTo(target, {
+                            reusePath: 10,
                             visualizePathStyle: {
                                 stroke: '#ffffff'
                             }
@@ -187,6 +192,7 @@ var roleLinkBaseHarvester = {
                     }
                     case ERR_NOT_IN_RANGE: {
                         creep.moveTo(target, {
+                            reusePath: 10,
                             visualizePathStyle: {
                                 stroke: '#ffffff'
                             }

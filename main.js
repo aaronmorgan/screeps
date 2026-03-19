@@ -1,4 +1,5 @@
 // 1. Check the Dropminer's Link before building a second one. If the sources are both close together both Dropminers might share the same Link structure.
+// 2. Build roads from the controller to the container and storage structures.
 
 require("prototype.room")();
 
@@ -39,6 +40,7 @@ module.exports.loop = function () {
         room.droppedResources();
         room.getDistanceToRCL();
 
+        //room.memory.jobs = undefined;
         //room.memory.isInit = false;
 
         // Check the flag as well, just in case we spawn into a room we've already played before.
@@ -64,13 +66,6 @@ module.exports.loop = function () {
                     phase: 1,
                 };
             }
-        }
-
-        const allStructures = room.find(FIND_RUINS, {
-        });
-
-        if (allStructures) {
-            //console.log(JSON.stringify(allStructures))
         }
 
         creepFactory.validateCache(room);
@@ -216,6 +211,7 @@ module.exports.loop = function () {
                 maxRoamingHarversterCreeps = 4;
                 maxUpgraderCreeps = 2;
                 maxGopherCreeps = 1;//Math.max(1, Math.floor(harvesters.length / 2));
+                maxDefenderCreeps = 1;
 
                 break;
             }
@@ -228,16 +224,32 @@ module.exports.loop = function () {
                     dropMinersCount = 2 * room.memory.sources.length;
                 }
 
-                // May need to increase builder ceiling from 3 to 4.
-                maxBuilderCreeps = room.constructionSites().length > 0 ? 2 : 0;
+                if (room.constructionSites().length > 0) {
+                    maxBuilderCreeps = dropminers.length > 3 ? 4 : 2; // TODO: This is a test.
+                }
+
+                const flagTile = room.lookForAt(LOOK_ENERGY, Game.flags[room.name + '_DUMP'].pos);
+                let droppedEnergyAtFlag = 0;
+
+                if (flagTile.length > 0) {
+                    droppedEnergyAtFlag = flagTile.reduce((acc, current) => {
+                        if (current.resourceType === 'energy') {
+                            return acc + current.energy;
+                        } else {
+                            return 0;
+                        }
+                    }, 0);
+                }
+
                 // maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
                 maxDropMinerCreeps = (structures.link !== undefined && couriers.length > 0) ? 0 : dropMinersCount;
                 maxHarvesterCreeps = dropminers.length > 0 == 0 ? room.memory.sources.length : 0;
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
                 //maxUpgraderCreeps = Math.max(1, Math.floor(room.memory.controller.path.length / 10)) + 1;
-                maxUpgraderCreeps = Math.max(2, Math.floor(storedEnergy / 800));
+                maxUpgraderCreeps = Math.max(2, Math.floor((storedEnergy + droppedEnergyAtFlag) / 300));
                 maxRoamingHarversterCreeps = 4;
                 maxGopherCreeps = 1;
+                maxDefenderCreeps = 1;
 
                 if (structures.link) {
                     maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
@@ -260,6 +272,33 @@ module.exports.loop = function () {
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
                 maxRoamingHarversterCreeps = 4;
                 maxGopherCreeps = 2; //linkSourceHarvesters.length > 0 ? 0 : 2;
+                maxDefenderCreeps = 2;
+
+                if (structures.link) {
+                    maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
+                }
+
+                if (maxBuilderCreeps > 0) {
+                    maxUpgraderCreeps = 1;
+                }
+
+                break;
+            }
+            case 4: {
+                room.memory.game.phase = 4;
+
+                maxBuilderCreeps = room.constructionSites().length > 0 ? 3 : 0;
+                // Set only one harvester per source and with a courier act like dropminers.
+                // At this time before we start producing lots of energy then there'll be room for builders/upgraders
+                // to also source energy without having to compete with numerous harvester creeps.
+                maxDropMinerCreeps = room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? room.memory.sources.length : 0;
+                maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
+                maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
+
+                maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
+                maxRoamingHarversterCreeps = 4;
+                maxGopherCreeps = 2; //linkSourceHarvesters.length > 0 ? 0 : 2;
+                maxDefenderCreeps = 2;
 
                 if (structures.link) {
                     maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
@@ -290,6 +329,7 @@ module.exports.loop = function () {
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800) + 3);
                 maxRoamingHarversterCreeps = 4;
                 maxGopherCreeps = 1;
+                maxDefenderCreeps = 2;
 
                 if (structures.link || structures.storage) {
                     maxLinkBaseHarvesters = 1;
@@ -411,6 +451,9 @@ module.exports.loop = function () {
 
         //room.memory.creepBuildQueue.queue.pop(); // Clear build queue.
 
+        //var hostiles = room.find(FIND_HOSTILE_CREEPS);
+        //       console.log(JSON.stringify(hostiles))
+
         if (spawn) {
             if (spawn.spawning === null &&
                 room.memory.creepBuildQueue.queue.length == 0) {
@@ -431,9 +474,9 @@ module.exports.loop = function () {
                 //     roleRoamingHarvester.tryBuild(room, energyCapacityAvailable);
                 // }
                 // GOPHERS
-                // if (!sufficientGophers) {
-                //     roleGopher.tryBuild(room, energyAvailable);
-                // }
+                if (!sufficientGophers) {
+                    roleGopher.tryBuild(room, energyAvailable);
+                }
                 // DEFENDERS
                 if (!sufficientDefenders) {
                     roleDefender.tryBuild(room, energyAvailable);

@@ -108,6 +108,7 @@ var roleDropMiner = {
         switch (targetSource) {
             case (ERR_NOT_IN_RANGE): {
                 const moveToResult = creep.moveTo(creep.memory.source.pos, {
+                    reusePath: 10,
                     visualizePathStyle: {
                         stroke: '#ffffff'
                     }
@@ -135,6 +136,7 @@ var roleDropMiner = {
             switch (transferResult) {
                 case (ERR_NOT_IN_RANGE): {
                     const moveToResult = creep.moveTo(linkStructure, {
+                        reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffffff'
                         }
@@ -151,6 +153,7 @@ var roleDropMiner = {
 
         if (targetSource == ERR_NOT_IN_RANGE) {
             const moveToResult = creep.moveTo(Game.getObjectById(creep.memory.source.id), {
+                reusePath: 10,
                 visualizePathStyle: {
                     stroke: '#ffaa00'
                 }

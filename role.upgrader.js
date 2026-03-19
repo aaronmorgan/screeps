@@ -64,6 +64,7 @@ var roleUpgrader = {
         if (creep.memory.upgrading) {
             if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.controller, {
+                    reusePath: 10,
                     visualizePathStyle: {
                         stroke: '#4189d0'
                     }
@@ -82,6 +83,7 @@ var roleUpgrader = {
 
                     if (pickupResult == ERR_NOT_IN_RANGE) {
                         creep.moveTo(droppedEnergy, {
+                            reusePath: 10,
                             visualizePathStyle: {
                                 stroke: '#ffaa00'
                             }
@@ -114,6 +116,7 @@ var roleUpgrader = {
                     }
                     case (ERR_NOT_IN_RANGE): {
                         return creep.moveTo(dropSite, {
+                            reusePath: 10,
                             visualizePathStyle: {
                                 stroke: '#3370ac'
                             }
@@ -123,7 +126,9 @@ var roleUpgrader = {
             } else {
                 // There are not energy pickup targets so to avoid the creeps gathering around the
                 // Spawn and blocking access to/from it move them away a little.
-                creep.moveTo(Game.spawns['Spawn1'].pos.x - 2, Game.spawns['Spawn1'].pos.y)
+                creep.moveTo(Game.spawns['Spawn1'].pos.x - 2, Game.spawns['Spawn1'].pos.y, {
+                    reusePath: 10
+                })
             }
         }
     }

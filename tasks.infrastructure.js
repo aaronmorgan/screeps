@@ -3,12 +3,12 @@ const { EXIT_CODE } = require("game.constants");
 var infrastructureTasks = {
     processJobs: function (spawn, rclLevel, jobs) {
         for (let i = 0; i < jobs.length; i++) {
-            if (jobs[i].built) {
-                console.log(JSON.stringify(job))
+            let job = jobs[i];
+
+            if (job.built) {
                 continue;
             }
 
-            let job = jobs[i];
             let specialSite = false;
 
             const jobType = job.type;
@@ -37,6 +37,7 @@ var infrastructureTasks = {
                             type: STRUCTURE_ROAD,
                             x: path[0].x,
                             y: path[0].y,
+                            built: true
                         };
 
                         specialSite = true;
@@ -72,7 +73,7 @@ var infrastructureTasks = {
                                 type: STRUCTURE_ROAD,
                                 x: path[0].x,
                                 y: path[0].y,
-                                built: false,
+                                built: true,
                             };
 
                             specialSite = true;
@@ -288,6 +289,21 @@ var infrastructureTasks = {
 
                         break;
                     }
+                    case STRUCTURE_STORAGE: {
+                        structures = spawn.room.find(FIND_STRUCTURES, {
+                            filter: { structureType: STRUCTURE_STORAGE }
+                        });
+
+                        // TODO: Is this really appropriate? What if the containers aren't working at this point, there'll be no-where to 
+                        // dump enery until AFTER the Storage is completed.
+                        const roomFlag = Game.flags[spawn.room.name + '_DUMP'];
+
+                        if (roomFlag) {
+                            Game.flags[roomFlag.name].remove();
+                        }
+
+                        break;
+                    }
                 }
 
                 // If necessary mark this job as done and iterate to the next in the RCL group.
@@ -357,18 +373,7 @@ var infrastructureTasks = {
                 }
 
                 if (!tile.structure) {
-                    // Check if the reason we cannot build is the spawn dump flag is here. 
-                    // TODO Remove the spawn dump flag when we get container storage.
-                    if (tile.type === 'flag' && tile.flag.name.endsWith('_DUMP')) {
-                        if (Game.flags[tile.flag.name]) {
-                            Game.flags[tile.flag.name].remove();
-                        }
-                    } else {
-                        console.log("⛔ Error: tile.structure is falsy tile=" + JSON.stringify(tile));
-
-                        // Try the next templated job...
-                        //     job.built = true;
-                    }
+                    console.log("⛔ Error: tile.structure is falsy tile=" + JSON.stringify(tile));
 
                     continue;
                 }
@@ -439,7 +444,7 @@ var infrastructureTasks = {
         }
 
         // Cast around for a random location within 4 tiles of the spawn to site the Dump flag.
-        const [buildAtX, buildAtY] = this.determineBuildLocation(spawn.pos, { range: 3 }, room);
+        const [buildAtX, buildAtY] = this.determineBuildLocation(spawn.pos, { range: 4 }, room);
 
         new RoomPosition(buildAtX, buildAtY, room.name).createFlag(room.name + "_DUMP");
     },
@@ -457,15 +462,19 @@ var infrastructureTasks = {
 
         const spawnAdjacentCoords = [-1, 0, 1];
 
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; directions.length < 12; i++) {
             // Find a random number between 3 and -1 and floor it, this will create a rante -1 to 1 giving us options of -1, 0 and 1 for the x y.
-            let x = Math.floor(Math.random() * 3 - 1)
-            let y = Math.floor(Math.random() * 3 - 1)
+            let x = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+            let y = Math.floor(Math.random() * 3) - 1;
 
-            if (Math.random(100) % 2 === 0) {
-                x += range;
+            // Randomly pick a sign (+1 or -1) for the range offset.
+            const sign = Math.random() < 0.5 ? 1 : -1;
+
+            // Randomly apply the range offset to either x or y.
+            if (Math.random() < 0.5) {
+                x += range * sign;
             } else {
-                y += range;
+                y += range * sign;
             }
 
             // We don't want the structure to touch the spawn so ensure if there is a position adjacent to the spawn discard it.
@@ -476,6 +485,9 @@ var infrastructureTasks = {
             }
 
             // directions.push([Math.ceil(range, x), Math.ceil(range, y)]);
+            if (directions.includes([x, y])) {
+                continue;
+            }
             directions.push([x, y]);
         }
 
@@ -488,9 +500,8 @@ var infrastructureTasks = {
                 const buildAtX = pos.x + x;
                 const buildAtY = pos.y + y;
 
+                console.log(4)
                 const tileObjects = room.lookAt(buildAtX, buildAtY);
-
-                const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
 
                 const existingStructure = tileObjects.some(obj => {
                     if (obj.type === 'structure') {
@@ -498,8 +509,13 @@ var infrastructureTasks = {
                     }
                 });
 
+                console.log(JSON.stringify(existingStructure))
+
                 if (!existingStructure) {
+                    const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
+
                     if (terrain && terrain.terrain === 'plain') {
+                        console.log(buildAtX)
                         return [buildAtX, buildAtY];
                     }
                 }
