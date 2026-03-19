@@ -167,6 +167,8 @@ var roleGopher = {
                     creep.memory.harvesting = false;
                 }
             }
+
+            return;
         }
 
         if (!creep.memory.harvesting && creepFillPercentage > 0) {
@@ -193,25 +195,29 @@ var roleGopher = {
 
                 return;
             } else {
-                // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps
-                // to pickup.
-                creep.dropResources();
-                creep.memory.harvesting = false;
+                const flag = Game.flags[creep.room.name + '_DUMP'];
 
-                // Move off the target so we don't block other creeps if this one has no current job.
-                const x = Math.floor(Math.random() * 9) - 1; // -4, 0, or 4
-                const y = Math.floor(Math.random() * 9) - 1;
+                // We cannot find any targets, are we sitting on the flag preventing energy from being dropped?
+                if (creep.pos.x === flag.pos.x && creep.pos.y === flag.pos.y) {
 
-                // Move the creep off the dump flag. It'll only actually work for one tick if there are other dropped
-                // resources for it to pick up. If there aren't it should move the creep far enough away to get out of
-                // the way of other creeps.
-                creep.say('🛵 ' + x + ',' + y);
+                    // Locate a random tile around our current position and attempt to move there.
+                    const area = creep.room.lookForAtArea(
+                        LOOK_TERRAIN,
+                        creep.pos.y - 10,
+                        creep.pos.x - 10,
+                        creep.pos.y + 10,
+                        creep.pos.x + 10,
+                        true
+                    );
 
-                creep.moveTo(creep.pos.x + x, creep.pos.y + y, {
-                    reusePath: 10
-                });
+                    var moveResult = creep.moveTo(area, {
+                        reusePath: 10
+                    });
 
-                return;
+                    if (moveResult !== OK) {
+                        console.log('⚠️ Gopher cannot move off Flag position, error: ', moveResult)
+                    }
+                }
             }
         }
     }
