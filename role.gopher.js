@@ -59,29 +59,19 @@ var roleGopher = {
             };
         }
 
-        // If we're not full and there are ruins around, withdraw from those too.
-        if (creepFillPercentage < 100 && !creep.memory.harvesting) {
-            const ruin = creep.room.find(FIND_RUINS, { filter: x => x.store && x.store.energy > 0 })[0];
-
-            if (ruin) {
-                if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(ruin, {
-                        reusePath: 10
-                    });
-
-                    return;
-                }
-            }
-        }
-
         // Creep has no energy so we need to move to our source.
-        if (creepFillPercentage === 0 && !creep.memory.harvesting) {
-            const ruin = creep.pos.findClosestByRange(FIND_RUINS);
+        if (creepFillPercentage < 100 && !creep.memory.harvesting) {
+            const ruin = creep.pos.findClosestByRange(FIND_RUINS, {
+                filter: x => x.store && x.store.energy > 0
+            });
 
             if (ruin) {
-                if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                if (creep.withdraw(ruin, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(ruin, {
                         reusePath: 10,
+                        visualizePathStyle: {
+                            stroke: '#ffaa00'
+                        }
                     });
 
                     return;
@@ -118,10 +108,22 @@ var roleGopher = {
         if (creepFillPercentage === 100 && !creep.memory.harvesting) {
             const target = Game.flags[creep.room.name + '_DUMP'];
 
-            // Stand off to the side so we don't block other creeps trying to unload at the 'dump'.
-            creep.moveTo(target, {
-                reusePath: 10
-            });
+            if (!creep.pos.isEqualTo(target)) {
+                creep.moveTo(target, {
+                    reusePath: 10,
+                    range: 1,
+                    visualizePathStyle: {
+                        stroke: '#ffffff'
+                    }
+                });
+
+                if (creep.pos.isNearTo(target) || creep.pos.isEqualTo(target)) {
+                    creep.dropResources();
+                }
+            } else {
+                // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps to pickup.
+                creep.dropResources();
+            }
 
         }
 
@@ -150,7 +152,6 @@ var roleGopher = {
 
             switch (pickupResult) {
                 case OK: {
-                    creep.say('🚄 ' + creepFillPercentage + '%');
                     break;
                 }
                 case ERR_NOT_IN_RANGE: {
