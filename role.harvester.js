@@ -69,6 +69,10 @@ var roleHarvester = {
 
             if (harvestResult === ERR_INVALID_TARGET) {
                 console.log('⛔ Error: INVALID_TARGET attempting to locate nearest source, source=' + JSON.stringify(source));
+
+                if (!source) {
+                    creep.memory.source = this.getSourceToMine(creep.room);
+                }
             } else if (harvestResult === ERR_NOT_IN_RANGE) {
                 const moveResult = creep.moveTo(source, {
                     reusePath: 10,

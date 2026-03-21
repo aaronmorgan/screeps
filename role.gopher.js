@@ -1,3 +1,6 @@
+// Gopher has some pathing problems if the spawn is full on energy and it's full it sits on the dump flag.
+// After the first container is built it's working better because there's always somewhere to dump the energy.
+
 const {
     role
 } = require('game.constants');
@@ -43,6 +46,10 @@ var roleGopher = {
         const creepFillPercentage = creep.CreepFillPercentage();
         creep.say('🛵 ' + creepFillPercentage + '%');
 
+        if (creepFillPercentage === 0) {
+            creep.memory.harvesting = true;
+        }
+
         if (!creep.memory.targetedDroppedEnergy) {
             // Identify the lowest dropped energy
             const droppedEnergy = creep.room.droppedResources();
@@ -82,7 +89,30 @@ var roleGopher = {
 
             // Gopher has no work.
             if (!energyTarget) {
-                creep.memory.targetedDroppedEnergy = undefined;
+                const targets = creep.findEnergyTransferTarget();
+
+                // Head home so we're close to base when energy slots open up.
+                let target = undefined;
+
+                if (targets.length === 0) {
+                    target = Game.flags[creep.room.name + '_DUMP'];
+                } else {
+                    // Just select the first target in the collection.
+                    target = targets[0];
+                }
+
+                creep.memory.harvesting = false;
+                if (!creep.pos.isEqualTo(target)) {
+
+                    creep.moveTo(target, {
+                        reusePath: 10,
+                        visualizePathStyle: {
+                            stroke: '#ffffff'
+                        }
+                    })
+                };
+
+
                 return;
             }
 
@@ -105,28 +135,6 @@ var roleGopher = {
             creep.memory.harvesting = false;
         }
 
-        if (creepFillPercentage === 100 && !creep.memory.harvesting) {
-            const target = Game.flags[creep.room.name + '_DUMP'];
-
-            if (!creep.pos.isEqualTo(target)) {
-                creep.moveTo(target, {
-                    reusePath: 10,
-                    range: 1,
-                    visualizePathStyle: {
-                        stroke: '#ffffff'
-                    }
-                });
-
-                if (creep.pos.isNearTo(target) || creep.pos.isEqualTo(target)) {
-                    creep.dropResources();
-                }
-            } else {
-                // Should be dropping resources on the spot outside our spawn for other builder and upgrader creeps to pickup.
-                creep.dropResources();
-            }
-
-        }
-
         if (creepFillPercentage < 100 && creep.memory.harvesting) {
             const ruin = creep.pos.findClosestByRange(FIND_RUINS);
             if (ruin) {
@@ -138,13 +146,13 @@ var roleGopher = {
                     return;
                 }
             }
-            // TODO: Should the creep just hang around the flag/spawn and not venture further away?
 
             const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
 
             if (!energyTarget) {
                 creep.memory.harvesting = false;
                 creep.memory.targetedDroppedEnergy = undefined;
+
                 return;
             }
 
@@ -155,12 +163,13 @@ var roleGopher = {
                     break;
                 }
                 case ERR_NOT_IN_RANGE: {
-                    const moveResult = creep.moveTo(energyTarget, {
+                    creep.moveTo(energyTarget, {
                         reusePath: 10,
                         visualizePathStyle: {
                             stroke: '#ffaa00'
                         }
                     });
+
                     break;
                 }
                 case ERR_INVALID_TARGET:
@@ -173,6 +182,7 @@ var roleGopher = {
         }
 
         if (!creep.memory.harvesting && creepFillPercentage > 0) {
+
             const targets = creep.findEnergyTransferTarget();
 
             // Head home so we're close to base when energy slots open up.
@@ -185,8 +195,8 @@ var roleGopher = {
                 target = targets[0];
             }
 
+            creep.memory.harvesting = false;
             if (!creep.pos.isEqualTo(target)) {
-
                 creep.moveTo(target, {
                     reusePath: 10,
                     visualizePathStyle: {
