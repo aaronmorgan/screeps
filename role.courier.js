@@ -105,6 +105,7 @@ var roleCourier = {
 
             const moveResult = creep.moveTo(Game.getObjectById(creep.memory.source.id), {
                 reusePath: 10,
+                range: 2,
                 visualizePathStyle: {
                     stroke: '#ffffff'
                 }
@@ -161,7 +162,9 @@ var roleCourier = {
                     }
                 } else {
                     // Cannot see any dropped resources in range, cancel harvesting state.
-                    creep.memory.harvesting = false;
+                    if (creepFillPercentage > 65) {
+                        creep.memory.harvesting = false;
+                    }
                 }
             } else {
                 creep.memory.harvesting = false;

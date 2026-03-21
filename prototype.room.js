@@ -84,7 +84,13 @@ module.exports = function () {
 
         if (!obj) return;
 
-        return this.lookForAtArea(LOOK_ENERGY, obj.pos.y - range, obj.pos.x - range, obj.pos.y + range, obj.pos.x + range, true);
+        return this.lookForAtArea(
+            LOOK_ENERGY,
+            obj.pos.y - range,
+            obj.pos.x - range,
+            obj.pos.y + range,
+            obj.pos.x + range,
+            true);
     };
 
     // Used by creeps that might pickup energy; resetting the room for other creeps that tick.

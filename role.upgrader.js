@@ -75,7 +75,13 @@ var roleUpgrader = {
             const target = Game.flags[creep.room.name + '_DUMP'];
 
             if (target) {
-                const xyTileEnergy = creep.room.lookForAtArea(LOOK_ENERGY, target.pos.y, target.pos.x, target.pos.y, target.pos.x, true);
+                const xyTileEnergy = creep.room.lookForAtArea(
+                    LOOK_ENERGY,
+                    target.pos.y - 3,
+                    target.pos.x - 3,
+                    target.pos.y + 3,
+                    target.pos.x + 3,
+                    true);
 
                 if (!_.isEmpty(xyTileEnergy)) {
                     const droppedEnergy = Game.getObjectById(xyTileEnergy[0].energy.id);
@@ -124,9 +130,13 @@ var roleUpgrader = {
                     }
                 }
             } else {
+                var spawns = creep.room.find(FIND_MY_STRUCTURES, {
+                    filter: { structureType: STRUCTURE_SPAWN }
+                });
+
                 // There are not energy pickup targets so to avoid the creeps gathering around the
                 // Spawn and blocking access to/from it move them away a little.
-                creep.moveTo(Game.spawns['Spawn1'].pos.x - 2, Game.spawns['Spawn1'].pos.y, {
+                creep.moveTo(spawns[0].pos.x - 2, spawns[0].pos.y, {
                     reusePath: 10
                 })
             }
