@@ -19,6 +19,7 @@ module.exports.EXIT_CODE = {
 
     module.exports.role = {
         BUILDER: 'Builder',
+        CLAIMER: 'Claimer',
         COURIER: 'Courier',
         DEFENDER: 'Defender',
         DROPMINER: 'DropMiner',
