@@ -322,8 +322,7 @@ var infrastructureTasks = {
             );
         });
 
-        if (
-            tileObjects.length < 3 &&
+        if (tileObjects.length < 3 &&
             tileObjects[0].type == "terrain" &&
             tileObjects[0].terrain != "wall" &&
             tileObjects[0].terrain != "swamp"
@@ -331,8 +330,6 @@ var infrastructureTasks = {
             let result = spawn.room.createConstructionSite(x, y, job.type);
             switch (result) {
                 case OK: {
-                    //  jobs[i].built = true;
-
                     // Only set down one construction site at a time.
                     return true;
                 }
@@ -347,6 +344,7 @@ var infrastructureTasks = {
                         ", y=" +
                         job.y
                     );
+
                     return true;
                 }
             }

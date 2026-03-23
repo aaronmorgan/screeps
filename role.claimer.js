@@ -12,13 +12,13 @@ var roleClaimer = {
         let bodyType = [];
 
         if (energyCapacityAvailable >= 700) {
-            [CLAIM, MOVE, MOVE];
+            bodyType = [CLAIM, MOVE, MOVE];
         }
 
         if (!_.isEmpty(bodyType)) {
             const roomExits = Game.map.describeExits(room.name);
 
-            let targetRoom = roomExits[1];
+            let targetRoom = roomExits[0];
 
             return creepFactory.create(room, role.CLAIMER, bodyType, {
                 role: role.CLAIMER,

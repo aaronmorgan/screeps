@@ -40,8 +40,9 @@ module.exports = function () {
                 gophers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.GOPHER),
                 harvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HARVESTER),
                 linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER),
-                roamingHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.ROAMING_HARVESTER),
-                upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER)
+                //roamingHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.ROAMING_HARVESTER),
+                upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER),
+                claimers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.CLAIMER)
             }
         }
 
