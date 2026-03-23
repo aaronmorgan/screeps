@@ -12,6 +12,7 @@ const roleDropMiner = require("role.dropminer");
 const roleGopher = require("role.gopher");
 const roleHarvester = require("role.harvester");
 const roleLinkBaseHarvester = require("role.link.base.harvester");
+const roleClaimer = require("role.claimer");
 //const roleRoamingHarvester = require("role.roaming.harvester");
 const roleUpgrader = require("role.upgrader");
 
@@ -28,6 +29,10 @@ module.exports.loop = function () {
         //     Game.creeps[creepName].dropResourcesAndDie();
         // }
 
+        /** Clear build queue. */
+        //room.memory.creepBuildQueue.queue.pop();
+
+
         const room = Game.rooms[name];
         const structures = room.structures();
 
@@ -40,7 +45,6 @@ module.exports.loop = function () {
         room.droppedResources();
         room.getDistanceToRCL();
 
-        //room.memory.jobs = undefined;
         //room.memory.isInit = false;
 
         // Check the flag as well, just in case we spawn into a room we've already played before.
@@ -49,12 +53,14 @@ module.exports.loop = function () {
 
             room.memory = {
                 isInit: true,
-                jobs: require("tasks.infrastructure.jobs"),
+                jobs: [],
                 hasSpawn: spawn ? true : false,
                 isFarm: !spawn ? true : false,
                 roamingHarvesters: []
             };
 
+            // We might have play tested this room before, ensure we've first cleared out jobs before loading the module.
+            room.memory.jobs = require("tasks.infrastructure.jobs");
             room.determineSourceAccessPoints();
 
             infrastructureTasks.locateSpawnDumpLocation(room);
@@ -149,6 +155,7 @@ module.exports.loop = function () {
         const linkBaseHarvesters = room.creeps().linkBaseHarvesters || [];
         // const roamingHarvesters = room.memory.roamingHarvesters;
         const upgraders = room.creeps().upgraders || [];
+        const claimers = room.creeps().claimers || [];
 
         // if (spawn) {
         //     room.memory.roamingHarvesters.forEach(creepId => {
@@ -177,6 +184,7 @@ module.exports.loop = function () {
         let maxLinkBaseHarvesters = 0;
         let maxRoamingHarversterCreeps = 1
         let maxUpgraderCreeps = 2;
+        let maxClaimerCreeps = 0;
 
         // Emergency catch all to reset the queue should we end up without any energy gathering screeps.
         if (harvesters.length <= 2 && dropminers.length == 0 && !_.isEmpty(room.memory.creepBuildQueue.queue)) {
@@ -204,7 +212,7 @@ module.exports.loop = function () {
                 room.memory.game.phase = 1;
                 // Goal is to quickly get to RCL 2 by creating two Upgraders.
                 // Builders are extra and in preparation for RCL 2 construction projects.
-                maxBuilderCreeps = room.constructionSites().length > 0 ? 2 : 0;
+                maxBuilderCreeps = 0;// room.constructionSites().length > 0 ? 1 : 0;
                 maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
                 maxHarvesterCreeps = maxDropMinerCreeps == 0 ? totalAccessPoints : 0;
                 maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
@@ -216,6 +224,28 @@ module.exports.loop = function () {
                 break;
             }
             case 2: {
+                const flagPos = Game.flags[room.name + '_DUMP'].pos;
+
+                const flagTile = room.lookForAtArea(
+                    LOOK_ENERGY,
+                    flagPos.y - 3,
+                    flagPos.x - 3,
+                    flagPos.y + 3,
+                    flagPos.x + 3,
+                    true);
+
+                let droppedEnergyAtFlag = 0;
+
+                if (flagTile.length > 0) {
+                    droppedEnergyAtFlag = flagTile.reduce((acc, current) => {
+                        if (current.energy.resourceType === 'energy') {
+                            return acc + current.energy.amount;
+                        } else {
+                            return 0;
+                        }
+                    }, 0);
+                }
+
                 room.memory.game.phase = 2;
 
                 let dropMinersCount = room.memory.sources.length;
@@ -225,20 +255,9 @@ module.exports.loop = function () {
                 }
 
                 if (room.constructionSites().length > 0) {
-                    maxBuilderCreeps = dropminers.length > 3 ? 4 : 2; // TODO: This is a test.
-                }
-
-                const flagTile = room.lookForAt(LOOK_ENERGY, Game.flags[room.name + '_DUMP'].pos);
-                let droppedEnergyAtFlag = 0;
-
-                if (flagTile.length > 0) {
-                    droppedEnergyAtFlag = flagTile.reduce((acc, current) => {
-                        if (current.resourceType === 'energy') {
-                            return acc + current.energy;
-                        } else {
-                            return 0;
-                        }
-                    }, 0);
+                    maxBuilderCreeps = droppedEnergyAtFlag > 300 ? 3 : 2; // TODO: This is a test.
+                } else {
+                    maxBuilderCreeps = 0;
                 }
 
                 // maxDropMinerCreeps = couriers.length > 0 ? room.memory.sources.length : 0;
@@ -281,6 +300,9 @@ module.exports.loop = function () {
                 if (maxBuilderCreeps > 0) {
                     maxUpgraderCreeps = 1;
                 }
+
+                // TODO: Check with the Extensions we have enough potential energy here to spawn it.
+                maxClaimerCreeps = 1;
 
                 break;
             }
@@ -350,6 +372,7 @@ module.exports.loop = function () {
         room.memory.maxLinkBaseHarvesters = maxLinkBaseHarvesters;
         //room.memory.maxRoamingHarversterCreeps = maxRoamingHarversterCreeps;
         room.memory.maxUpgraderCreeps = maxUpgraderCreeps;
+        room.memory.maxClaimerCreeps = maxClaimerCreeps;
 
         const sufficientBuilders = builders.length >= maxBuilderCreeps; // Should also include harvesters?
         const sufficientCouriers = couriers.length >= maxCourierCreeps;
@@ -360,17 +383,13 @@ module.exports.loop = function () {
         const sufficientLinkBaseHarvesters = linkBaseHarvesters.length >= maxLinkBaseHarvesters;
         const sufficientRoamingHarvesters = room.memory.roamingHarvesters.length >= maxRoamingHarversterCreeps;
         const sufficientUpgraders = upgraders.length >= maxUpgraderCreeps;
+        const sufficientClaimers = claimers.length >= maxClaimerCreeps;
+
 
         // Summary of actual vs target numbers.
         if (spawn) {
-            if (maxBuilderCreeps > 0) {
-                console.log("  Builders: " + builders.length + "/" + maxBuilderCreeps + " " + (sufficientBuilders ? "✔️" : "❌"));
-            }
-            if (maxCourierCreeps > 0) {
-                console.log("  Couriers: " + couriers.length + "/" + maxCourierCreeps + " " + (sufficientCouriers ? "✔️" : "❌"));
-            }
-            if (maxDefenderCreeps > 0) {
-                console.log("  Defenders: " + defenders.length + "/" + maxDefenderCreeps + " " + (sufficientDefenders ? "✔️" : "❌"));
+            if (maxHarvesterCreeps > 0) {
+                console.log("  Harvesters: " + harvesters.length + "/" + maxHarvesterCreeps + " " + (sufficientHarvesters ? "✔️" : "❌"));
             }
             if (maxDropMinerCreeps > 0) {
                 console.log("  Drop Miners: " + dropminers.length + "/" + maxDropMinerCreeps + " " + (sufficientDropMiners ? "✔️" : "❌"));
@@ -378,15 +397,24 @@ module.exports.loop = function () {
             if (maxGopherCreeps > 0) {
                 console.log("  Gophers: " + gophers.length + "/" + maxGopherCreeps + " " + (sufficientGophers ? "✔️" : "❌"));
             }
-            if (maxHarvesterCreeps > 0) {
-                console.log("  Harvesters: " + harvesters.length + "/" + maxHarvesterCreeps + " " + (sufficientHarvesters ? "✔️" : "❌"));
+            if (maxCourierCreeps > 0) {
+                console.log("  Couriers: " + couriers.length + "/" + maxCourierCreeps + " " + (sufficientCouriers ? "✔️" : "❌"));
+            }
+            if (maxDefenderCreeps > 0) {
+                console.log("  Defenders: " + defenders.length + "/" + maxDefenderCreeps + " " + (sufficientDefenders ? "✔️" : "❌"));
             }
             if (maxLinkBaseHarvesters > 0) {
                 console.log("  LinkBaseHarvesters: " + linkBaseHarvesters.length + "/" + maxLinkBaseHarvesters + " " + (sufficientLinkBaseHarvesters ? "✔️" : "❌"));
             }
             //console.log("  Roaming Harvesters: " + room.memory.roamingHarvesters.length + "/" + maxRoamingHarversterCreeps + " " + (sufficientRoamingHarvesters ? "✔️" : "❌"));
+            if (maxBuilderCreeps > 0) {
+                console.log("  Builders: " + builders.length + "/" + maxBuilderCreeps + " " + (sufficientBuilders ? "✔️" : "❌"));
+            }
             if (maxUpgraderCreeps > 0) {
                 console.log("  Upgraders: " + upgraders.length + "/" + maxUpgraderCreeps + " " + (sufficientUpgraders ? "✔️" : "❌"));
+            }
+            if (maxClaimerCreeps > 0) {
+                console.log("  Claimers: " + claimers.length + "/" + maxClaimerCreeps + " " + (sufficientClaimers ? "✔️" : "❌"));
             }
 
             if (Game.time % 50 == 0) {
@@ -437,26 +465,21 @@ module.exports.loop = function () {
             const creep = Game.creeps[c.name];
 
             switch (creep.memory.role) {
-                case role.BUILDER: roleBuilder.run(creep); break;
-                case role.COURIER: roleCourier.run(creep); break;
-                case role.DEFENDER: roleDefender.run(creep); break;
+                case role.HARVESTER: roleHarvester.run(creep); break;
                 case role.DROPMINER: roleDropMiner.run(creep); break;
                 case role.GOPHER: roleGopher.run(creep); break;
-                case role.HARVESTER: roleHarvester.run(creep); break;
+                case role.COURIER: roleCourier.run(creep); break;
+                case role.DEFENDER: roleDefender.run(creep); break;
                 case role.LINK_BASE_HARVESTER: roleLinkBaseHarvester.run(creep); break;
                 //case role.ROAMING_HARVESTER: roleRoamingHarvester.run(creep); break;
+                case role.BUILDER: roleBuilder.run(creep); break;
                 case role.UPGRADER: roleUpgrader.run(creep); break;
+                case role.CLAIMER: roleClaimer.run(creep); break;
             }
         });
 
-        //room.memory.creepBuildQueue.queue.pop(); // Clear build queue.
-
-        //var hostiles = room.find(FIND_HOSTILE_CREEPS);
-        //       console.log(JSON.stringify(hostiles))
-
         if (spawn) {
-            if (spawn.spawning === null &&
-                room.memory.creepBuildQueue.queue.length == 0) {
+            if (!spawn.spawning && room.memory.creepBuildQueue.queue.length === 0) {
                 if (
                     (harvesters.length === 0 && dropminers.length === 0) ||
                     (dropminers.length > 0 && (couriers.length === 0 || gophers.length === 0)) ||
@@ -469,6 +492,10 @@ module.exports.loop = function () {
                 if (!sufficientHarvesters) {
                     roleHarvester.tryBuild(room, energyAvailable);
                 }
+                // DROPMINERS
+                if (!sufficientDropMiners) {
+                    roleDropMiner.tryBuild(room, energyAvailable);
+                }
                 // ROAMING HARVESTERS
                 // if (!sufficientRoamingHarvesters) {
                 //     roleRoamingHarvester.tryBuild(room, energyCapacityAvailable);
@@ -476,6 +503,10 @@ module.exports.loop = function () {
                 // GOPHERS
                 if (!sufficientGophers) {
                     roleGopher.tryBuild(room, energyAvailable);
+                }
+                // COURIERS
+                if (!sufficientCouriers) {
+                    roleCourier.tryBuild(room, energyAvailable);
                 }
                 // DEFENDERS
                 if (!sufficientDefenders) {
@@ -485,14 +516,6 @@ module.exports.loop = function () {
                 if (!sufficientLinkBaseHarvesters) {
                     roleLinkBaseHarvester.tryBuild(room, energyAvailable);
                 }
-                // COURIERS
-                if (!sufficientCouriers) {
-                    roleCourier.tryBuild(room, energyAvailable);
-                }
-                // DROPMINERS
-                if (!sufficientDropMiners) {
-                    roleDropMiner.tryBuild(room, energyAvailable);
-                }
                 // BUILDERS
                 if (!sufficientBuilders) {
                     roleBuilder.tryBuild(room, energyAvailable);
@@ -500,6 +523,10 @@ module.exports.loop = function () {
                 // UPGRADERS
                 if (!sufficientUpgraders) {
                     roleUpgrader.tryBuild(room, energyAvailable);
+                }
+                // CLAIMERS
+                if (!sufficientClaimers) {
+                    roleClaimer.tryBuild(room, energyAvailable);
                 }
             }
 

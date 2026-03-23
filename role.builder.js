@@ -57,8 +57,8 @@ var roleBuilder = {
 
             // Attempt to resupply Spawn if there are no couriers.
             if (creep.room.memory.creeps.harvesters === 0 && creep.room.memory.creeps.couriers === 0) {
-                if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                    targets.push(Game.spawns['Spawn1']);
+                if (creep.room.spawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                    targets.push(creep.room.spawn);
                 }
             }
 
@@ -164,6 +164,26 @@ var roleBuilder = {
                 }
             } else {
                 // We cannot find any targets, are we sitting on the flag preventing energy from being dropped?
+                if (creep.pos.x === flag.pos.x && creep.pos.y === flag.pos.y) {
+
+                    // Locate a random tile around our current position and attempt to move there.
+                    const area = creep.room.lookForAtArea(
+                        LOOK_TERRAIN,
+                        creep.pos.y - 3,
+                        creep.pos.x - 3,
+                        creep.pos.y + 3,
+                        creep.pos.x + 3,
+                        true
+                    );
+
+                    var moveResult = creep.moveTo(area, {
+                        reusePath: 10
+                    });
+
+                    if (moveResult !== OK) {
+                        console.log('⚠️ Builder cannot move off Flag position, error: ', moveResult)
+                    }
+                }
             }
         }
     }

@@ -40,8 +40,9 @@ module.exports = function () {
                 gophers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.GOPHER),
                 harvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.HARVESTER),
                 linkBaseHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.LINK_BASE_HARVESTER),
-                roamingHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.ROAMING_HARVESTER),
-                upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER)
+                //roamingHarvesters: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.ROAMING_HARVESTER),
+                upgraders: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.UPGRADER),
+                claimers: _.filter(this.myCreeps(), (creep) => creep.room.name == this.name && creep.memory.role == role.CLAIMER)
             }
         }
 
@@ -84,7 +85,13 @@ module.exports = function () {
 
         if (!obj) return;
 
-        return this.lookForAtArea(LOOK_ENERGY, obj.pos.y - range, obj.pos.x - range, obj.pos.y + range, obj.pos.x + range, true);
+        return this.lookForAtArea(
+            LOOK_ENERGY,
+            obj.pos.y - range,
+            obj.pos.x - range,
+            obj.pos.y + range,
+            obj.pos.x + range,
+            true);
     };
 
     // Used by creeps that might pickup energy; resetting the room for other creeps that tick.

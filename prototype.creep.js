@@ -35,16 +35,12 @@ module.exports = function () {
     Creep.prototype.findEnergyTransferTarget = function () {
         let targets = [];
 
-        if (Game.spawns["Spawn1"].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            targets.push(Game.spawns["Spawn1"]);
-        }
+        var spawns = this.room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_SPAWN }
+        });
 
-        if (targets.length === 0) {
-            targets = _.filter(
-                this.room.structures().storage,
-                (structure) =>
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-            );
+        if (spawns && spawns.length > 0 && spawns[0].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            targets.push(spawns[0]);
         }
 
         // It gets into a state where the Tower is consuming more energy than can be supplied, creating a feedback loop
@@ -101,7 +97,8 @@ module.exports = function () {
             switch (transferResult) {
                 case ERR_INVALID_TARGET:
                 case ERR_NOT_IN_RANGE: {
-                    const moveResult = this.moveTo(target, {
+                    this.moveTo(target, {
+                        reusePath: 10,
                         visualizePathStyle: {
                             stroke: "#ffffff",
                         },
