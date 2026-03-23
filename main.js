@@ -48,7 +48,7 @@ module.exports.loop = function () {
         //room.memory.isInit = false;
 
         // Check the flag as well, just in case we spawn into a room we've already played before.
-        if (!room.memory.isInit || Game.flags[room.name + '_DUMP'] === undefined) {
+        if (!room.memory.isInit) { // || Game.flags[room.name + '_DUMP'] === undefined) {
             console.log('Instantiating room memory...')
 
             room.memory = {
@@ -123,25 +123,26 @@ module.exports.loop = function () {
             // Locate the Link structure closest to the Spawn, this 'should' be the base Link.
             if (!_.isEmpty(structures.link) && !room.memory.baseLinkId) {
                 room.memory.baseLinkId = {
-                    id: spawn.pos.findClosestByPath(structures.link).id,
+                    id: structures.storage[0].pos.findClosestByPath(structures.link).id,
                 };
             }
 
             // Foreach room source, check if it has a Link, and if so transfer to the first Link
             // structure in the array, which is the first build; the 'base' Link station.
             room.memory.sources.forEach(function (source) {
-                if (source.linkId) {
-                    const sourceLink = Game.getObjectById(source.linkId);
 
-                    if (sourceLink.store.getUsedCapacity === 0) {
-                        return;
-                    }
+                const sourceObj = Game.getObjectById(source.id);
+                const sourceLink = sourceObj.pos.findClosestByPath(structures.link);
 
-                    const transferResult = sourceLink.transferEnergy(
-                        structures.link[0]
-                    );
+                if (sourceLink.store.getUsedCapacity === 0) {
+                    return;
                 }
-            });
+
+                const transferResult = sourceLink.transferEnergy(
+                    structures.link[0]
+                );
+            }
+            )
         }
 
         let energyAvailable = room.energyAvailable;
@@ -286,7 +287,12 @@ module.exports.loop = function () {
                 // to also source energy without having to compete with numerous harvester creeps.
                 maxDropMinerCreeps = room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? room.memory.sources.length : 0;
                 maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
-                maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
+
+                const droppedEnergy = room.droppedResources().reduce((prev, current) => {
+                    return (prev.amount > current.amount) ? prev : current;
+                });
+
+                maxCourierCreeps = Math.max(2, Math.floor((droppedEnergy.energy) / 300));
 
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
                 maxRoamingHarversterCreeps = 4;
@@ -315,7 +321,12 @@ module.exports.loop = function () {
                 // to also source energy without having to compete with numerous harvester creeps.
                 maxDropMinerCreeps = room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? room.memory.sources.length : 0;
                 maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
-                maxCourierCreeps = Math.max(maxHarvesterCreeps, maxDropMinerCreeps);
+
+                const droppedEnergy = room.droppedResources().reduce((prev, current) => {
+                    return (prev.amount > current.amount) ? prev : current;
+                });
+
+                maxCourierCreeps = Math.max(2, Math.floor((droppedEnergy.energy) / 300));
 
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800)) + 3;
                 maxRoamingHarversterCreeps = 4;
@@ -324,6 +335,7 @@ module.exports.loop = function () {
 
                 if (structures.link) {
                     maxLinkBaseHarvesters = structures.link.length > 1 ? 1 : 0;
+                    maxCourierCreeps = 0;
                 }
 
                 if (maxBuilderCreeps > 0) {
@@ -332,7 +344,40 @@ module.exports.loop = function () {
 
                 break;
             }
+            case 5: {
+                room.memory.game.phase = 5;
 
+                // May need to increase builder ceiling from 3 to 4.
+                maxBuilderCreeps = room.constructionSites().length > 0 ? 2 : 0;
+                // Set only one harvester per source and with a courier act like dropminers.
+                // At this time before we start producing lots of energy then there'll be room for builders/upgraders
+                // to also source energy without having to compete with numerous harvester creeps.
+                maxDropMinerCreeps = room.memory.sources.length;
+                maxHarvesterCreeps =
+                    room.memory.creeps.dropminers > 0 && room.memory.creeps.couriers > 0
+                        ? 0
+                        : room.memory.sources.length; // maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
+                // maxCourierCreeps = room.memory.sources.length - (_.isEmpty(structures.link) ? 0 : structures.link.length - 1);
+
+                const droppedEnergy = room.droppedResources().reduce((prev, current) => {
+                    return (prev.amount > current.amount) ? prev : current;
+                }, 0);
+
+                maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800) + 3);
+                maxRoamingHarversterCreeps = 4;
+                maxGopherCreeps = 1;
+                maxDefenderCreeps = 2;
+
+                maxCourierCreeps = Math.min(2, Math.floor((droppedEnergy.energy) / 300));
+
+                if (structures.link || structures.storage) {
+                    maxLinkBaseHarvesters = 1;
+                    maxCourierCreeps = 0;
+                }
+
+
+                break;
+            }
             default: {
                 room.memory.game.phase = 999;
 
@@ -346,7 +391,13 @@ module.exports.loop = function () {
                     room.memory.creeps.dropminers > 0 && room.memory.creeps.couriers > 0
                         ? 0
                         : room.memory.sources.length; // maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
-                maxCourierCreeps = room.memory.sources.length - (_.isEmpty(structures.link) ? 0 : structures.link.length - 1);
+                // maxCourierCreeps = room.memory.sources.length - (_.isEmpty(structures.link) ? 0 : structures.link.length - 1);
+
+                const droppedEnergy = room.droppedResources().reduce((prev, current) => {
+                    return (prev.amount > current.amount) ? prev : current;
+                });
+
+                maxCourierCreeps = Math.max(2, Math.floor((droppedEnergy.energy) / 300));
 
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800) + 3);
                 maxRoamingHarversterCreeps = 4;
@@ -384,7 +435,6 @@ module.exports.loop = function () {
         const sufficientRoamingHarvesters = room.memory.roamingHarvesters.length >= maxRoamingHarversterCreeps;
         const sufficientUpgraders = upgraders.length >= maxUpgraderCreeps;
         const sufficientClaimers = claimers.length >= maxClaimerCreeps;
-
 
         // Summary of actual vs target numbers.
         if (spawn) {
