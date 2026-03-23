@@ -50,133 +50,205 @@ var roleGopher = {
             creep.memory.harvesting = true;
         }
 
-        if (!creep.memory.targetedDroppedEnergy) {
-            // Identify the lowest dropped energy
-            const droppedEnergy = creep.room.droppedResources();
-            const randomIndex = [Math.floor((Math.random() * droppedEnergy.length))];
-            const targetEnergy = droppedEnergy[randomIndex];
+        // if (!creep.memory.targetedDroppedEnergy) {
+        //     // Identify the lowest dropped energy
+        //     const droppedEnergy = creep.room.droppedResources();
+        //     const randomIndex = [Math.floor((Math.random() * droppedEnergy.length))];
+        //     const targetEnergy = droppedEnergy[randomIndex];
 
-            if (!targetEnergy) {
-                return;
-            }
+        //     if (!targetEnergy) {
+        //         return;
+        //     }
 
-            creep.memory.targetedDroppedEnergy = {
-                id: targetEnergy.id,
-                pos: targetEnergy.pos
-            };
-        }
+        //     creep.memory.targetedDroppedEnergy = {
+        //         id: targetEnergy.id,
+        //         pos: targetEnergy.pos
+        //     };
+        // }
 
         // Creep has no energy so we need to move to our source.
-        if (creepFillPercentage < 100 && !creep.memory.harvesting) {
-            const ruin = creep.pos.findClosestByRange(FIND_RUINS, {
-                filter: x => x.store && x.store.energy > 0
-            });
+        // if (creepFillPercentage < 100 && !creep.memory.harvesting) {
+        //     // Find ruins and collect any resources.
+        //     const ruin = creep.pos.findClosestByRange(FIND_RUINS, {
+        //         filter: x => x.store && x.store.energy > 0
+        //     });
 
-            if (ruin) {
-                if (creep.withdraw(ruin, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(ruin, {
-                        reusePath: 10,
-                        visualizePathStyle: {
-                            stroke: '#ffaa00'
-                        }
-                    });
+        //     if (ruin) {
+        //         if (creep.withdraw(ruin, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        //             creep.moveTo(ruin, {
+        //                 reusePath: 10,
+        //                 visualizePathStyle: {
+        //                     stroke: '#ffaa00'
+        //                 }
+        //             });
 
-                    return;
-                }
-            }
+        //             return;
+        //         }else {
+        //             creep.memory.harvesting = false;
+        //         }
+        //     }
 
-            const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
+        //     // Find creep tombstones and collect the dropped resources.
+        //     const tombstone = creep.pos.findClosestByRange(FIND_TOMBSTONES, {
+        //         filter: x => x.store && x.store.energy > 0
+        //     });
 
-            // Gopher has no work.
-            if (!energyTarget) {
-                const targets = creep.findEnergyTransferTarget();
+        //     if (tombstone) {
+        //         if (creep.withdraw(tombstone, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        //             creep.moveTo(tombstone, {
+        //                 reusePath: 10,
+        //                 visualizePathStyle: {
+        //                     stroke: '#ffaa00'
+        //                 }
+        //             });
 
-                // Head home so we're close to base when energy slots open up.
-                let target = undefined;
+        //             return;
+        //         }else {
+        //             creep.memory.harvesting = false;
+        //         }
+        //     }
 
-                if (targets.length === 0) {
-                    target = Game.flags[creep.room.name + '_DUMP'];
-                } else {
-                    // Just select the first target in the collection.
-                    target = targets[0];
-                }
+        //     const droppedResources = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
+        //         filter: x => x.store && x.store.energy > 0
+        //     });
 
-                creep.memory.harvesting = false;
-                if (!creep.pos.isEqualTo(target)) {
+        //     if (droppedResources) {
+        //         if (creep.withdraw(droppedResources, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        //             creep.moveTo(tombstone, {
+        //                 reusePath: 10,
+        //                 visualizePathStyle: {
+        //                     stroke: '#ffaa00'
+        //                 }
+        //             });
 
-                    creep.moveTo(target, {
-                        reusePath: 10,
-                        visualizePathStyle: {
-                            stroke: '#ffffff'
-                        }
-                    })
-                };
+        //             return;
+        //         }else {
+        //             creep.memory.harvesting = false;
+        //         }
+        //     }
+
+        //     // const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
+
+        //     // // Gopher has no work.
+        //     // if (!energyTarget) {
+        //     //     const targets = creep.findEnergyTransferTarget();
+
+        //     //     // Head home so we're close to base when energy slots open up.
+        //     //     let target = undefined;
+
+        //     //     if (targets.length === 0) {
+        //     //         target = Game.flags[creep.room.name + '_DUMP'];
+        //     //     } else {
+        //     //         // Just select the first target in the collection.
+        //     //         target = targets[0];
+        //     //     }
+
+        //     //     creep.memory.harvesting = false;
+        //     //     if (!creep.pos.isEqualTo(target)) {
+
+        //     //         creep.moveTo(target, {
+        //     //             reusePath: 10,
+        //     //             visualizePathStyle: {
+        //     //                 stroke: '#ffffff'
+        //     //             }
+        //     //         })
+        //     //     };
 
 
-                return;
-            }
+        //     //     return;
+        //     // }
 
-            if (creep.pos && !creep.pos.inRangeTo(energyTarget, 2)) {
-                var moveResult = creep.moveTo(energyTarget, {
-                    reusePath: 10,
-                    visualizePathStyle: {
-                        stroke: '#ffaa00'
-                    }
-                });
+        //     // if (creep.pos && !creep.pos.inRangeTo(energyTarget, 2)) {
+        //     //     var moveResult = creep.moveTo(energyTarget, {
+        //     //         reusePath: 10,
+        //     //         visualizePathStyle: {
+        //     //             stroke: '#ffaa00'
+        //     //         }
+        //     //     });
 
-                return;
-            } else {
-                // Target source is within range so switch to harvesting mode.
-                creep.memory.harvesting = true;
-            }
+        //     //     return;
+        //     // } else {
+        //     //     // Target source is within range so switch to harvesting mode.
+        //     //     creep.memory.harvesting = true;
+        //     // }
 
-            return;
-        } else if (creepFillPercentage === 100) {
-            creep.memory.harvesting = false;
-        }
+        //     return;
+        // } else if (creepFillPercentage === 100) {
+        //     creep.memory.harvesting = false;
+        // }
 
-        if (creepFillPercentage < 100 && creep.memory.harvesting) {
+        if (creep.memory.harvesting) {
             const ruin = creep.pos.findClosestByRange(FIND_RUINS);
             if (ruin) {
+                console.log('ruins')
                 if (creep.withdraw(ruin, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(ruin, {
                         reusePath: 10
                     });
-
-                    return;
+                } else {
+                    creep.memory.harvesting = false;
                 }
-            }
-
-            const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
-
-            if (!energyTarget) {
-                creep.memory.harvesting = false;
-                creep.memory.targetedDroppedEnergy = undefined;
 
                 return;
             }
 
-            const pickupResult = creep.pickup(energyTarget);
-
-            switch (pickupResult) {
-                case OK: {
-                    break;
-                }
-                case ERR_NOT_IN_RANGE: {
-                    creep.moveTo(energyTarget, {
-                        reusePath: 10,
-                        visualizePathStyle: {
-                            stroke: '#ffaa00'
-                        }
-                    });
-
-                    break;
-                }
-                case ERR_INVALID_TARGET:
-                case ERR_FULL: {
+            const tombstone = creep.pos.findClosestByRange(FIND_TOMBSTONES);
+            if (tombstone) {
+                console.log('tombstone', JSON.stringify(tombstone))
+                console.log(creep.pickup(tombstone) == ERR_NOT_IN_RANGE)
+                if (creep.pickup(tombstone) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(tombstone);
+                } else {
                     creep.memory.harvesting = false;
                 }
+
+                return;
             }
+
+            const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+            if (target) {
+                console.log('dropped resources')
+                console.log(creep.pickup(target) == ERR_NOT_IN_RANGE);
+
+                if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
+                } else {
+                    creep.memory.harvesting = false;
+                }
+
+                return;
+            }
+
+            // const energyTarget = Game.getObjectById(creep.memory.targetedDroppedEnergy.id);
+
+            // if (!energyTarget) {
+            //     creep.memory.harvesting = false;
+            //     creep.memory.targetedDroppedEnergy = undefined;
+
+            //     return;
+            // }
+
+            // const pickupResult = creep.pickup(energyTarget);
+
+            // switch (pickupResult) {
+            //     case OK: {
+            //         break;
+            //     }
+            //     case ERR_NOT_IN_RANGE: {
+            //         creep.moveTo(energyTarget, {
+            //             reusePath: 10,
+            //             visualizePathStyle: {
+            //                 stroke: '#ffaa00'
+            //             }
+            //         });
+
+            //         break;
+            //     }
+            //     case ERR_INVALID_TARGET:
+            //     case ERR_FULL: {
+            //         creep.memory.harvesting = false;
+            //     }
+            // }
 
             return;
         }
@@ -195,8 +267,11 @@ var roleGopher = {
                 target = targets[0];
             }
 
+            console.log(JSON.stringify(target))
+
             creep.memory.harvesting = false;
             if (!creep.pos.isEqualTo(target)) {
+                console.log(2)
                 creep.moveTo(target, {
                     reusePath: 10,
                     visualizePathStyle: {
@@ -206,10 +281,11 @@ var roleGopher = {
 
                 return;
             } else {
-                const flag = Game.flags[creep.room.name + '_DUMP'];
+                console.log(3)
+            //    const flag = Game.flags[creep.room.name + '_DUMP'];
 
                 // We cannot find any targets, are we sitting on the flag preventing energy from being dropped?
-                if (creep.pos.x === flag.pos.x && creep.pos.y === flag.pos.y) {
+                if (creep.pos.x === target.pos.x && creep.pos.y === target.pos.y) {
 
                     // Locate a random tile around our current position and attempt to move there.
                     const area = creep.room.lookForAtArea(
