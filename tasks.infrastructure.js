@@ -20,7 +20,9 @@ var infrastructureTasks = {
                         break;
                     }
                     case STRUCTURE_CONTROLLER:
-                    case STRUCTURE_CONTAINER: {
+                    case STRUCTURE_CONTAINER:
+                    case STRUCTURE_STORAGE:
+                    case STRUCTURE_TOWER: {
                         targets = spawn.room.find(FIND_STRUCTURES, {
                             filter: { structureType: job.target }
                         });
@@ -125,7 +127,11 @@ var infrastructureTasks = {
                         })[0];
 
                         if (!linkStructure) {
-                            const [buildAtX, buildAtY] = this.determineBuildLocation(storage.pos, job, room);
+                            const [buildAtX, buildAtY] = this.determineBuildLocation(storage.pos, job, spawn.room);
+
+                            const structures = spawn.room.find(FIND_STRUCTURES, {
+                                filter: { structureType: STRUCTURE_STORAGE }
+                            });
 
                             this.createConstructionSite(spawn, buildAtX, buildAtY, job);
                             this.buildStructure(spawn, structures, job);
@@ -149,7 +155,11 @@ var infrastructureTasks = {
                         if (!linkStructure || _.isEmpty(linkStructure)) {
                             const pos = Game.getObjectById(source.id).pos;
 
-                            const [buildAtX, buildAtY] = this.determineBuildLocation(pos, job, room);
+                            const [buildAtX, buildAtY] = this.determineBuildLocation(pos, job, spawn.room);
+
+                            const structures = spawn.room.find(FIND_STRUCTURES, {
+                                filter: { structureType: STRUCTURE_STORAGE }
+                            });
 
                             this.createConstructionSite(spawn, buildAtX, buildAtY, job);
                             this.buildStructure(spawn, structures, job);
