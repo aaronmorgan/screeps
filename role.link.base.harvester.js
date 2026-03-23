@@ -39,18 +39,20 @@ var roleLinkBaseHarvester = {
         }
     },
 
-    findEnergyTransferTargets: function (room) {
+    findEnergyTransferTargets: function (creep) {
         let targets = [];
 
-        if (room.spawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            targets.push(room.spawn);
+        const spawn = creep.room.structures().spawn[0];
+
+        if (spawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            targets.push(spawn);
         }
         if (targets.length === 0) {
             // Only refill the Tower if the fill percentage is < 20%.
-            targets = _.filter(room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
+            targets = _.filter(creep.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
         }
         if (targets.length === 0) {
-            targets = _.filter(room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+            targets = _.filter(creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
         }
 
         // Deliberately don't attempt to fill containers.
@@ -70,7 +72,7 @@ var roleLinkBaseHarvester = {
             creep.memory.taskId = ROLES.WithdrawFromLink;
         }
 
-        const energyTransferTargets = this.findEnergyTransferTargets(creep.room);
+        const energyTransferTargets = this.findEnergyTransferTargets(creep);
 
 
         if (creep.memory.taskId == ROLES.WithdrawFromLink) {

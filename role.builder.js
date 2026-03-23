@@ -138,10 +138,8 @@ var roleBuilder = {
             }
 
             // Then look for energy in the normal storage locations...
-            let targets = _.filter(creep.room.structures().all, (structure) => {
-                return (structure.structureType == STRUCTURE_CONTAINER ||
-                    structure.structureType == STRUCTURE_STORAGE) &&
-                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+            const targets = creep.room.find(FIND_STRUCTURES, {
+                filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             });
 
             if (targets.length > 0) {
