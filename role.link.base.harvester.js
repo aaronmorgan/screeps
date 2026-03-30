@@ -39,18 +39,20 @@ var roleLinkBaseHarvester = {
         }
     },
 
-    findEnergyTransferTargets: function (room) {
+    findEnergyTransferTargets: function (creep) {
         let targets = [];
 
-        if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            targets.push(Game.spawns['Spawn1']);
+        const spawn = creep.room.structures().spawn[0];
+
+        if (spawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            targets.push(spawn);
         }
-        if (targets.length == 0) {
+        if (targets.length === 0) {
             // Only refill the Tower if the fill percentage is < 20%.
-            targets = _.filter(room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
+            targets = _.filter(creep.room.structures().tower, (structure) => Math.round(structure.store.getUsedCapacity(RESOURCE_ENERGY) / structure.store.getCapacity(RESOURCE_ENERGY) * 100) < 80);
         }
-        if (targets.length == 0) {
-            targets = _.filter(room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
+        if (targets.length === 0) {
+            targets = _.filter(creep.room.structures().extension, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
         }
 
         // Deliberately don't attempt to fill containers.
@@ -70,7 +72,7 @@ var roleLinkBaseHarvester = {
             creep.memory.taskId = ROLES.WithdrawFromLink;
         }
 
-        const targets2 = this.findEnergyTransferTargets(creep.room);
+        const energyTransferTargets = this.findEnergyTransferTargets(creep);
 
 
         if (creep.memory.taskId == ROLES.WithdrawFromLink) {
@@ -110,11 +112,11 @@ var roleLinkBaseHarvester = {
         }
 
         // Transfer creep energy into the Storage structure.
-        if (creep.memory.taskId == ROLES.TransferToStorage) {
+        if (creep.memory.taskId === ROLES.TransferToStorage) {
             let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
 
             if (targets.length > 0) {
-                const target = creep.pos.findClosestByPath(targets)
+                const target = creep.pos.findClosestByRange(targets)
                 const transferResult = creep.transfer(target, RESOURCE_ENERGY);
 
                 switch (transferResult) {
@@ -143,7 +145,7 @@ var roleLinkBaseHarvester = {
             }
         }
 
-        if (targets2.length === 0) {
+        if (energyTransferTargets.length === 0) {
             creep.memory.taskId = ROLES.WithdrawFromLink;
 
             return;
@@ -154,7 +156,7 @@ var roleLinkBaseHarvester = {
 
             let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             if (targets.length > 0) {
-                const target = creep.pos.findClosestByPath(targets)
+                const target = creep.pos.findClosestByRange(targets)
                 const transferResult = creep.withdraw(target, RESOURCE_ENERGY);
 
                 switch (transferResult) {
@@ -180,9 +182,9 @@ var roleLinkBaseHarvester = {
             }
         }
 
-        if (creep.memory.taskId == ROLES.Transfer) {
-            if (targets2.length > 0) {
-                const target = creep.pos.findClosestByPath(targets2)
+        if (creep.memory.taskId === ROLES.Transfer) {
+            if (energyTransferTargets.length > 0) {
+                const target = creep.pos.findClosestByRange(energyTransferTargets)
                 const transferResult = creep.transfer(target, RESOURCE_ENERGY);
 
                 switch (transferResult) {

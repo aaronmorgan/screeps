@@ -57,8 +57,8 @@ var roleBuilder = {
 
             // Attempt to resupply Spawn if there are no couriers.
             if (creep.room.memory.creeps.harvesters === 0 && creep.room.memory.creeps.couriers === 0) {
-                if (Game.spawns['Spawn1'].store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-                    targets.push(Game.spawns['Spawn1']);
+                if (creep.room.spawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                    targets.push(creep.room.spawn);
                 }
             }
 
@@ -69,7 +69,7 @@ var roleBuilder = {
                     return a.progress > b.progress ? -1 : 1
                 });
 
-                const closestBuildingSite = creep.pos.findClosestByPath(targets);
+                const closestBuildingSite = creep.pos.findClosestByRange(targets);
 
                 // While there might be building sites if they're blocked by other creeps there may be no path.
                 // Return and give the other creeps time to move.
@@ -138,14 +138,12 @@ var roleBuilder = {
             }
 
             // Then look for energy in the normal storage locations...
-            let targets = _.filter(creep.room.structures().all, (structure) => {
-                return (structure.structureType == STRUCTURE_CONTAINER ||
-                    structure.structureType == STRUCTURE_STORAGE) &&
-                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+            const targets = creep.room.find(FIND_STRUCTURES, {
+                filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             });
 
             if (targets.length > 0) {
-                const dropSite = creep.pos.findClosestByPath(targets);
+                const dropSite = creep.pos.findClosestByRange(targets);
                 const actionResult = creep.withdraw(dropSite, RESOURCE_ENERGY);
 
                 switch (actionResult) {
@@ -164,6 +162,26 @@ var roleBuilder = {
                 }
             } else {
                 // We cannot find any targets, are we sitting on the flag preventing energy from being dropped?
+                if (creep.pos.x === flag.pos.x && creep.pos.y === flag.pos.y) {
+
+                    // Locate a random tile around our current position and attempt to move there.
+                    const area = creep.room.lookForAtArea(
+                        LOOK_TERRAIN,
+                        creep.pos.y - 3,
+                        creep.pos.x - 3,
+                        creep.pos.y + 3,
+                        creep.pos.x + 3,
+                        true
+                    );
+
+                    var moveResult = creep.moveTo(area, {
+                        reusePath: 10
+                    });
+
+                    if (moveResult !== OK) {
+                        console.log('⚠️ Builder cannot move off Flag position, error: ', moveResult)
+                    }
+                }
             }
         }
     }

@@ -115,7 +115,7 @@ var roleRoamingHarvester = {
 
         creep.memory.isHarvesting = creep.store.getFreeCapacity() != 0;
 
-        let closestSource = creep.pos.findClosestByPath(creep.room.find(FIND_SOURCES));
+        let closestSource = creep.pos.findClosestByRange(creep.room.find(FIND_SOURCES));
 
         if (!creep.memory.source) {
             creep.memory.source = closestSource
@@ -205,7 +205,7 @@ var roleRoamingHarvester = {
                             if (room) {
                                 let roomPosition = new RoomPosition(25, 25, sourceRoom);
 
-                                let closestSource = roomPosition.findClosestByPath(FIND_SOURCES);
+                                let closestSource = roomPosition.findClosestByRange(FIND_SOURCES);
 
 
                                 console.log('closestSource', closestSource)
@@ -263,7 +263,7 @@ var roleRoamingHarvester = {
 
             if (creep.room.name === Game.spawns['Spawn1'].room.name) {
                 targets = creep.findEnergyTransferTarget();
-                target = creep.pos.findClosestByPath(targets);
+                target = creep.pos.findClosestByRange(targets);
             } else {
                 target = Game.spawns['Spawn1'];
             }
