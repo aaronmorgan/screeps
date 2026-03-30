@@ -111,7 +111,7 @@ var roleUpgrader = {
             });
 
             if (targets.length > 0) {
-                const dropSite = creep.pos.findClosestByPath(targets);
+                const dropSite = creep.pos.findClosestByRange(targets);
 
                 const withdrawResult = creep.withdraw(dropSite, RESOURCE_ENERGY);
 

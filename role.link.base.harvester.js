@@ -116,7 +116,7 @@ var roleLinkBaseHarvester = {
             let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
 
             if (targets.length > 0) {
-                const target = creep.pos.findClosestByPath(targets)
+                const target = creep.pos.findClosestByRange(targets)
                 const transferResult = creep.transfer(target, RESOURCE_ENERGY);
 
                 switch (transferResult) {
@@ -156,7 +156,7 @@ var roleLinkBaseHarvester = {
 
             let targets = _.filter(creep.room.structures().storage, (structure) => structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
             if (targets.length > 0) {
-                const target = creep.pos.findClosestByPath(targets)
+                const target = creep.pos.findClosestByRange(targets)
                 const transferResult = creep.withdraw(target, RESOURCE_ENERGY);
 
                 switch (transferResult) {
@@ -184,7 +184,7 @@ var roleLinkBaseHarvester = {
 
         if (creep.memory.taskId === ROLES.Transfer) {
             if (energyTransferTargets.length > 0) {
-                const target = creep.pos.findClosestByPath(energyTransferTargets)
+                const target = creep.pos.findClosestByRange(energyTransferTargets)
                 const transferResult = creep.transfer(target, RESOURCE_ENERGY);
 
                 switch (transferResult) {

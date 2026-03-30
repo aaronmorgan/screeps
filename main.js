@@ -1,5 +1,6 @@
 // 1. Check the Dropminer's Link before building a second one. If the sources are both close together both Dropminers might share the same Link structure.
 // 2. Build roads from the controller to the container and storage structures.
+// 3. Bug: If the source only has one access point the courier can get blocked by couriers 
 
 require("prototype.room")();
 
@@ -48,7 +49,7 @@ module.exports.loop = function () {
         //room.memory.isInit = false;
 
         // Check the flag as well, just in case we spawn into a room we've already played before.
-        if (!room.memory.isInit || (room.controller.level > 2 && Game.flags[room.name + '_DUMP'] === undefined)) {
+        if (!room.memory.isInit || (room.controller.level < 4 && Game.flags[room.name + '_DUMP'] === undefined)) {
             console.log('Instantiating room memory...')
 
             room.memory = {
@@ -123,7 +124,7 @@ module.exports.loop = function () {
             // Locate the Link structure closest to the Spawn, this 'should' be the base Link.
             if (!_.isEmpty(structures.link) && !room.memory.baseLinkId) {
                 room.memory.baseLinkId = {
-                    id: structures.storage[0].pos.findClosestByPath(structures.link).id,
+                    id: structures.storage[0].pos.findClosestByRange(structures.link).id,
                 };
             }
 
@@ -132,7 +133,7 @@ module.exports.loop = function () {
             room.memory.sources.forEach(function (source) {
 
                 const sourceObj = Game.getObjectById(source.id);
-                const sourceLink = sourceObj.pos.findClosestByPath(structures.link);
+                const sourceLink = sourceObj.pos.findClosestByRange(structures.link);
 
                 if (sourceLink.store.getUsedCapacity === 0) {
                     return;

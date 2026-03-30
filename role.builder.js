@@ -69,7 +69,7 @@ var roleBuilder = {
                     return a.progress > b.progress ? -1 : 1
                 });
 
-                const closestBuildingSite = creep.pos.findClosestByPath(targets);
+                const closestBuildingSite = creep.pos.findClosestByRange(targets);
 
                 // While there might be building sites if they're blocked by other creeps there may be no path.
                 // Return and give the other creeps time to move.
@@ -143,7 +143,7 @@ var roleBuilder = {
             });
 
             if (targets.length > 0) {
-                const dropSite = creep.pos.findClosestByPath(targets);
+                const dropSite = creep.pos.findClosestByRange(targets);
                 const actionResult = creep.withdraw(dropSite, RESOURCE_ENERGY);
 
                 switch (actionResult) {
