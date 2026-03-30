@@ -48,7 +48,7 @@ module.exports.loop = function () {
         //room.memory.isInit = false;
 
         // Check the flag as well, just in case we spawn into a room we've already played before.
-        if (!room.memory.isInit) { // || Game.flags[room.name + '_DUMP'] === undefined) {
+        if (!room.memory.isInit || (room.controller.level > 2 && Game.flags[room.name + '_DUMP'] === undefined)) {
             console.log('Instantiating room memory...')
 
             room.memory = {
