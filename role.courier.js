@@ -105,7 +105,7 @@ var roleCourier = {
 
             const moveResult = creep.moveTo(Game.getObjectById(creep.memory.source.id), {
                 reusePath: 10,
-                range: 2,
+                range: 1,
                 visualizePathStyle: {
                     stroke: '#ffffff'
                 }
