@@ -49,7 +49,7 @@ module.exports.loop = function () {
         //room.memory.isInit = false;
 
         // Check the flag as well, just in case we spawn into a room we've already played before.
-        if (!room.memory.isInit || (room.controller.level < 4 && Game.flags[room.name + '_DUMP'] === undefined)) {
+        if (!room.memory.isInit || Game.time % 50 === 0) { // (room.controller.level < 4 && Game.flags[room.name + '_DUMP'] === undefined)) {
             console.log('Instantiating room memory...')
 
             room.memory = {
@@ -64,7 +64,7 @@ module.exports.loop = function () {
             room.memory.jobs = require("tasks.infrastructure.jobs");
             room.determineSourceAccessPoints();
 
-            infrastructureTasks.locateSpawnDumpLocation(room);
+            infrastructureTasks.buildSpawnDumpLocation(room);
         }
 
         if (!room.memory.creepBuildQueue) {
@@ -97,26 +97,26 @@ module.exports.loop = function () {
             });
         }
 
-        if (structures.tower) {
-            structures.tower.forEach((tower) => {
-                let hostiles = room.find(FIND_HOSTILE_CREEPS);
+        const tower = room.find(FIND_MY_STRUCTURES, {
+            filter: s => s.structureType === STRUCTURE_TOWER
+        })[0];
 
-                if (hostiles.length) {
-                    console.log("DEFENCE: Attacking hostile from '" + hostiles[0].owner.username + "'");
-                    tower.attack(hostiles[0]);
-                } else if (storedEnergy > 300) {
-                    let closestDamagedStructure = tower.pos.findClosestByRange(
-                        FIND_STRUCTURES,
-                        {
-                            filter: (structure) =>
-                                structure.hits < structure.hitsMax,
-                        }
-                    );
-                    if (closestDamagedStructure) {
-                        tower.repair(closestDamagedStructure);
-                    }
-                }
-            });
+        if (tower) {
+            // Priority 1: attack enemies
+            const enemy = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            if (enemy) {
+                tower.attack(enemy);
+                return;
+            }
+
+            // Priority 2: repair decayed structures
+            const damaged = room.find(FIND_STRUCTURES, {
+                filter: s => s.hits < s.hitsMax && s.structureType !== STRUCTURE_WALL // walls need special handling
+            }).sort((a, b) => a.hits - b.hits)[0]; // most damaged first
+
+            if (damaged) {
+                tower.repair(damaged);
+            }
         }
 
         // Guard against the RCL dropping to a level less than where Link structures are supported.

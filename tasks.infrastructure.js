@@ -69,7 +69,7 @@ var infrastructureTasks = {
                         filter: { structureType: STRUCTURE_EXTENSION }
                     });
 
-                    if (this.buildStructure(spawn, structures, job)) {
+                    if (this.buildStructure(spawn, structures, job, job.range + 1)) {
                         job.built = true;
                     }
 
@@ -80,7 +80,7 @@ var infrastructureTasks = {
                         filter: { structureType: STRUCTURE_CONTAINER }
                     });
 
-                    if (this.buildStructure(spawn, structures, job)) {
+                    if (this.buildStructure(spawn, structures, job, job.range + 1)) {
                         job.built = true;
                     }
                     return;
@@ -177,8 +177,12 @@ var infrastructureTasks = {
         }
     },
 
-    // Doesn't use a traditional queue or any cache but instead looks at current construction site objects
-    // to determine whether to continue or not.
+    /** 
+     * Doesn't use a traditional queue or any cache but instead looks at current construction site objects
+     * to determine whether to continue or not.
+     * 
+     * @param {any} room The room object we're building within.
+     */
     buildLinks: function (room) {
         if (!room.structures().spawn) {
             return;
@@ -204,7 +208,12 @@ var infrastructureTasks = {
         }
     },
 
-    locateSpawnDumpLocation: function (room) {
+    /** 
+     * Builds a Flag for the spawn. Acts as a common area to drop energy before we have adequate container/storage structures.
+     * 
+     * @param {any} room The room object we're building within.
+     */
+    buildSpawnDumpLocation: function (room) {
         if (!room.structures().spawn || room.structures().container) {
             return;
         }
@@ -234,8 +243,10 @@ var infrastructureTasks = {
      * @param {any} pos The position we're going to build around.
      * @param {any} job The job object we're trying to build, e.g. Extension.
      * @param {any} room The room object we're building within.
+     * @param {any} maxStraightLineDistance The maximum path distance from the pos, so we can try and avoid building on the other
+     * side of mountains.
      */
-    determineBuildLocation: function (pos, job, room) {
+    determineBuildLocation: function (pos, job, room, maxStraightLineDistance) {
         let range = job.range;
         let directions = [];
 
@@ -267,6 +278,7 @@ var infrastructureTasks = {
             if (directions.includes([x, y])) {
                 continue;
             }
+
             directions.push([x, y]);
         }
 
@@ -291,6 +303,18 @@ var infrastructureTasks = {
                     const terrain = _.find(tileObjects, { type: LOOK_TERRAIN });
 
                     if (terrain && terrain.terrain === 'plain') {
+
+                        if (maxStraightLineDistance) {
+                            const path = pos.findPathTo(buildAtX, buildAtY, {
+                                ignoreDestructibleStructures: false,
+                                ignoreCreeps: true,
+                            });
+
+                            if (path > maxStraightLineDistance) {
+                                continue;
+                            }
+                        }
+
                         return [buildAtX, buildAtY];
                     }
                 }
@@ -309,7 +333,7 @@ var infrastructureTasks = {
         return array;
     },
 
-    buildStructure: function (spawn, structures, job) {
+    buildStructure: function (spawn, structures, job, maxStraightLineDistance) {
         if (structures.length >= job.count) {
             job.built = true;
 
@@ -317,7 +341,7 @@ var infrastructureTasks = {
         }
 
         // TODO: In time put the pos to build around on the job array, instead of passing spawn.pos each time.
-        const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn.room);
+        const [xCoord, yCoord] = this.determineBuildLocation(spawn.pos, job, spawn.room, maxStraightLineDistance);
 
         this.createConstructionSite(spawn, xCoord, yCoord, job);
     },
