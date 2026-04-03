@@ -79,6 +79,26 @@ module.exports = function () {
         return this._droppedResources;
     };
 
+    /** Returns the resource object with the largest 'amount' value for the current room. */
+    Room.prototype.largestDroppedResources = function () {
+        // Find the largest dropped resources in the room.
+        let droppedEnergy = undefined;
+
+        const droppedResources = this.droppedResources();
+
+        if (droppedResources && droppedResources.length > 0) {
+            droppedEnergy = droppedResources.reduce((prev, current) => {
+                return (prev.amount > current.amount) ? prev : current;
+            });
+        }
+
+        if (!droppedEnergy) {
+            droppedEnergy = []
+        }
+
+        return droppedEnergy;
+    };
+
     // Finds all the dropped energy within a 7x7 area around the target object or structure.
     Room.prototype.droppedResourcesCloseToSource = function (objId, range) {
         const obj = Game.getObjectById(objId);

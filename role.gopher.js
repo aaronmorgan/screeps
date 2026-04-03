@@ -138,13 +138,9 @@ var roleGopher = {
                         true
                     );
 
-                    var moveResult = creep.moveTo(area, {
+                    creep.moveTo(area, {
                         reusePath: 10
                     });
-
-                    if (moveResult !== OK) {
-                        console.log('⚠️ Gopher cannot move off Flag position, error: ', moveResult)
-                    }
                 }
             }
         }
