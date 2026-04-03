@@ -1,6 +1,7 @@
 // 1. Check the Dropminer's Link before building a second one. If the sources are both close together both Dropminers might share the same Link structure.
 // 2. Build roads from the controller to the container and storage structures.
 // 3. Bug: If the source only has one access point the courier can get blocked by couriers 
+// 4. Better determine the number of couriers. If a source is 10 or more from the spawn it might be necessary to have two couriers.
 
 require("prototype.room")();
 
@@ -122,7 +123,7 @@ module.exports.loop = function () {
         // Guard against the RCL dropping to a level less than where Link structures are supported.
         if (room.controller.level >= 5) {
             // Locate the Link structure closest to the Spawn, this 'should' be the base Link.
-            if (!_.isEmpty(structures.link) && !room.memory.baseLinkId) {
+            if (!_.isEmpty(structures.link) && !room.memory.baseLinkId && structures.storage) {
                 room.memory.baseLinkId = {
                     id: structures.storage[0].pos.findClosestByRange(structures.link).id,
                 };
@@ -135,13 +136,16 @@ module.exports.loop = function () {
                 const sourceObj = Game.getObjectById(source.id);
                 const sourceLink = sourceObj.pos.findClosestByRange(structures.link);
 
-                if (sourceLink.store.getUsedCapacity === 0) {
-                    return;
-                }
+                if (sourceLink) {
 
-                const transferResult = sourceLink.transferEnergy(
-                    structures.link[0]
-                );
+                    if (sourceLink.store.getUsedCapacity === 0) {
+                        return;
+                    }
+
+                    const transferResult = sourceLink.transferEnergy(
+                        structures.link[0]
+                    );
+                }
             }
             )
         }
@@ -198,8 +202,9 @@ module.exports.loop = function () {
             }
         }
 
-        // TODO Only do this mod n times, e.g. % 10.
-        infrastructureTasks.buildLinks(room);
+        if (Game.time % 10 === 0) {
+            infrastructureTasks.buildLinks(room);
+        }
 
         const totalAccessPoints = room.memory.sources.reduce((accumulator, sourceObj) => {
             return accumulator + sourceObj.accessPoints;
@@ -289,9 +294,7 @@ module.exports.loop = function () {
                 maxDropMinerCreeps = room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? room.memory.sources.length : 0;
                 maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
 
-                const droppedEnergy = room.droppedResources().reduce((prev, current) => {
-                    return (prev.amount > current.amount) ? prev : current;
-                });
+                const droppedEnergy = room.largestDroppedResources();
 
                 maxCourierCreeps = Math.max(2, Math.floor((droppedEnergy.energy) / 300));
 
@@ -323,9 +326,7 @@ module.exports.loop = function () {
                 maxDropMinerCreeps = room.memory.sources.length; //(upgraders.length > 0 && (couriers.length > 0 || linkSourceHarvesters.length > 0)) > 0 ? room.memory.sources.length : 0;
                 maxHarvesterCreeps = maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
 
-                const droppedEnergy = room.droppedResources().reduce((prev, current) => {
-                    return (prev.amount > current.amount) ? prev : current;
-                });
+                const droppedEnergy = room.largestDroppedResources();
 
                 maxCourierCreeps = Math.max(2, Math.floor((droppedEnergy.energy) / 300));
 
@@ -360,9 +361,7 @@ module.exports.loop = function () {
                         : room.memory.sources.length; // maxDropMinerCreeps == 0 ? room.memory.sources.length : 0;
                 // maxCourierCreeps = room.memory.sources.length - (_.isEmpty(structures.link) ? 0 : structures.link.length - 1);
 
-                const droppedEnergy = room.droppedResources().reduce((prev, current) => {
-                    return (prev.amount > current.amount) ? prev : current;
-                }, 0);
+                const droppedEnergy = room.largestDroppedResources();
 
                 maxUpgraderCreeps = Math.max(3, Math.floor(storedEnergy / 800) + 3);
                 maxRoamingHarversterCreeps = 4;
@@ -370,6 +369,10 @@ module.exports.loop = function () {
                 maxDefenderCreeps = 2;
 
                 maxCourierCreeps = Math.min(2, Math.floor((droppedEnergy.energy) / 300));
+
+                if (maxCourierCreeps > maxDropMinerCreeps) {
+                    maxCourierCreeps = maxDropMinerCreeps;
+                }
 
                 if (structures.link || structures.storage) {
                     maxLinkBaseHarvesters = 1;
@@ -433,9 +436,29 @@ module.exports.loop = function () {
         const sufficientGophers = gophers.length >= maxGopherCreeps;
         const sufficientHarvesters = harvesters.length >= maxHarvesterCreeps;
         const sufficientLinkBaseHarvesters = linkBaseHarvesters.length >= maxLinkBaseHarvesters;
-        const sufficientRoamingHarvesters = room.memory.roamingHarvesters.length >= maxRoamingHarversterCreeps;
+        //const sufficientRoamingHarvesters = room.memory.roamingHarvesters.length >= maxRoamingHarversterCreeps;
         const sufficientUpgraders = upgraders.length >= maxUpgraderCreeps;
         const sufficientClaimers = claimers.length >= maxClaimerCreeps;
+
+        if (Game.time % 1000 === 0) {
+            if (room.controller &&
+                room.controller.level > 1 &&
+                room.controller.my && room.controller.ticksToDowngrade < 79000) { // Max is 80000
+                console.log(`Room: ${room.controller.room.name}, RCL: ${room.controller.level}`);
+                console.log(`Ticks until downgrade: ${room.controller.ticksToDowngrade}`);
+
+                if (room.controller.ticksToDowngrade > 0) {
+                    console.log('⚠️ Something is wrong, resetting room init in an attempt to reboot things...')
+                    room.memory.isInit = false;
+                }
+
+                // Check if it's getting dangerously low (e.g., less than 5000 ticks)
+                if (room.controller.ticksToDowngrade < 5000) {
+                    console.log('WARNING: Controller is degrading!');
+                }
+            }
+        }
+
 
         // Summary of actual vs target numbers.
         if (spawn) {
@@ -467,28 +490,32 @@ module.exports.loop = function () {
             if (maxClaimerCreeps > 0) {
                 console.log("  Claimers: " + claimers.length + "/" + maxClaimerCreeps + " " + (sufficientClaimers ? "✔️" : "❌"));
             }
-
-            if (Game.time % 50 == 0) {
-                console.log("⚠️ INFO: Checking for deleted creeps...");
-                for (var i in Memory.creeps) {
-                    if (!Game.creeps[i]) {
-                        delete Memory.creeps[i];
-                    }
-                }
-
-                for (var i in room.memory.roamingHarvesters) {
-                    const roamingCreep = Game.getObjectById(i);
-                    if (!Game.creeps[roamingCreep]) {
-                        console.log('deleting memory roamingHarvesters')
-                        delete room.memory.roamingHarvesters[i];
-                    }
-                }
-
-                room.memory.roamingHarvesters = room.memory.roamingHarvesters.filter(element => {
-                    return element !== null;
-                });
-            }
         }
+
+        // if (Game.time % 50 === 0) {
+        //     infrastructureTasks.buildLinks(room, true);
+
+        //     if (spawn) {
+        //         console.log("⚠️ INFO: Checking for deleted creeps...");
+        //         for (var i in Memory.creeps) {
+        //             if (!Game.creeps[i]) {
+        //                 delete Memory.creeps[i];
+        //             }
+        //         }
+
+        //         for (var i in room.memory.roamingHarvesters) {
+        //             const roamingCreep = Game.getObjectById(i);
+        //             if (!Game.creeps[roamingCreep]) {
+        //                 console.log('deleting memory roamingHarvesters')
+        //                 delete room.memory.roamingHarvesters[i];
+        //             }
+        //         }
+
+        //         room.memory.roamingHarvesters = room.memory.roamingHarvesters.filter(element => {
+        //             return element !== null;
+        //         });
+        //     }
+        // }
 
 
         //room.memory.roamingHarvesters = []

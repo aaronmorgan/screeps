@@ -48,6 +48,8 @@ var roleGopher = {
 
         if (creepFillPercentage === 0) {
             creep.memory.harvesting = true;
+        } else if (creepFillPercentage === 100) {
+            creep.memory.harvesting = false;
         }
 
         if (creep.memory.harvesting) {
@@ -138,9 +140,15 @@ var roleGopher = {
                         true
                     );
 
-                    creep.moveTo(area, {
+                    var moveResult = creep.moveTo(area, {
                         reusePath: 10
                     });
+
+                    if (moveResult !== OK) {
+                        console.log('⚠️ Gopher cannot move off Flag position, error: ', moveResult)
+
+                        creep.memory.harvesting = true;
+                    }
                 }
             }
         }
