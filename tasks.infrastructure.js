@@ -182,14 +182,15 @@ var infrastructureTasks = {
      * to determine whether to continue or not.
      * 
      * @param {any} room The room object we're building within.
+     * @param {bool} recheckAllJobs 
      */
-    buildLinks: function (room) {
+    buildLinks: function (room, recheckAllJobs) {
         if (!room.structures().spawn) {
             return;
         }
 
         // Only enqueue one construction site at a time.
-        if (room.constructionSites().length > 0) {
+        if (!recheckAllJobs && room.constructionSites().length > 0) {
             return;
         }
 
@@ -310,7 +311,9 @@ var infrastructureTasks = {
                                 ignoreCreeps: true,
                             });
 
-                            if (path > maxStraightLineDistance) {
+                            if (path.length > maxStraightLineDistance) {
+                                console.log('Structure exceeds maxStraightLineDistance, retrying...');
+
                                 continue;
                             }
                         }
@@ -325,6 +328,11 @@ var infrastructureTasks = {
         }
     },
 
+    /**
+     * Shuffles an array into a random layout.
+     * 
+     * @param {any} Array to shuffle.
+     */
     shuffleArray: function (array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -333,6 +341,15 @@ var infrastructureTasks = {
         return array;
     },
 
+    /**
+     * Builds the given job attached to the spawn room.
+     * 
+     * @param {any} spawn 
+     * @param {any} structures 
+     * @param {any} job 
+     * @param {any} maxStraightLineDistance The maximum path distance from the pos, so we can try and avoid building on the other
+     * side of mountains.
+     */
     buildStructure: function (spawn, structures, job, maxStraightLineDistance) {
         if (structures.length >= job.count) {
             job.built = true;
